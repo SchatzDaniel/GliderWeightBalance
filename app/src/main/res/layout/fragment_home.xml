@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/twSchwerpunktlage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/Schwerpunktlage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/twMasseNTTeile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/MasseNTTeile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlage" />
+
+    <TextView
+        android:id="@+id/twGesamtgewicht"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/Gesamtgewicht"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/twMasseNTTeile" />
+
+    <TextView
+        android:id="@+id/twMMHinterBE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/mmHinterBE"
+        app:layout_constraintStart_toEndOf="@+id/twSchwerpunktlageErgebnis"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/twKG1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/kg"
+        app:layout_constraintStart_toEndOf="@+id/twMasseNTTeileErgebnis"
+        app:layout_constraintTop_toBottomOf="@+id/twMMHinterBE" />
+
+    <TextView
+        android:id="@+id/twKG2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/kg"
+        app:layout_constraintStart_toEndOf="@+id/twGesamtgewichtOutput"
+        app:layout_constraintTop_toBottomOf="@+id/twKG1" />
+
+    <TextView
+        android:id="@+id/twSchwerpunktlageErgebnis"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@+id/twSchwerpunktlage"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/twMasseNTTeileErgebnis"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/twSchwerpunktlageErgebnis"
+        app:layout_constraintStart_toStartOf="@+id/twSchwerpunktlageErgebnis"
+        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlageErgebnis" />
+
+    <TextView
+        android:id="@+id/twGesamtgewichtOutput"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/twMasseNTTeileErgebnis"
+        app:layout_constraintStart_toStartOf="@+id/twMasseNTTeileErgebnis"
+        app:layout_constraintTop_toBottomOf="@+id/twMasseNTTeileErgebnis" />
+
+    <TextView
+        android:id="@+id/Gewichte"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/Gewichte"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/twGesamtgewichtOutput" />
+
+    <include
+        layout="@layout/fragment_scrolling"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Gewichte" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

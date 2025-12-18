@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Weight&amp;Balance2</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manu ally requested</string>
+    <string name="Schwerpunktlage">Schwerpunktlage</string>
+    <string name="MasseNTTeile">Masse n.t. Teile</string>
+    <string name="Gesamtgewicht">Gesamtgewicht</string>
+    <string name="mmHinterBE">mm hinter B.E.</string>
+    <string name="kg">kg</string>
+    <string name="Gewichte">Gewichte</string>
+    <string name="Pilot">Pilot</string>
+    <string name="ZuladungCockpit">Zuladung Cockpit</string>
+    <string name="Trimmplatten">Trimmplatten</string>
+    <string name="Bleikissen">Bleikissen</string>
+    <string name="Fallschirm">Fallschirm</string>
+    <string name="GepäckraumUnten">Gepäckraum unten</string>
+    <string name="GepäckraumOben">Gepäckraum oben</string>
+    <string name="Wasserballast">Wasserballast</string>
+    <string name="BallastSeitenflosse">Ballast Seitenflosse</string>
+    <string name="Sauerstoffflasche">Sauerstoffflasche</string>
+    <string name="extraInstrumente">extra Instrumente</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="Flugzeug">Flugzeug</string>
+    <string name="Leermasse">Leermasse</string>
+    <string name="Rumpf">Rumpf</string>
+    <string name="Höhenleitwerk">Höhenleitwerk</string>
+    <string name="Hebelarme">Hebelarme in mm</string>
+    <string name="mm">mm</string>
+    <string name="Settings">Settings</string>
+</resources>

@@ -1,0 +1,60 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/Flugzeug">
+        <EditTextPreference
+            app:key="Leermasse"
+            app:title="@string/Leermasse"
+            app:useSimpleSummaryProvider="true"
+            />
+        <EditTextPreference
+            app:key="Rumpf"
+            app:title="@string/Rumpf"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="Höhenleitwerk"
+            app:title="@string/Höhenleitwerk"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/Hebelarme">
+        <EditTextPreference
+            app:key="LeermasseHebel"
+            app:title="@string/Leermasse"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="PilotHebel"
+            app:title="@string/Pilot"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="GepäckraumUntenHebel"
+            app:title="@string/GepäckraumUnten"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="GepäckraumObenHebel"
+            app:title="@string/GepäckraumOben"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="TrimmplattenHebel"
+            app:title="@string/Trimmplatten"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="WasserballastHebel"
+            app:title="@string/Wasserballast"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="BallastSeitenflosseHebel"
+            app:title="@string/BallastSeitenflosse"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="SauerstoffflascheHebel"
+            app:title="@string/Sauerstoffflasche"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="InstrumenteHebel"
+            app:title="@string/extraInstrumente"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

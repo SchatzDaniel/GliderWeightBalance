@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_scrolling"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ConstraintLayout2">
+
+        <TextView
+            android:id="@+id/twPilot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/etPilot"
+            android:text="@string/Pilot"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/etPilot"/>
+
+        <EditText
+            android:id="@+id/etPilot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextZuladungCockpit"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextZuladungCockpit"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/editTextZuladungCockpit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextTrimmplatten"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextTrimmplatten"
+            app:layout_constraintTop_toBottomOf="@+id/etPilot"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextTrimmplatten"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextBleikissen"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextBleikissen"
+            app:layout_constraintTop_toBottomOf="@+id/editTextZuladungCockpit"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextBleikissen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextFallschirm"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextFallschirm"
+            app:layout_constraintTop_toBottomOf="@+id/editTextTrimmplatten"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextFallschirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextGepäckraumUnten"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextGepäckraumUnten"
+            app:layout_constraintTop_toBottomOf="@+id/editTextBleikissen"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextGepäckraumUnten"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextGepäckraumOben"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextGepäckraumOben"
+            app:layout_constraintTop_toBottomOf="@+id/editTextFallschirm"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextGepäckraumOben"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextWasserballast"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextWasserballast"
+            app:layout_constraintTop_toBottomOf="@+id/editTextGepäckraumUnten"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextWasserballast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextBallastSeitenflosse"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextBallastSeitenflosse"
+            app:layout_constraintTop_toBottomOf="@+id/editTextGepäckraumOben"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextBallastSeitenflosse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextSauerstoffflasche"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextSauerstoffflasche"
+            app:layout_constraintTop_toBottomOf="@+id/editTextWasserballast"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextSauerstoffflasche"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="@+id/editTextExtraInstrumente"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/editTextExtraInstrumente"
+            app:layout_constraintTop_toBottomOf="@+id/editTextBallastSeitenflosse"
+            android:importantForAutofill="no" />
+
+        <EditText
+            android:id="@+id/editTextExtraInstrumente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:inputType="number"
+            android:minHeight="48dp"
+            app:layout_constraintStart_toEndOf="@+id/twBallastSeitenflosse"
+            app:layout_constraintTop_toBottomOf="@+id/editTextSauerstoffflasche"
+            android:importantForAutofill="no"/>
+
+        <TextView
+            android:id="@+id/twKG3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/etPilot"
+            app:layout_constraintStart_toEndOf="@+id/etPilot" />
+
+        <TextView
+            android:id="@+id/textViewZuladungCockpit"
+            android:labelFor="@id/editTextZuladungCockpit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ZuladungCockpit"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextZuladungCockpit"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twTrimmplatten"
+            android:labelFor="@id/editTextTrimmplatten"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Trimmplatten"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextTrimmplatten"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twBleikissen"
+            android:labelFor="@id/editTextBleikissen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Bleikissen"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextBleikissen"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twFallschirm"
+            android:labelFor="@id/editTextFallschirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Fallschirm"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextFallschirm"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twGepäckraumUnten"
+            android:labelFor="@id/editTextGepäckraumUnten"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GepäckraumUnten"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextGepäckraumUnten"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twGepäckraumOben"
+            android:labelFor="@id/editTextGepäckraumOben"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GepäckraumOben"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextGepäckraumOben"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twWasserballast"
+            android:labelFor="@id/editTextWasserballast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Wasserballast"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextWasserballast"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twBallastSeitenflosse"
+            android:labelFor="@id/editTextBallastSeitenflosse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/BallastSeitenflosse"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextBallastSeitenflosse"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twKG4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextZuladungCockpit"
+            app:layout_constraintStart_toEndOf="@+id/editTextZuladungCockpit"
+            tools:ignore="DuplicateIds" />
+
+        <TextView
+            android:id="@+id/twKG5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextTrimmplatten"
+            app:layout_constraintStart_toEndOf="@+id/editTextTrimmplatten" />
+
+        <TextView
+            android:id="@+id/twKG6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextBleikissen"
+            app:layout_constraintStart_toEndOf="@+id/editTextBleikissen" />
+
+        <TextView
+            android:id="@+id/twKG7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextFallschirm"
+            app:layout_constraintStart_toEndOf="@+id/editTextFallschirm" />
+
+        <TextView
+            android:id="@+id/twKG8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextGepäckraumUnten"
+            app:layout_constraintStart_toEndOf="@+id/editTextGepäckraumUnten" />
+
+        <TextView
+            android:id="@+id/twKG9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextGepäckraumOben"
+            app:layout_constraintStart_toEndOf="@+id/editTextGepäckraumOben" />
+
+        <TextView
+            android:id="@+id/twKG10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextWasserballast"
+            app:layout_constraintStart_toEndOf="@+id/editTextWasserballast" />
+
+        <TextView
+            android:id="@+id/twKG11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextBallastSeitenflosse"
+            app:layout_constraintStart_toEndOf="@+id/editTextBallastSeitenflosse" />
+
+        <TextView
+            android:id="@+id/twKG12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextSauerstoffflasche"
+            app:layout_constraintStart_toEndOf="@+id/editTextSauerstoffflasche" />
+
+        <TextView
+            android:id="@+id/twKG13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kg"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextExtraInstrumente"
+            app:layout_constraintStart_toEndOf="@+id/editTextExtraInstrumente" />
+
+        <TextView
+            android:id="@+id/twExtraInstrumente"
+            android:labelFor="@id/editTextExtraInstrumente"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/extraInstrumente"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextExtraInstrumente"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/twSauerstoffflasche"
+            android:labelFor="@id/editTextSauerstoffflasche"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Sauerstoffflasche"
+            app:layout_constraintBaseline_toBaselineOf="@+id/editTextSauerstoffflasche"
+            app:layout_constraintStart_toStartOf="parent" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="128dp"
+            app:layout_constraintTop_toBottomOf="@id/editTextExtraInstrumente"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
