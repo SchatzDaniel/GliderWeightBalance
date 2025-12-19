@@ -106,12 +106,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/twGesamtgewichtOutput" />
 
-    <include
-        layout="@layout/fragment_scrolling"
-        android:layout_width="wrap_content"
+
+    <fragment
+        android:id="@+id/scrollingFragment"
+        android:name="com.example.weightbalance2.ScrollingFragment"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/Gewichte"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Gewichte" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

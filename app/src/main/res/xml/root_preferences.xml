@@ -1,59 +1,72 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/Flugzeug">
         <EditTextPreference
-            app:key="Leermasse"
+            app:key="empty_mass"
             app:title="@string/Leermasse"
             app:useSimpleSummaryProvider="true"
-            />
+            android:inputType="numberDecimal" />
         <EditTextPreference
-            app:key="Rumpf"
+            app:key="fuselage_mass"
             app:title="@string/Rumpf"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
         <EditTextPreference
-            app:key="Höhenleitwerk"
+            app:key="stabilizer_mass"
             app:title="@string/Höhenleitwerk"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
 
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/Hebelarme">
         <EditTextPreference
-            app:key="LeermasseHebel"
+            app:key="empty_arm"
             app:title="@string/Leermasse"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
         <EditTextPreference
-            app:key="PilotHebel"
+            app:key="pilot_arm"
             app:title="@string/Pilot"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
         <EditTextPreference
-            app:key="GepäckraumUntenHebel"
+            app:key="lower_baggage_arm"
             app:title="@string/GepäckraumUnten"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
         <EditTextPreference
-            app:key="GepäckraumObenHebel"
+            app:key="upper_baggage_arm"
             app:title="@string/GepäckraumOben"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
         <EditTextPreference
-            app:key="TrimmplattenHebel"
+            app:key="trim_ballast_arm"
             app:title="@string/Trimmplatten"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
         <EditTextPreference
-            app:key="WasserballastHebel"
+            app:key="water_ballast_arm"
             app:title="@string/Wasserballast"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
         <EditTextPreference
-            app:key="BallastSeitenflosseHebel"
+            app:key="stabilizer_ballast_arm"
             app:title="@string/BallastSeitenflosse"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
         <EditTextPreference
-            app:key="SauerstoffflascheHebel"
+            app:key="oxygen_arm"
             app:title="@string/Sauerstoffflasche"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
         <EditTextPreference
-            app:key="InstrumenteHebel"
+            app:key="instrument_arm"
             app:title="@string/extraInstrumente"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"/>
 
     </PreferenceCategory>
 
