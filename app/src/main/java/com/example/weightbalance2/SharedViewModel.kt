@@ -37,6 +37,11 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     val instrumentMass = MutableLiveData<Double>(0.0)
 
     // Interne LiveData für Werte aus den Preferences
+    val maxTotalMass = MutableLiveData<Double>()
+    val maxNonLiftingMass = MutableLiveData<Double>()
+    val minCG = MutableLiveData<Double>()
+    val maxCG = MutableLiveData<Double>()
+
     private val emptyMass = MutableLiveData<Double>()
     private val fuselageMass = MutableLiveData<Double>()
     private val stabilizerMass = MutableLiveData<Double>()
@@ -73,6 +78,15 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     // Hilfsmethode, um einen einzelnen Wert basierend auf dem Key zu aktualisieren
     private fun updateValueFromKey(key: String?) {
         when (key) {
+            "max_total_mass" -> maxTotalMass.value = prefs.getString(key, "0.0")
+                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            "max_non_lifting_mass" -> maxNonLiftingMass.value = prefs.getString(key, "0.0")
+                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            "min_cg" -> minCG.value = prefs.getString(key, "0.0")
+                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            "max_cg" -> maxCG.value = prefs.getString(key, "0.0")
+                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+
             "empty_mass" -> emptyMass.value = prefs.getString(key, "0.0")
                 ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
             "fuselage_mass" -> fuselageMass.value = prefs.getString(key, "0.0")
@@ -103,6 +117,15 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
 
     // Hilfsmethode, um alle Werte zu Beginn zu laden
     private fun updateAllValuesFromPreferences() {
+        maxTotalMass.value = prefs.getString("max_total_mass", "0.0")
+            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        maxNonLiftingMass.value = prefs.getString("max_non_lifting_mass", "0.0")
+            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        minCG.value = prefs.getString("min_cg", "0.0")
+            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        maxCG.value = prefs.getString("max_cg", "0.0")
+            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+
         emptyMass.value = prefs.getString("empty_mass", "0.0")
             ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
         fuselageMass.value = prefs.getString("fuselage_mass", "0.0")

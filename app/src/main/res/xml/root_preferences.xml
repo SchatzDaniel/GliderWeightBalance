@@ -2,6 +2,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory app:title="@string/Grenzwerte">
+        <EditTextPreference
+            app:key="max_total_mass"
+            app:title="@string/max_total_mass"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
+        <EditTextPreference
+            app:key="max_non_lifting_mass"
+            app:title="@string/max_non_lifting_mass"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
+        <EditTextPreference
+            app:key="min_cg"
+            app:title="@string/min_cg"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
+        <EditTextPreference
+            app:key="max_cg"
+            app:title="@string/max_cg"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal" />
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/Flugzeug">
         <EditTextPreference
             app:key="empty_mass"

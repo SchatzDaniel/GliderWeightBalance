@@ -26,4 +26,9 @@
     <string name="Hebelarme">Hebelarme in mm</string>
     <string name="mm">mm</string>
     <string name="Settings">Settings</string>
+    <string name="Grenzwerte">Grenzwerte</string>
+    <string name="max_total_mass">Maximal zulässige Gesamtmasse in kg</string>
+    <string name="max_non_lifting_mass">Maximal zulässige Masse nicht tragender Teile in kg</string>
+    <string name="min_cg">Minimal zulässige Schwerpunktlage in mm hinter B.E.</string>
+    <string name="max_cg">Maximal zulässige Schwerpunktlage in mm hinter B.E:</string>
 </resources>
