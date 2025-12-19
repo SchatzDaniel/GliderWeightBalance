@@ -8,11 +8,14 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import androidx.preference.PreferenceManager
 
 class HomeFragment : Fragment(){
 
     lateinit var navController: NavController
+
+    private val sharedViewModel: SharedViewModel by navGraphViewModels(R.id.main_nav)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

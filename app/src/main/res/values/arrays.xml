@@ -1,12 +1,31 @@
 <resources>
     <!-- Reply Preference -->
-    <string-array name="reply_entries">
-        <item>Reply</item>
-        <item>Reply to all</item>
+    <string-array name="recalculation_preference_keys">
+        <item>Leermasse</item>
+        <item>Rumpf</item>
+        <item>Höhenleitwerk</item>
+        <item>LeermasseHebel</item>
+        <item>PilotHebel</item>
+        <item>GepäckraumUntenHebel</item>
+        <item>GepäckraumObenHebel</item>
+        <item>TrimmplattenHebel</item>
+        <item>WasserballastHebel</item>
+        <item>BallastSeitenflosseHebel</item>
+        <item>SauerstoffflascheHebel</item>
+        <item>InstrumenteHebel</item>
     </string-array>
 
-    <string-array name="reply_values">
-        <item>reply</item>
-        <item>reply_all</item>
+    <string-array name="flight_settings">
+        <item>@+id/etPilot</item>
+        <item>@+id/editTextZuladungCockpit</item>
+        <item>@+id/editTextTrimmplatten</item>
+        <item>@+id/editTextBleikissen</item>
+        <item>@+id/editTextFallschirm</item>
+        <item>@+id/editTextGepäckraumUnten</item>
+        <item>@+id/editTextGepäckraumOben</item>
+        <item>@+id/editTextWasserballast</item>
+        <item>@+id/editTextBallastSeitenflosse</item>
+        <item>@+id/editTextSauerstoffflasche</item>
+        <item>@+id/editTextExtraInstrumente</item>
     </string-array>
 </resources>
