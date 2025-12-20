@@ -19,67 +19,67 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
             key = "pilot_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("pilot_mass", value.toFloat()).apply() }
+                prefs.edit().putString("pilot_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "cockpit_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("cockpit_baggage_mass", value.toFloat()).apply() }
+                prefs.edit().putString("cockpit_baggage_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "trim_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("trim_ballast_mass", value.toFloat()).apply() }
+                prefs.edit().putString("trim_ballast_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "trim_pillow_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("trim_pillow_mass", value.toFloat()).apply() }
+                prefs.edit().putString("trim_pillow_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "parachute_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("parachute_mass", value.toFloat()).apply() }
+                prefs.edit().putString("parachute_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "lower_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("lower_baggage_mass", value.toFloat()).apply() }
+                prefs.edit().putString("lower_baggage_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "upper_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("upper_baggage_mass", value.toFloat()).apply() }
+                prefs.edit().putString("upper_baggage_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "water_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("water_ballast_mass", value.toFloat()).apply() }
+                prefs.edit().putString("water_ballast_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "stabilizer_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("stabilizer_ballast_mass", value.toFloat()).apply() }
+                prefs.edit().putString("stabilizer_ballast_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "oxygen_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("oxygen_mass", value.toFloat()).apply() }
+                prefs.edit().putString("oxygen_mass", value.toString()).apply() }
         ),
         PersistentValue(
             key = "instrument_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putFloat("instrument_mass", value.toFloat()).apply() }
+                prefs.edit().putString("instrument_mass", value.toString()).apply() }
         )
     )
 
@@ -235,7 +235,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
         instrumentArm.value = readStringAsDouble(KEY_INSTRUMENT_ARM)
 
         persistentValues.forEach { value ->
-            value.liveData.value = prefs.getFloat(value.key, 0f).toDouble()
+            value.liveData.value = prefs.getString(value.key, "0.0")?.toDoubleOrNull() ?: 0.0
         }
     }
 

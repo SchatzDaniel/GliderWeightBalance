@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.navGraphViewModels
@@ -29,18 +30,27 @@ class ScrollingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fülle die EditText-Felder mit den aktuellen Werten aus dem ViewModel
-        binding.pilotMassInput.setText(sharedViewModel.pilotMass.value?.toString())
-        binding.cockpitBaggageMassInput.setText(sharedViewModel.cockpitBaggageMass.value?.toString())
-        binding.trimBallastMassInput.setText(sharedViewModel.trimBallastMass.value?.toString())
-        binding.trimPillowMassInput.setText(sharedViewModel.trimPillowMass.value?.toString())
-        binding.parachuteMassInput.setText(sharedViewModel.parachuteMass.value?.toString())
-        binding.lowerBaggageMassInput.setText(sharedViewModel.lowerBaggageMass.value?.toString())
-        binding.upperBaggageMassInput.setText(sharedViewModel.upperBaggageMass.value?.toString())
-        binding.waterBallastMassInput.setText(sharedViewModel.waterBallastMass.value?.toString())
-        binding.stabilizerBallastMassInput.setText(sharedViewModel.stabilizerBallastMass.value?.toString())
-        binding.oxygenMassInput.setText(sharedViewModel.oxygenMass.value?.toString())
-        binding.instrumentMassInput.setText(sharedViewModel.instrumentMass.value?.toString())
+        // Hilfsfunktion, um einen Wert nur dann zu setzen, wenn er nicht 0.0 ist
+        fun setInputTextIfNotZero(editText: EditText, value: Double?) {
+            if (value != null && value != 0.0) {
+                editText.setText(value.toString().removeSuffix(".0"))
+            } else {
+                editText.setText("") // Setze das Feld auf leer, wenn der Wert 0.0 oder null ist
+            }
+        }
+
+        // Fülle die EditText-Felder mit der neuen Logik
+        setInputTextIfNotZero(binding.pilotMassInput, sharedViewModel.pilotMass.value)
+        setInputTextIfNotZero(binding.trimPillowMassInput, sharedViewModel.trimPillowMass.value)
+        setInputTextIfNotZero(binding.trimBallastMassInput, sharedViewModel.trimBallastMass.value)
+        setInputTextIfNotZero(binding.cockpitBaggageMassInput, sharedViewModel.cockpitBaggageMass.value)
+        setInputTextIfNotZero(binding.parachuteMassInput, sharedViewModel.parachuteMass.value)
+        setInputTextIfNotZero(binding.lowerBaggageMassInput, sharedViewModel.lowerBaggageMass.value)
+        setInputTextIfNotZero(binding.upperBaggageMassInput, sharedViewModel.upperBaggageMass.value)
+        setInputTextIfNotZero(binding.waterBallastMassInput, sharedViewModel.waterBallastMass.value)
+        setInputTextIfNotZero(binding.stabilizerBallastMassInput, sharedViewModel.stabilizerBallastMass.value)
+        setInputTextIfNotZero(binding.oxygenMassInput, sharedViewModel.oxygenMass.value)
+        setInputTextIfNotZero(binding.instrumentMassInput, sharedViewModel.instrumentMass.value)
 
         binding.pilotMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
