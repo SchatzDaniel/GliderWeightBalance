@@ -6,12 +6,104 @@ import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 
 class SharedViewModel(application: Application) : AndroidViewModel(application),
     SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
+
+    private val persistentValues = listOf(
+        PersistentValue(
+            key = "pilot_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("pilot_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "cockpit_baggage_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("cockpit_baggage_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "trim_ballast_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("trim_ballast_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "trim_pillow_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("trim_pillow_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "parachute_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("parachute_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "lower_baggage_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("lower_baggage_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "upper_baggage_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("upper_baggage_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "water_ballast_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("water_ballast_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "stabilizer_ballast_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("stabilizer_ballast_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "oxygen_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("oxygen_mass", value.toFloat()).apply() }
+        ),
+        PersistentValue(
+            key = "instrument_mass",
+            liveData = MutableLiveData(0.0),
+            observer = Observer { value ->
+                prefs.edit().putFloat("instrument_mass", value.toFloat()).apply() }
+        )
+    )
+
+
+
+    // BESTEHENDE KEYS AUS root_preferences.xml
+    private val KEY_MAS_TOTAL_MASS = "max_total_mass"
+    private val KEY_MAX_NON_LIFTING_MASS = "max_non_lifting_mass"
+    private val KEY_MIN_CG = "min_cg"
+    private val KEY_MAX_CG = "max_cg"
+
+    private val KEY_EMPTY_MASS = "empty_mass"
+    private val KEY_FUSELAGE_MASS = "fuselage_mass"
+    private val KEY_STABILIZER_MASS = "stabilizer_mass"
+
+    private val KEY_EMPTY_ARM = "empty_arm"
+    private val KEY_PILOT_ARM = "pilot_arm"
+    private val KEY_LB_ARM = "lower_baggage_arm"
+    private val KEY_UB_ARM = "upper_baggage_arm"
+    private val KEY_TRIM_BALLAST_ARM = "trim_ballast_arm"
+    private val KEY_WATER_ARM = "water_ballast_arm"
+    private val KEY_STABILIZER_BALLAST_ARM = "stabilizer_ballast_arm"
+    private val KEY_OXYGEN_ARM = "oxygen_arm"
+    private val KEY_INSTRUMENT_ARM = "instrument_arm"
 
     // LiveData für alle Werte. Diese werden von aussen (HomeFragment) beobachtet.
     private val _totalMass = MutableLiveData<Double>()
@@ -24,17 +116,20 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     val nonLiftingMass: LiveData<Double> = _nonLiftingMass
 
     // Eingabe-LiveData vom ScrollingFragment
-    val pilotMass = MutableLiveData<Double>(0.0)
-    val cockpitBaggageMass = MutableLiveData<Double>(0.0)
-    val trimBallastMass = MutableLiveData<Double>(0.0)
-    val trimPillowMass = MutableLiveData<Double>(0.0)
-    val parachuteMass = MutableLiveData<Double>(0.0)
-    val lowerBaggageMass = MutableLiveData<Double>(0.0)
-    val upperBaggageMass = MutableLiveData<Double>(0.0)
-    val waterBallastMass = MutableLiveData<Double>(0.0)
-    val stabilizerBallastMass = MutableLiveData<Double>(0.0)
-    val oxygenMass = MutableLiveData<Double>(0.0)
-    val instrumentMass = MutableLiveData<Double>(0.0)
+    val pilotMass = persistentValues.first { it.key == "pilot_mass" }.liveData
+    val cockpitBaggageMass = persistentValues.first { it.key == "cockpit_baggage_mass" }.liveData
+    val trimBallastMass = persistentValues.first { it.key == "trim_ballast_mass" }.liveData
+    val trimPillowMass = persistentValues.first { it.key == "trim_pillow_mass" }.liveData
+    val parachuteMass = persistentValues.first { it.key == "parachute_mass" }.liveData
+    val lowerBaggageMass = persistentValues.first { it.key == "lower_baggage_mass" }.liveData
+    val upperBaggageMass = persistentValues.first { it.key == "upper_baggage_mass" }.liveData
+    val waterBallastMass = persistentValues.first { it.key == "water_ballast_mass" }.liveData
+    val stabilizerBallastMass = persistentValues.first { it.key == "stabilizer_ballast_mass" }.liveData
+    val oxygenMass = persistentValues.first { it.key == "oxygen_mass" }.liveData
+    val instrumentMass = persistentValues.first { it.key == "instrument_mass" }.liveData
+
+    private fun getLiveData(key: String): LiveData<Double> =
+        persistentValues.first { it.key == key }.liveData
 
     // Interne LiveData für Werte aus den Preferences
     val maxTotalMass = MutableLiveData<Double>()
@@ -56,6 +151,12 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     private val oxygenArm = MutableLiveData<Double>()
     private val instrumentArm = MutableLiveData<Double>()
 
+    private data class PersistentValue(
+        val key: String,
+        val liveData: MutableLiveData<Double>,
+        val observer: Observer<Double>
+    )
+
     init {
         // 1. Registriere den Listener
         prefs.registerOnSharedPreferenceChangeListener(this)
@@ -65,10 +166,18 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
 
         // 3. Führe die erste Berechnung durch
         recalc()
+
+        // 4. Registriere die Observer mit einer Schleife
+        persistentValues.forEach { it.liveData.observeForever(it.observer) }
     }
 
     // Diese Methode wird bei JEDER Änderung an den Preferences aufgerufen
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        // Finde heraus, ob dieser Key von einem unserer "ScrollingFragment"-Werte stammt.
+        val isPersistentValueKey = persistentValues.any { it.key == key }
+        if (isPersistentValueKey){
+            return
+        }
         // Aktualisiere den spezifischen Wert, der sich geändert hat
         updateValueFromKey(key)
         // Führe eine Neuberechnung durch
@@ -77,81 +186,61 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
 
     // Hilfsmethode, um einen einzelnen Wert basierend auf dem Key zu aktualisieren
     private fun updateValueFromKey(key: String?) {
+        val newValue =
+            prefs.getString(key, "0.0")?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
         when (key) {
-            "max_total_mass" -> maxTotalMass.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "max_non_lifting_mass" -> maxNonLiftingMass.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "min_cg" -> minCG.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "max_cg" -> maxCG.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            KEY_MAS_TOTAL_MASS -> maxTotalMass.value = newValue
+            KEY_MAX_NON_LIFTING_MASS -> maxNonLiftingMass.value = newValue
+            KEY_MIN_CG -> minCG.value = newValue
+            KEY_MAX_CG -> maxCG.value = newValue
 
-            "empty_mass" -> emptyMass.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "fuselage_mass" -> fuselageMass.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "stabilizer_mass" -> stabilizerMass.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            KEY_EMPTY_MASS -> emptyMass.value = newValue
+            KEY_FUSELAGE_MASS -> fuselageMass.value = newValue
+            KEY_STABILIZER_MASS -> stabilizerMass.value = newValue
 
-            "empty_arm" -> emptyArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "pilot_arm" -> pilotArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "lower_baggage_arm" -> lowerBaggageArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "upper_baggage_arm" -> upperBaggageArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "trim_ballast_arm" -> trimBallastArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "water_ballast_arm" -> waterBallastArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "stabilizer_ballast_arm" -> stabilizerBallastArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "oxygen_arm" -> oxygenArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-            "instrument_arm" -> instrumentArm.value = prefs.getString(key, "0.0")
-                ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            KEY_EMPTY_ARM -> emptyArm.value = newValue
+            KEY_PILOT_ARM -> pilotArm.value = newValue
+            KEY_LB_ARM -> lowerBaggageArm.value = newValue
+            KEY_UB_ARM -> upperBaggageArm.value = newValue
+            KEY_TRIM_BALLAST_ARM -> trimBallastArm.value = newValue
+            KEY_WATER_ARM -> waterBallastArm.value = newValue
+            KEY_STABILIZER_BALLAST_ARM -> stabilizerBallastArm.value = newValue
+            KEY_OXYGEN_ARM -> oxygenArm.value = newValue
+            KEY_INSTRUMENT_ARM -> instrumentArm.value = newValue
         }
     }
 
     // Hilfsmethode, um alle Werte zu Beginn zu laden
     private fun updateAllValuesFromPreferences() {
-        maxTotalMass.value = prefs.getString("max_total_mass", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        maxNonLiftingMass.value = prefs.getString("max_non_lifting_mass", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        minCG.value = prefs.getString("min_cg", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        maxCG.value = prefs.getString("max_cg", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        fun readStringAsDouble(key: String): Double {
+            return prefs.getString(key, "0.0")?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        }
+        maxTotalMass.value = readStringAsDouble(KEY_MAS_TOTAL_MASS)
+        maxNonLiftingMass.value = readStringAsDouble(KEY_MAX_NON_LIFTING_MASS)
+        minCG.value = readStringAsDouble(KEY_MIN_CG)
+        maxCG.value = readStringAsDouble(KEY_MAX_CG)
 
-        emptyMass.value = prefs.getString("empty_mass", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        fuselageMass.value = prefs.getString("fuselage_mass", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        stabilizerMass.value = prefs.getString("stabilizer_mass", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        emptyMass.value = readStringAsDouble(KEY_EMPTY_MASS)
+        fuselageMass.value = readStringAsDouble(KEY_FUSELAGE_MASS)
+        stabilizerMass.value = readStringAsDouble(KEY_STABILIZER_MASS)
 
-        emptyArm.value = prefs.getString("empty_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        pilotArm.value = prefs.getString("pilot_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        lowerBaggageArm.value = prefs.getString("lower_baggage_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        upperBaggageArm.value = prefs.getString("upper_baggage_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        trimBallastArm.value = prefs.getString("trim_ballast_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        waterBallastArm.value = prefs.getString("water_ballast_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        stabilizerBallastArm.value = prefs.getString("stabilizer_ballast_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        oxygenArm.value = prefs.getString("oxygen_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        instrumentArm.value = prefs.getString("instrument_arm", "0.0")
-            ?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+        emptyArm.value = readStringAsDouble(KEY_EMPTY_ARM)
+        pilotArm.value = readStringAsDouble(KEY_PILOT_ARM)
+        lowerBaggageArm.value = readStringAsDouble(KEY_LB_ARM)
+        upperBaggageArm.value = readStringAsDouble(KEY_UB_ARM)
+        trimBallastArm.value = readStringAsDouble(KEY_TRIM_BALLAST_ARM)
+        waterBallastArm.value = readStringAsDouble(KEY_WATER_ARM)
+        stabilizerBallastArm.value = readStringAsDouble(KEY_STABILIZER_BALLAST_ARM)
+        oxygenArm.value = readStringAsDouble(KEY_OXYGEN_ARM)
+        instrumentArm.value = readStringAsDouble(KEY_INSTRUMENT_ARM)
+
+        persistentValues.forEach { value ->
+            value.liveData.value = prefs.getFloat(value.key, 0f).toDouble()
+        }
     }
+
+    // Hilfsfunktion für recalc
+    private fun getValue(key: String): Double = persistentValues.first { it.key == key }.liveData.value ?: 0.0
 
     // Die zentrale Berechnungslogik, jetzt öffentlich, da wir sie manuell aufrufen
     fun recalc() {
@@ -159,18 +248,18 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
         val mF = fuselageMass.value?: 0.0
         val mS = stabilizerMass.value?: 0.0
         val mP = listOfNotNull(
-            pilotMass.value,
-            trimPillowMass.value,
-            cockpitBaggageMass.value,
-            parachuteMass.value
+            getValue("pilot_mass"),
+            getValue("trim_pillow_mass"),
+            getValue("cockpit_baggage_mass"),
+            getValue("parachute_mass")
         ).sum()
-        val mLB = lowerBaggageMass.value ?: 0.0
-        val mUB = upperBaggageMass.value ?: 0.0
-        val mTB = trimBallastMass.value ?: 0.0
-        val mWB = waterBallastMass.value ?: 0.0
-        val mSB = stabilizerBallastMass.value ?: 0.0
-        val mO = oxygenMass.value ?: 0.0
-        val mI = instrumentMass.value ?: 0.0
+        val mLB = getValue("lower_baggage_mass")
+        val mUB = getValue("upper_baggage_mass")
+        val mTB = getValue("trim_ballast_mass")
+        val mWB = getValue("water_ballast_mass")
+        val mSB = getValue("stabilizer_ballast_mass")
+        val mO = getValue("oxygen_mass")
+        val mI = getValue("instrument_mass")
 
         val xL = emptyArm.value ?: 0.0
         val xP = pilotArm.value ?: 0.0
@@ -201,5 +290,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     override fun onCleared() {
         super.onCleared()
         prefs.unregisterOnSharedPreferenceChangeListener(this)
+
+        // Melde die Observer mit einer Schleife ab
+        persistentValues.forEach { it.liveData.removeObserver(it.observer) }
     }
 }

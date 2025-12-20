@@ -29,6 +29,19 @@ class ScrollingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Fülle die EditText-Felder mit den aktuellen Werten aus dem ViewModel
+        binding.pilotMassInput.setText(sharedViewModel.pilotMass.value?.toString())
+        binding.cockpitBaggageMassInput.setText(sharedViewModel.cockpitBaggageMass.value?.toString())
+        binding.trimBallastMassInput.setText(sharedViewModel.trimBallastMass.value?.toString())
+        binding.trimPillowMassInput.setText(sharedViewModel.trimPillowMass.value?.toString())
+        binding.parachuteMassInput.setText(sharedViewModel.parachuteMass.value?.toString())
+        binding.lowerBaggageMassInput.setText(sharedViewModel.lowerBaggageMass.value?.toString())
+        binding.upperBaggageMassInput.setText(sharedViewModel.upperBaggageMass.value?.toString())
+        binding.waterBallastMassInput.setText(sharedViewModel.waterBallastMass.value?.toString())
+        binding.stabilizerBallastMassInput.setText(sharedViewModel.stabilizerBallastMass.value?.toString())
+        binding.oxygenMassInput.setText(sharedViewModel.oxygenMass.value?.toString())
+        binding.instrumentMassInput.setText(sharedViewModel.instrumentMass.value?.toString())
+
         binding.pilotMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.pilotMass.value = text.toString().toDoubleOrNull() ?: 0.0
