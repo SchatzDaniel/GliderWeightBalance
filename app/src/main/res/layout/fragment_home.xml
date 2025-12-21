@@ -18,6 +18,26 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/twPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/percent"
+        app:layout_constraintStart_toEndOf="@+id/twSchwerpunktlageErgebnis"
+        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlage" />
+
+    <TextView
+        android:id="@+id/twPercentResult"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@+id/twSchwerpunktlage"
+        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlageErgebnis" />
+
+
+    <TextView
         android:id="@+id/twMasseNTTeile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -25,7 +45,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/MasseNTTeile"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlage" />
+        app:layout_constraintTop_toBottomOf="@+id/twPercent" />
 
     <TextView
         android:id="@+id/twGesamtgewicht"
@@ -55,7 +75,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/kg"
         app:layout_constraintStart_toEndOf="@+id/twMasseNTTeileErgebnis"
-        app:layout_constraintTop_toBottomOf="@+id/twMMHinterBE" />
+        app:layout_constraintTop_toBottomOf="@+id/twPercent" />
 
     <TextView
         android:id="@+id/twKG2"
@@ -83,7 +103,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="@+id/twSchwerpunktlageErgebnis"
         app:layout_constraintStart_toStartOf="@+id/twSchwerpunktlageErgebnis"
-        app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlageErgebnis" />
+        app:layout_constraintTop_toBottomOf="@+id/twPercentResult" />
 
     <TextView
         android:id="@+id/twGesamtgewichtOutput"
