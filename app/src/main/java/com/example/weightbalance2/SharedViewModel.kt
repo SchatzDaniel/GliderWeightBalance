@@ -284,7 +284,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
 
         _totalMass.value = mGes
         _cg.value = xSp
-        _nonLiftingMass.value = mGes - mL + mF + mS
+        _nonLiftingMass.value = mGes - mL - mWB + mF + mS
     }
 
     override fun onCleared() {
