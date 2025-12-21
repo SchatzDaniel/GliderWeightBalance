@@ -285,9 +285,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
         }
 
         // Regel 2: Hebelarm fehlt für eine eingegebene Masse
-        val hasCgInputError = masses.any { (key, mass) ->
-            mass > 0.0 && (arms[key] ?: 0.0) == 0.0
-        }
+        val hasCgInputError = (mL > 0.0 && (emptyArm.value ?: 0.0) == 0.0) || // PRÜFE AUCH DEN LEERMASSENHEBELARM
+                masses.any { (key, mass) ->
+                    mass > 0.0 && (arms[key] ?: 0.0) == 0.0
+                }
         if (hasCgInputError) {
             _cg.value = CalculationResult.Error // Nur CG ist betroffen
         }
