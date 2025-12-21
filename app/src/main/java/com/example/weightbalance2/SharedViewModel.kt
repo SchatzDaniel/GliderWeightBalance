@@ -9,9 +9,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 
+/**
+ * Repräsentiert das Ergebnis einer Berechnung.
+ * Kann entweder ein gültiger [Success]-Wert oder ein [Error] sein.
+ */
+sealed class CalculationResult {
+    data class Success(val value: Double) : CalculationResult()
+    object Error : CalculationResult()
+}
+
 class SharedViewModel(application: Application) : AndroidViewModel(application),
     SharedPreferences.OnSharedPreferenceChangeListener {
-
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     private val persistentValues = listOf(
@@ -106,14 +114,14 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     private val KEY_INSTRUMENT_ARM = "instrument_arm"
 
     // LiveData für alle Werte. Diese werden von aussen (HomeFragment) beobachtet.
-    private val _totalMass = MutableLiveData<Double>()
-    val totalMass: LiveData<Double> = _totalMass
+    private val _totalMass = MutableLiveData<CalculationResult>()
+    val totalMass: LiveData<CalculationResult> = _totalMass
 
-    private val _cg = MutableLiveData<Double>()
-    val cg: LiveData<Double> = _cg
+    private val _cg = MutableLiveData<CalculationResult>()
+    val cg: LiveData<CalculationResult> = _cg
 
-    private val _nonLiftingMass = MutableLiveData<Double>()
-    val nonLiftingMass: LiveData<Double> = _nonLiftingMass
+    private val _nonLiftingMass = MutableLiveData<CalculationResult >()
+    val nonLiftingMass: LiveData<CalculationResult  > = _nonLiftingMass
 
     // Eingabe-LiveData vom ScrollingFragment
     val pilotMass = persistentValues.first { it.key == "pilot_mass" }.liveData
@@ -242,50 +250,81 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     // Hilfsfunktion für recalc
     private fun getValue(key: String): Double = persistentValues.first { it.key == key }.liveData.value ?: 0.0
 
-    // Die zentrale Berechnungslogik, jetzt öffentlich, da wir sie manuell aufrufen
+    // Haupt Berechnungsfunktion
     fun recalc() {
+        // --- 1. Werte sammeln ---
         val mL = emptyMass.value ?: 0.0
-        val mF = fuselageMass.value?: 0.0
-        val mS = stabilizerMass.value?: 0.0
-        val mP = listOfNotNull(
-            getValue("pilot_mass"),
-            getValue("trim_pillow_mass"),
-            getValue("cockpit_baggage_mass"),
-            getValue("parachute_mass")
-        ).sum()
-        val mLB = getValue("lower_baggage_mass")
-        val mUB = getValue("upper_baggage_mass")
-        val mTB = getValue("trim_ballast_mass")
-        val mWB = getValue("water_ballast_mass")
-        val mSB = getValue("stabilizer_ballast_mass")
-        val mO = getValue("oxygen_mass")
-        val mI = getValue("instrument_mass")
+        val mF = fuselageMass.value ?: 0.0
+        val mS = stabilizerMass.value ?: 0.0
 
-        val xL = emptyArm.value ?: 0.0
-        val xP = pilotArm.value ?: 0.0
-        val xLB = lowerBaggageArm.value ?: 0.0
-        val xUB = upperBaggageArm.value ?: 0.0
-        val xTB = trimBallastArm.value ?: 0.0
-        val xWB = waterBallastArm.value ?: 0.0
-        val xSB = stabilizerBallastArm.value ?: 0.0
-        val xO = oxygenArm.value ?: 0.0
-        val xI = instrumentArm.value ?: 0.0
+        // Massen und Arme aus dem ScrollingFragment
+        val masses = persistentValues.map { it.key to getValue(it.key) }.toMap()
+        val arms = mapOf(
+            "pilot_mass" to (pilotArm.value ?: 0.0),
+            "lower_baggage_mass" to (lowerBaggageArm.value ?: 0.0),
+            "upper_baggage_mass" to (upperBaggageArm.value ?: 0.0),
+            "trim_ballast_mass" to (trimBallastArm.value ?: 0.0),
+            "water_ballast_mass" to (waterBallastArm.value ?: 0.0),
+            "stabilizer_ballast_mass" to (stabilizerBallastArm.value ?: 0.0),
+            "oxygen_mass" to (oxygenArm.value ?: 0.0),
+            "instrument_mass" to (instrumentArm.value ?: 0.0),
+            // Füge "trim_pillow_mass" und "parachute_mass" hinzu, die den Hebelarm des Piloten verwenden
+            "trim_pillow_mass" to (pilotArm.value ?: 0.0),
+            "cockpit_baggage_mass" to (pilotArm.value ?: 0.0),
+            "parachute_mass" to (pilotArm.value ?: 0.0)
+        )
 
-        val mGes = mL + mP + mLB + mUB + mTB + mWB + mSB + mO + mI
+        // --- 2. Fehlerprüfungen durchführen ---
 
-        if (mGes == 0.0) {
-            _totalMass.value = 0.0
-            _cg.value = 0.0
-            return
+        // Regel 1: Leermasse fehlt
+        if (mL == 0.0) {
+            _totalMass.value = CalculationResult.Error
+            _cg.value = CalculationResult.Error
+            _nonLiftingMass.value = CalculationResult.Error // Alle Ergebnisse betroffen
+            return // Berechnung abbrechen
         }
 
-        val xSp = (mL * xL + mP * xP + mLB * xLB + mUB * xUB + mTB * xTB + mWB * xWB + mSB * xSB
-                + mO * xO + mI * xI) / mGes
+        // Regel 2: Hebelarm fehlt für eine eingegebene Masse
+        val hasCgInputError = masses.any { (key, mass) ->
+            mass > 0.0 && (arms[key] ?: 0.0) == 0.0
+        }
+        if (hasCgInputError) {
+            _cg.value = CalculationResult.Error // Nur CG ist betroffen
+        }
 
-        _totalMass.value = mGes
-        _cg.value = xSp
-        _nonLiftingMass.value = mGes - mL - mWB + mF + mS
+        // Regel 3: fuselageMass oder stabilizerMass fehlt
+        val hasNonLiftingInputError = mF == 0.0 || mS == 0.0
+        if (hasNonLiftingInputError) {
+            _nonLiftingMass.value = CalculationResult.Error // Nur nonLiftingMass ist betroffen
+        }
+
+        // --- 3. Berechnungen durchführen ---
+
+        // TotalMass (kann nicht mehr fehlschlagen, da wir mL > 0.0 geprüft haben)
+        val mGes = mL + masses.values.sum()
+        _totalMass.value = CalculationResult.Success(mGes)
+
+
+        // CG (Schwerpunkt)
+        if (!hasCgInputError) { // Nur berechnen, wenn kein Fehler vorliegt
+            val totalMoment = (mL * (emptyArm.value ?: 0.0)) +
+                    masses.entries.sumOf { (key, mass) -> mass * (arms[key] ?: 0.0) }
+
+            if (mGes > 0) {
+                _cg.value = CalculationResult.Success(totalMoment / mGes)
+            } else {
+                _cg.value = CalculationResult.Success(0.0)
+            }
+        }
+
+
+        // Non-Lifting Mass
+        if (!hasNonLiftingInputError) { // Nur berechnen, wenn kein Fehler vorliegt
+            val nonLifting = mGes - mL - (masses["water_ballast_mass"] ?: 0.0) + mF + mS
+            _nonLiftingMass.value = CalculationResult.Success(nonLifting)
+        }
     }
+
 
     override fun onCleared() {
         super.onCleared()

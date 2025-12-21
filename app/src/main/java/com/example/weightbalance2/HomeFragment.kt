@@ -10,7 +10,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.example.weightbalance2.databinding.FragmentHomeBinding
-import java.math.RoundingMode
 
 class HomeFragment : Fragment(){
 
@@ -38,59 +37,82 @@ class HomeFragment : Fragment(){
         navController = Navigation.findNavController(view)
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
 
-        sharedViewModel.totalMass.observe(viewLifecycleOwner) {
-            binding.twGesamtgewichtOutput.text =
-                it.toBigDecimal().setScale(1, RoundingMode.UP).toDouble().toString()
-            val maxMass = sharedViewModel.maxTotalMass.value ?: 0.0
-            if (it > maxMass) {
-                binding.twGesamtgewichtOutput.setTextColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_text_color)
-                )
-                binding.twGesamtgewichtOutput.setBackgroundColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_background_color)
-                )
-            }
-            else {
-                binding.twGesamtgewichtOutput.setTextColor(defaultTextColor)
-                binding.twGesamtgewichtOutput.setBackgroundResource(android.R.color.transparent)
-            }
-        }
-        sharedViewModel.cg.observe(viewLifecycleOwner) {
-            binding.twSchwerpunktlageErgebnis.text =
-                it.toBigDecimal().setScale(1, RoundingMode.UP).toDouble().toString()
-            val minCG = sharedViewModel.minCG.value ?: 0.0
-            val maxCG = sharedViewModel.maxCG.value ?: 0.0
-            if (it < minCG || it > maxCG) {
-                binding.twSchwerpunktlageErgebnis.setTextColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_text_color)
-                )
-                binding.twSchwerpunktlageErgebnis.setBackgroundColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_background_color)
-                )
-            }
-            else {
-                binding.twSchwerpunktlageErgebnis.setTextColor(defaultTextColor)
-                binding.twSchwerpunktlageErgebnis.setBackgroundResource(android.R.color.transparent)
+        sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is CalculationResult.Success -> {
+                    // Gültiger Wert empfangen
+                    binding.twGesamtgewichtOutput.text = String.format("%.1f", result.value)
+
+                    // Führe hier die Prüfung gegen maxTotalMass durch
+                    val maxMass = sharedViewModel.maxTotalMass.value ?: 0.0
+                    if (result.value > maxMass && maxMass > 0.0) {
+                        // Rote Warnfarben setzen
+                        binding.twGesamtgewichtOutput.setTextColor(ContextCompat.getColor(requireContext(), R.color.error_text_color))
+                        binding.twGesamtgewichtOutput.setBackgroundResource(R.color.error_background_color)
+                    } else {
+                        // Standardfarben wiederherstellen
+                        binding.twGesamtgewichtOutput.setTextColor(defaultTextColor)
+                        binding.twGesamtgewichtOutput.setBackgroundResource(android.R.color.transparent)
+                    }
+                }
+                is CalculationResult.Error -> {
+                    // Fehlerfall
+                    binding.twGesamtgewichtOutput.text = getString(R.string.error_text) // z.B. "Error"
+                }
             }
         }
-        sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) {
-            binding.twMasseNTTeileErgebnis.text =
-                it.toBigDecimal().setScale(1, RoundingMode.UP).toDouble().toString()
-            val maxNonLiftingMass = sharedViewModel.maxNonLiftingMass.value ?: 0.0
-            if (it > maxNonLiftingMass) {
-                binding.twMasseNTTeileErgebnis.setTextColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_text_color)
-                )
-                binding.twMasseNTTeileErgebnis.setBackgroundColor(
-                    ContextCompat.getColor(requireContext(), R.color.error_background_color)
-                )
-            }
-            else {
-                binding.twMasseNTTeileErgebnis.setTextColor(defaultTextColor)
-                binding.twMasseNTTeileErgebnis.setBackgroundResource(android.R.color.transparent)
+
+// Beobachte cg
+        sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is CalculationResult.Success -> {
+                    binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
+                    // Prüfe gegen minCG und maxCG... (deine bestehende Logik)
+                    val minCG = sharedViewModel.minCG.value ?: 0.0
+                    val maxCG = sharedViewModel.maxCG.value ?: 0.0
+                    if (result.value < minCG || result.value > maxCG) {
+                        binding.twSchwerpunktlageErgebnis.setTextColor(
+                            ContextCompat.getColor(requireContext(), R.color.error_text_color)
+                        )
+                        binding.twSchwerpunktlageErgebnis.setBackgroundColor(
+                            ContextCompat.getColor(requireContext(), R.color.error_background_color)
+                        )
+                    }
+                    else {
+                        binding.twSchwerpunktlageErgebnis.setTextColor(defaultTextColor)
+                        binding.twSchwerpunktlageErgebnis.setBackgroundResource(android.R.color.transparent)
+                    }
+                }
+                is CalculationResult.Error -> {
+                    binding.twSchwerpunktlageErgebnis.text = getString(R.string.error_text)
+                }
             }
         }
-    }
+
+// Beobachte nonLiftingMass
+        sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is CalculationResult.Success -> {
+                    binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
+                    // Prüfe gegen maxNonLiftingMass... (deine bestehende Logik)
+                    val maxNonLiftingMass = sharedViewModel.maxNonLiftingMass.value ?: 0.0
+                    if (result.value > maxNonLiftingMass) {
+                        binding.twMasseNTTeileErgebnis.setTextColor(
+                            ContextCompat.getColor(requireContext(), R.color.error_text_color)
+                        )
+                        binding.twMasseNTTeileErgebnis.setBackgroundColor(
+                            ContextCompat.getColor(requireContext(), R.color.error_background_color)
+                        )
+                    } else {
+                        binding.twMasseNTTeileErgebnis.setTextColor(defaultTextColor)
+                        binding.twMasseNTTeileErgebnis.setBackgroundResource(android.R.color.transparent)
+                    }
+                }
+                is CalculationResult.Error -> {
+                    binding.twMasseNTTeileErgebnis.text = getString(R.string.error_text)}
+                }
+            }
+        }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
