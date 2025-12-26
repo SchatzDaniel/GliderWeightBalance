@@ -1,0 +1,155 @@
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Flugzeugdaten"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/editTextRegistration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Kennzeichen" />
+
+        <EditText
+            android:id="@+id/editTextAircraftType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Typ"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grenzwerte"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/max_total_mass"
+            android:hint="@string/max_total_mass"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/text_margin"/>
+        <EditText
+            android:id="@+id/max_non_lifting_mass"
+            android:hint="@string/max_non_lifting_mass"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/min_cg"
+            android:hint="@string/min_cg"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/max_cg"
+            android:hint="@string/max_cg"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Massen in kg"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/empty_mass"
+            android:hint="@string/Leermasse"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/fuselage_mass"
+            android:hint="@string/Rumpf"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/stabilizer_mass"
+            android:hint="@string/Höhenleitwerk"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Hebelarme"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/empty_arm"
+            android:hint="@string/Leermasse"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/pilot_arm"
+            android:hint="@string/Pilot"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/lower_baggage_arm"
+            android:hint="@string/GepäckraumUnten"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/upper_baggage_arm"
+            android:hint="@string/GepäckraumOben"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/trim_ballast_arm"
+            android:hint="@string/Trimmplatten"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/water_ballast_arm"
+            android:hint="@string/Wasserballast"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/stabilizer_ballast_arm"
+            android:hint="@string/BallastSeitenflosse"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/oxygen_arm"
+            android:hint="@string/Sauerstoffflasche"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/instrument_arm"
+            android:hint="@string/extraInstrumente"
+            android:inputType="numberSigned"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/buttonSaveAircraft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Speichern"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
+</ScrollView>

@@ -55,57 +55,46 @@ class ScrollingFragment : Fragment() {
         binding.pilotMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.pilotMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.cockpitBaggageMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.cockpitBaggageMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.trimBallastMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.trimBallastMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.trimPillowMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.trimPillowMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.parachuteMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.parachuteMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.lowerBaggageMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.lowerBaggageMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.upperBaggageMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.upperBaggageMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.waterBallastMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.waterBallastMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.stabilizerBallastMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.stabilizerBallastMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.oxygenMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.oxygenMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
         binding.instrumentMassInput.doAfterTextChanged { text ->
             // Setze den Wert im ViewModel. Gib 0.0 zurück, wenn die Eingabe leer oder ungültig ist.
             sharedViewModel.instrumentMass.value = text.toString().toDoubleOrNull() ?: 0.0
-            sharedViewModel.recalc()
         }
 
     }

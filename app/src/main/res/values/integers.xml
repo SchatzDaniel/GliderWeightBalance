@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- in res/values/integers.xml -->
+<resources>
+
+    <integer name="default_aircraft_id">-1</integer>
+
+</resources>

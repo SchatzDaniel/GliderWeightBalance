@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.activity
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.example.weightbalance2.databinding.FragmentHomeBinding
@@ -36,6 +37,15 @@ class HomeFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
+
+        sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
+            if (aircraft != null) {
+                activity?.title = aircraft.registration
+                sharedViewModel.recalc()
+            } else {
+                activity?.title = "Kein Flugzeug ausgewählt"
+            }
+        }
 
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
             when (result) {
@@ -158,10 +168,22 @@ class HomeFragment : Fragment(){
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.miSettings -> findNavController().navigate(R.id.settingsFragment)
+        return when(item.itemId) {
+            // Bestehender Fall für die Einstellungen
+            R.id.miSettings -> {
+                findNavController().navigate(R.id.settingsFragment)
+                true // Wichtig: true zurückgeben, um zu signalisieren, dass der Klick behandelt wurde
+            }
+            // NEUER Fall für das Hinzufügen eines Flugzeugs
+            R.id.miAircraft -> {
+                // Hier die Navigation zum AddAircraftFragment einfügen
+                // Passen Sie die ID ggf. an Ihre nav_graph.xml an
+                findNavController().navigate(R.id.action_homeFragment_to_aircraftFragment)
+                true // Wichtig: true zurückgeben
+            }
+            // Standardfall
+            else -> super.onOptionsItemSelected(item)
         }
-        return true
     }
 
     override fun onDestroyView() {

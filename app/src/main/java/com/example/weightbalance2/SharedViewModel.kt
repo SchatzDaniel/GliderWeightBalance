@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
+import com.example.weightbalance2.data.model.Aircraft
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -18,8 +19,19 @@ sealed class CalculationResult {
     object Error : CalculationResult()
 }
 
-class SharedViewModel(application: Application) : AndroidViewModel(application),
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class SharedViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val _selectedAircraft = MutableLiveData<Aircraft?>()
+    val selectedAircraft: LiveData<Aircraft?> get() = _selectedAircraft
+
+    /**
+     * Setzt das ausgewählte Flugzeug. Diese Methode wird vom AircraftFragment aufgerufen.
+     * @param aircraft Das vom Benutzer ausgewählte Flugzeug.
+     */
+    fun selectAircraft(aircraft: Aircraft) {
+        _selectedAircraft.value = aircraft
+    }
+
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     private val persistentValues = listOf(
@@ -91,28 +103,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
         )
     )
 
-
-
-    // BESTEHENDE KEYS AUS root_preferences.xml
-    private val KEY_MAS_TOTAL_MASS = "max_total_mass"
-    private val KEY_MAX_NON_LIFTING_MASS = "max_non_lifting_mass"
-    private val KEY_MIN_CG = "min_cg"
-    private val KEY_MAX_CG = "max_cg"
-
-    private val KEY_EMPTY_MASS = "empty_mass"
-    private val KEY_FUSELAGE_MASS = "fuselage_mass"
-    private val KEY_STABILIZER_MASS = "stabilizer_mass"
-
-    private val KEY_EMPTY_ARM = "empty_arm"
-    private val KEY_PILOT_ARM = "pilot_arm"
-    private val KEY_LB_ARM = "lower_baggage_arm"
-    private val KEY_UB_ARM = "upper_baggage_arm"
-    private val KEY_TRIM_BALLAST_ARM = "trim_ballast_arm"
-    private val KEY_WATER_ARM = "water_ballast_arm"
-    private val KEY_STABILIZER_BALLAST_ARM = "stabilizer_ballast_arm"
-    private val KEY_OXYGEN_ARM = "oxygen_arm"
-    private val KEY_INSTRUMENT_ARM = "instrument_arm"
-
     // LiveData für alle Werte. Diese werden von aussen (HomeFragment) beobachtet.
     private val _totalMass = MutableLiveData<CalculationResult>()
     val totalMass: LiveData<CalculationResult> = _totalMass
@@ -166,92 +156,122 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
     )
 
     init {
-        // 1. Registriere den Listener
-        prefs.registerOnSharedPreferenceChangeListener(this)
-
-        // 2. Lade ALLE Werte EINMAL initial aus den SharedPreferences
-        updateAllValuesFromPreferences()
-
-        // 3. Führe die erste Berechnung durch
-        recalc()
-
-        // 4. Registriere die Observer mit einer Schleife
-        persistentValues.forEach { it.liveData.observeForever(it.observer) }
-    }
-
-    // Diese Methode wird bei JEDER Änderung an den Preferences aufgerufen
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
-        // Finde heraus, ob dieser Key von einem unserer "ScrollingFragment"-Werte stammt.
-        val isPersistentValueKey = persistentValues.any { it.key == key }
-        if (isPersistentValueKey){
-            return
-        }
-        // Aktualisiere den spezifischen Wert, der sich geändert hat
-        updateValueFromKey(key)
-        // Führe eine Neuberechnung durch
-        recalc()
-    }
-
-    // Hilfsmethode, um einen einzelnen Wert basierend auf dem Key zu aktualisieren
-    private fun updateValueFromKey(key: String?) {
-        val newValue =
-            prefs.getString(key, "0.0")?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        when (key) {
-            KEY_MAS_TOTAL_MASS -> maxTotalMass.value = newValue
-            KEY_MAX_NON_LIFTING_MASS -> maxNonLiftingMass.value = newValue
-            KEY_MIN_CG -> minCG.value = newValue
-            KEY_MAX_CG -> maxCG.value = newValue
-
-            KEY_EMPTY_MASS -> emptyMass.value = newValue
-            KEY_FUSELAGE_MASS -> fuselageMass.value = newValue
-            KEY_STABILIZER_MASS -> stabilizerMass.value = newValue
-
-            KEY_EMPTY_ARM -> emptyArm.value = newValue
-            KEY_PILOT_ARM -> pilotArm.value = newValue
-            KEY_LB_ARM -> lowerBaggageArm.value = newValue
-            KEY_UB_ARM -> upperBaggageArm.value = newValue
-            KEY_TRIM_BALLAST_ARM -> trimBallastArm.value = newValue
-            KEY_WATER_ARM -> waterBallastArm.value = newValue
-            KEY_STABILIZER_BALLAST_ARM -> stabilizerBallastArm.value = newValue
-            KEY_OXYGEN_ARM -> oxygenArm.value = newValue
-            KEY_INSTRUMENT_ARM -> instrumentArm.value = newValue
-        }
-    }
-
-    // Hilfsmethode, um alle Werte zu Beginn zu laden
-    private fun updateAllValuesFromPreferences() {
-        fun readStringAsDouble(key: String): Double {
-            return prefs.getString(key, "0.0")?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
-        }
-        maxTotalMass.value = readStringAsDouble(KEY_MAS_TOTAL_MASS)
-        maxNonLiftingMass.value = readStringAsDouble(KEY_MAX_NON_LIFTING_MASS)
-        minCG.value = readStringAsDouble(KEY_MIN_CG)
-        maxCG.value = readStringAsDouble(KEY_MAX_CG)
-
-        emptyMass.value = readStringAsDouble(KEY_EMPTY_MASS)
-        fuselageMass.value = readStringAsDouble(KEY_FUSELAGE_MASS)
-        stabilizerMass.value = readStringAsDouble(KEY_STABILIZER_MASS)
-
-        emptyArm.value = readStringAsDouble(KEY_EMPTY_ARM)
-        pilotArm.value = readStringAsDouble(KEY_PILOT_ARM)
-        lowerBaggageArm.value = readStringAsDouble(KEY_LB_ARM)
-        upperBaggageArm.value = readStringAsDouble(KEY_UB_ARM)
-        trimBallastArm.value = readStringAsDouble(KEY_TRIM_BALLAST_ARM)
-        waterBallastArm.value = readStringAsDouble(KEY_WATER_ARM)
-        stabilizerBallastArm.value = readStringAsDouble(KEY_STABILIZER_BALLAST_ARM)
-        oxygenArm.value = readStringAsDouble(KEY_OXYGEN_ARM)
-        instrumentArm.value = readStringAsDouble(KEY_INSTRUMENT_ARM)
-
+        // 1. Lade die vom Benutzer zuletzt eingegebenen Massen aus den SharedPreferences.
         persistentValues.forEach { value ->
             value.liveData.value = prefs.getString(value.key, "0.0")?.toDoubleOrNull() ?: 0.0
         }
+
+        // 2. Registriere die Observer, die Benutzereingaben bei Änderung sofort speichern.
+        persistentValues.forEach { it.liveData.observeForever(it.observer) }
+
+        // 3. Füge einen weiteren Observer für JEDE Benutzereingabe hinzu, der die Neuberechnung anstößt.
+        persistentValues.forEach { persistentValue ->
+            persistentValue.liveData.observeForever {
+                // Immer wenn sich eine Masse ändert, rufe recalc() auf.
+                recalc()
+            }
+        }
+
+        // 4. Beobachte das ausgewählte Flugzeug. Dies ist der zentrale Trigger.
+        //    Immer wenn ein Flugzeug (neu) ausgewählt wird:
+        //      a) Lade die flugzeugspezifischen Daten (Hebelarme, Leermasse etc.).
+        //      b) Starte die Neuberechnung für die gesamte UI.
+        selectedAircraft.observeForever { aircraft ->
+            if (aircraft != null) {
+                // a) Lade die neuen Flugzeugdaten
+                updateAllValuesFromAircraft(aircraft)
+                // b) Starte die Neuberechnung.
+                recalc()
+            } else {
+                // Optional: Was soll passieren, wenn kein Flugzeug ausgewählt ist?
+                // Setze die Ergebnisse auf einen "neutralen" Zustand, nicht Error.
+                _totalMass.value = CalculationResult.Success(0.0)
+                _cg.value = CalculationResult.Success(0.0)
+                _nonLiftingMass.value = CalculationResult.Success(0.0)
+            }
+        }
     }
+
+    /*
+        // Diese Methode wird bei JEDER Änderung an den Preferences aufgerufen
+        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+            // Finde heraus, ob dieser Key von einem unserer "ScrollingFragment"-Werte stammt.
+            val isPersistentValueKey = persistentValues.any { it.key == key }
+            if (isPersistentValueKey){
+                return
+            }
+            // Aktualisiere den spezifischen Wert, der sich geändert hat
+            updateValueFromKey(key)
+            // Führe eine Neuberechnung durch
+            recalc()
+        }
+
+        // Hilfsmethode, um einen einzelnen Wert basierend auf dem Key zu aktualisieren
+        private fun updateValueFromKey(key: String?) {
+            val newValue =
+                prefs.getString(key, "0.0")?.replace(',', '.')?.toDoubleOrNull() ?: 0.0
+            when (key) {
+                KEY_MAS_TOTAL_MASS -> maxTotalMass.value = newValue
+                KEY_MAX_NON_LIFTING_MASS -> maxNonLiftingMass.value = newValue
+                KEY_MIN_CG -> minCG.value = newValue
+                KEY_MAX_CG -> maxCG.value = newValue
+
+                KEY_EMPTY_MASS -> emptyMass.value = newValue
+                KEY_FUSELAGE_MASS -> fuselageMass.value = newValue
+                KEY_STABILIZER_MASS -> stabilizerMass.value = newValue
+
+                KEY_EMPTY_ARM -> emptyArm.value = newValue
+                KEY_PILOT_ARM -> pilotArm.value = newValue
+                KEY_LB_ARM -> lowerBaggageArm.value = newValue
+                KEY_UB_ARM -> upperBaggageArm.value = newValue
+                KEY_TRIM_BALLAST_ARM -> trimBallastArm.value = newValue
+                KEY_WATER_ARM -> waterBallastArm.value = newValue
+                KEY_STABILIZER_BALLAST_ARM -> stabilizerBallastArm.value = newValue
+                KEY_OXYGEN_ARM -> oxygenArm.value = newValue
+                KEY_INSTRUMENT_ARM -> instrumentArm.value = newValue
+            }
+        }
+
+     */
+
+    // Hilfsmethode, um alle Werte zu Beginn zu laden
+    private fun updateAllValuesFromAircraft(aircraft: Aircraft) {
+        maxTotalMass.value = aircraft.maxTotalMass
+        maxNonLiftingMass.value = aircraft.maxNonLiftingMass
+        minCG.value = aircraft.minCg
+        maxCG.value = aircraft.maxCg
+
+        emptyMass.value = aircraft.emptyWeight
+        fuselageMass.value = aircraft.fuselageMass
+        stabilizerMass.value = aircraft.stabilizerMass
+
+        emptyArm.value = aircraft.emptyWeightArm
+        pilotArm.value = aircraft.pilotMassArm
+        lowerBaggageArm.value = aircraft.lowerBaggageMassArm
+        upperBaggageArm.value = aircraft.upperBaggageMassArm
+        trimBallastArm.value = aircraft.trimBallastMassArm
+        waterBallastArm.value = aircraft.waterBallastMassArm
+        stabilizerBallastArm.value = aircraft.stabilizerBallastMassArm
+        oxygenArm.value = aircraft.oxygenMassArm
+        instrumentArm.value = aircraft.instrumentMassArm
+    }
+
 
     // Hilfsfunktion für recalc
     private fun getValue(key: String): Double = persistentValues.first { it.key == key }.liveData.value ?: 0.0
 
     // Haupt Berechnungsfunktion
     fun recalc() {
+        // SCHUTZBEDINGUNG: Breche sofort ab, wenn kein Flugzeug ausgewählt ist.
+        // In diesem Fall sind die Basisdaten (Leermasse, Hebelarme) nicht vorhanden.
+        if (selectedAircraft.value == null) {
+            // Setze auf definierte Standardwerte, anstatt einen Fehler zu erzeugen.
+            _totalMass.value = CalculationResult.Success(0.0)
+            _cg.value = CalculationResult.Success(0.0)
+            _nonLiftingMass.value = CalculationResult.Success(0.0)
+            return
+        }
+
         // --- 1. Werte sammeln ---
         val mL = emptyMass.value ?: 0.0
         val mF = fuselageMass.value ?: 0.0
@@ -318,7 +338,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
             }
         }
 
-
         // Non-Lifting Mass
         if (!hasNonLiftingInputError) { // Nur berechnen, wenn kein Fehler vorliegt
             val nonLifting = mGes - mL - (masses["water_ballast_mass"] ?: 0.0) + mF + mS
@@ -326,10 +345,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
-
     override fun onCleared() {
         super.onCleared()
-        prefs.unregisterOnSharedPreferenceChangeListener(this)
+        //prefs.unregisterOnSharedPreferenceChangeListener(this)
 
         // Melde die Observer mit einer Schleife ab
         persistentValues.forEach { it.liveData.removeObserver(it.observer) }
