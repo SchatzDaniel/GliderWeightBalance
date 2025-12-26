@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weightbalance2.data.model.Aircraft
@@ -90,6 +88,7 @@ class AddAircraftFragment : Fragment() {
     private fun saveOrUpdateAircraft() {
         // --- Schritt 1: Definiere alle zu validierenden Felder ---
         // Wir gruppieren die UI-Felder und ihre Namen, um sie in einer Schleife zu verarbeiten.
+
         val fieldsToValidate = mapOf(
             "maxTotalMass" to binding.maxTotalMass,
             "maxNonLiftingMass" to binding.maxNonLiftingMass,
@@ -132,7 +131,7 @@ class AddAircraftFragment : Fragment() {
         }
 
         if (!allFieldsValid) {
-            Toast.makeText(requireContext(), "Bitte alle Felder korrekt ausfüllen.", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Bitte Kennzeichen und Typ ausfüllen.", Toast.LENGTH_LONG).show()
             return // Funktion verlassen
         }
 

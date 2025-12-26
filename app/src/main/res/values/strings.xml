@@ -40,4 +40,10 @@
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
     <string name="miAircraftTitle">Flugzeuge verwalten</string>
     <string name="no_aircraft_selected_title">Kein Flugzeug</string>
+    <string name="aicraft_specs">Flugzeugdaten</string>
+    <string name="registration">Kennzeichen</string>
+    <string name="aircraft_type">Typ</string>
+    <string name="aircraft_limits">Grenzwerte</string>
+    <string name="aircraft_masses">Massen in kg</string>
+    <string name="save_button_text">Speichern</string>
 </resources>

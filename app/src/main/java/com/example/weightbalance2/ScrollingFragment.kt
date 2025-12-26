@@ -8,7 +8,6 @@ import android.widget.EditText
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.navGraphViewModels
 import com.example.weightbalance2.databinding.FragmentScrollingBinding
 
 class ScrollingFragment : Fragment() {

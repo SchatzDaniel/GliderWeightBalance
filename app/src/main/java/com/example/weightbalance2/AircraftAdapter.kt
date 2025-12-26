@@ -23,13 +23,7 @@ class AircraftAdapter(
     override fun onBindViewHolder(holder: AircraftViewHolder, position: Int) {
         val current = getItem(position)
 
-        // ... Binden Sie Ihre anderen Daten (z.B. Kennzeichen) ...
-        holder.binding.tvAircraftName.text = buildString {
-            append(current.registration)
-            append(" (")
-            append(current.aircraftType)
-            append(")")
-        }
+        holder.bind(current)
 
         // Setze die beiden Click Listener
         holder.itemView.setOnClickListener {

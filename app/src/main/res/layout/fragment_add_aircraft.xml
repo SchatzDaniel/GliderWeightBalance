@@ -12,25 +12,25 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Flugzeugdaten"
+            android:text="@string/aicraft_specs"
             android:textSize="24sp" />
 
         <EditText
             android:id="@+id/editTextRegistration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Kennzeichen" />
+            android:hint="@string/registration" />
 
         <EditText
             android:id="@+id/editTextAircraftType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Typ"/>
+            android:hint="@string/aircraft_type"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grenzwerte"
+            android:text="@string/aircraft_limits"
             android:textSize="24sp" />
 
         <EditText
@@ -62,7 +62,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Massen in kg"
+            android:text="@string/aircraft_masses"
             android:textSize="24sp" />
 
         <EditText
@@ -149,7 +149,7 @@
             android:id="@+id/buttonSaveAircraft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Speichern"
+            android:text="@string/save_button_text"
             android:layout_gravity="center_horizontal" />
     </LinearLayout>
 </ScrollView>

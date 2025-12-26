@@ -38,67 +38,67 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         PersistentValue(
             key = "pilot_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("pilot_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "cockpit_baggage_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("cockpit_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "trim_ballast_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("trim_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "trim_pillow_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("trim_pillow_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "parachute_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("parachute_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "lower_baggage_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("lower_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "upper_baggage_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("upper_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "water_ballast_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("water_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "stabilizer_ballast_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("stabilizer_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "oxygen_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("oxygen_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "instrument_mass",
             liveData = MutableLiveData(0.0),
-            observer = Observer { value ->
+            observer = { value ->
                 prefs.edit { putString("instrument_mass", value.toString()) } }
         )
     )
