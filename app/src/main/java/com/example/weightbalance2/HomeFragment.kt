@@ -5,11 +5,10 @@ import android.os.Bundle
 import android.view.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.navigation.activity
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
+
 import com.example.weightbalance2.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment(){
@@ -19,7 +18,7 @@ class HomeFragment : Fragment(){
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val sharedViewModel: SharedViewModel by navGraphViewModels(R.id.main_nav)
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     // Variable, um die Standard-Textfarbe zu speichern
     private var defaultTextColor: ColorStateList? = null
@@ -28,7 +27,6 @@ class HomeFragment : Fragment(){
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setHasOptionsMenu(true)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -39,12 +37,24 @@ class HomeFragment : Fragment(){
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
 
         sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
-            if (aircraft != null) {
-                activity?.title = aircraft.registration
-                sharedViewModel.recalc()
+            val mainActivity = activity as? MainActivity
+
+            if (aircraft == null) {
+                // Fall 1: Kein Flugzeug ausgewählt
+                mainActivity?.setToolbarTitle(getString(R.string.no_aircraft_selected_title))
             } else {
-                activity?.title = "Kein Flugzeug ausgewählt"
+                // Fall 2: Ein Flugzeug ist ausgewählt
+                val title = buildString {
+                    append(aircraft.registration) // Innerhalb des else-Blocks ist 'aircraft' sicher nicht null
+                    append(" (")
+                    append(aircraft.aircraftType)
+                    append(")")
+                }
+                mainActivity?.setToolbarTitle(title)
             }
+
+
+            sharedViewModel.recalc()
         }
 
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
@@ -159,30 +169,6 @@ class HomeFragment : Fragment(){
                     }
                 }
             }
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.app_bar_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId) {
-            // Bestehender Fall für die Einstellungen
-            R.id.miSettings -> {
-                findNavController().navigate(R.id.settingsFragment)
-                true // Wichtig: true zurückgeben, um zu signalisieren, dass der Klick behandelt wurde
-            }
-            // NEUER Fall für das Hinzufügen eines Flugzeugs
-            R.id.miAircraft -> {
-                // Hier die Navigation zum AddAircraftFragment einfügen
-                // Passen Sie die ID ggf. an Ihre nav_graph.xml an
-                findNavController().navigate(R.id.action_homeFragment_to_aircraftFragment)
-                true // Wichtig: true zurückgeben
-            }
-            // Standardfall
-            else -> super.onOptionsItemSelected(item)
         }
     }
 

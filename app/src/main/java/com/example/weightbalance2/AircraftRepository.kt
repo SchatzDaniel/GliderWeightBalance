@@ -3,7 +3,6 @@ package com.example.weightbalance2
 import androidx.lifecycle.LiveData
 import com.example.weightbalance2.data.dao.AircraftDao
 import com.example.weightbalance2.data.model.Aircraft
-import kotlinx.coroutines.flow.Flow
 
 class AircraftRepository(private val aircraftDao: AircraftDao) {
 

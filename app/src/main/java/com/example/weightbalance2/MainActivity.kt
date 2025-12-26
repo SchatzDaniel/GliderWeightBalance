@@ -1,12 +1,13 @@
 package com.example.weightbalance2
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.NavigationUI
 import com.example.weightbalance2.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -14,28 +15,68 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
+    // Speichert das aktuell sichtbare Fragment
+    private var currentDestinationId: Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. Setzen Sie IHRE Toolbar als die primäre ActionBar.
+        // Toolbar als ActionBar setzen
         setSupportActionBar(binding.toolbar)
 
-        // 2. Finde den NavController
+        // NavController holen
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // 3. Erstelle die AppBarConfiguration
-        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        // HomeFragment ist Root (kein Zurück-Pfeil dort)
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment))
 
-        /// 4. Verbinde die jetzt offizielle ActionBar mit dem NavController.
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        // Toolbar mit Navigation verbinden
+        NavigationUI.setupWithNavController(
+            binding.toolbar,
+            navController,
+            appBarConfiguration
+        )
+
+        // Listener für Fragment-Wechsel
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            currentDestinationId = destination.id
+            invalidateOptionsMenu() // Menü neu vorbereiten
+        }
     }
-    // 5. Fügen Sie die onSupportNavigateUp-Methode wieder hinzu.
-    //    Diese ist notwendig, wenn man setSupportActionBar verwendet.
+
+    override fun onCreateOptionsMenu(menu: Menu):Boolean {
+        menuInflater.inflate(R.menu.app_bar_menu, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val showMenu = currentDestinationId == R.id.homeFragment
+
+        // Menü-Icons nur im HomeFragment anzeigen
+        menu.findItem(R.id.aircraftFragment)?.isVisible = showMenu
+        menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
+
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return NavigationUI.onNavDestinationSelected(item, navController)
+                || super.onOptionsItemSelected(item)
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    /**
+    * Ermöglicht es den Fragmenten, den Titel der ActionBar zu setzen.
+    */
+    fun setToolbarTitle(title: String) {
+        binding.toolbar.title = title
     }
 }

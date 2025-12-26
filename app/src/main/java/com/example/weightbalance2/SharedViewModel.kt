@@ -2,13 +2,13 @@
 package com.example.weightbalance2
 
 import android.app.Application
-import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.example.weightbalance2.data.model.Aircraft
+import androidx.core.content.edit
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -39,67 +39,67 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             key = "pilot_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("pilot_mass", value.toString()).apply() }
+                prefs.edit { putString("pilot_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "cockpit_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("cockpit_baggage_mass", value.toString()).apply() }
+                prefs.edit { putString("cockpit_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "trim_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("trim_ballast_mass", value.toString()).apply() }
+                prefs.edit { putString("trim_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "trim_pillow_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("trim_pillow_mass", value.toString()).apply() }
+                prefs.edit { putString("trim_pillow_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "parachute_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("parachute_mass", value.toString()).apply() }
+                prefs.edit { putString("parachute_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "lower_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("lower_baggage_mass", value.toString()).apply() }
+                prefs.edit { putString("lower_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "upper_baggage_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("upper_baggage_mass", value.toString()).apply() }
+                prefs.edit { putString("upper_baggage_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "water_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("water_ballast_mass", value.toString()).apply() }
+                prefs.edit { putString("water_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "stabilizer_ballast_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("stabilizer_ballast_mass", value.toString()).apply() }
+                prefs.edit { putString("stabilizer_ballast_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "oxygen_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("oxygen_mass", value.toString()).apply() }
+                prefs.edit { putString("oxygen_mass", value.toString()) } }
         ),
         PersistentValue(
             key = "instrument_mass",
             liveData = MutableLiveData(0.0),
             observer = Observer { value ->
-                prefs.edit().putString("instrument_mass", value.toString()).apply() }
+                prefs.edit { putString("instrument_mass", value.toString()) } }
         )
     )
 

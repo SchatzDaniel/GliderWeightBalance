@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/miAircraft"
-        app:icon="@drawable/ic_action_aircraft"
         android:title="@string/miAircraftTitle"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/aircraftFragment"
+        app:icon="@drawable/ic_action_aircraft"
+        app:showAsAction="never"/>
     <item
-        android:id="@+id/miSettings"
-        app:showAsAction="ifRoom"
+        android:title="@string/Settings"
+        android:id="@+id/settingsFragment"
         app:icon="@drawable/ic_action_name"
-        android:title="@string/Settings"/>
+        app:showAsAction="never"/>
 </menu>

@@ -1,8 +1,6 @@
 <resources>
 
-    <style name="Base.Theme.WeightBalance2"
-        parent="Theme.Material3.DayNight.NoActionBar">
-
+    <style name="Base.Theme.WeightBalance2" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- AppBar / Primary -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorOnPrimary">@color/black</item>
@@ -15,9 +13,11 @@
         <item name="android:statusBarColor">@color/purple_500</item>
         <item name="android:windowLightStatusBar">true</item>
 
+        <!-- Icons -->
+        <item name="iconColor">@android:color/black</item>
     </style>
 
-    <style name="Theme.WeightBalance2" parent="Base.Theme.WeightBalance2" />
+    <style name="Theme.WeightBalance2.noActionBar" parent="Base.Theme.WeightBalance2" />
 
     <style name="ThemeOverlay.App.Toolbar" parent="ThemeOverlay.Material3.Toolbar.Surface">
         <!--

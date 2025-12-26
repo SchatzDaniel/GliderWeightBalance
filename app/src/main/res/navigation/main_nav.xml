@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/addAircraftFragment"
         android:name="com.example.weightbalance2.AddAircraftFragment"
-        android:label="Add Aircraft">
+        android:label="@string/title_activity_add_aircraft">
         <argument
             android:name="aircraftId"
             app:argType="integer"
@@ -18,11 +18,10 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.weightbalance2.SettingsFragment"
-        android:label="Settings" />
+        android:label="@string/title_activity_settings" />
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.weightbalance2.HomeFragment"
-        android:label="Home"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_homeFragment3_to_settingsFragment"
@@ -34,7 +33,8 @@
     <fragment
         android:id="@+id/aircraftFragment"
         android:name="com.example.weightbalance2.AircraftFragment"
-        android:label="AircraftFragment" >
+        android:label="@string/title_activity_aircraft"
+        tools:layout="@layout/fragment_aircraft" >
         <action
             android:id="@+id/action_aircraftFragment_to_addAircraftFragment"
             app:destination="@id/addAircraftFragment"/>

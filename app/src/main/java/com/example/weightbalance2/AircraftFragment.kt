@@ -25,8 +25,8 @@ class AircraftFragment : Fragment() {
     private val binding get() = _binding!!
 
     // 2. ViewModel-Instanz holen
-    private val viewModel: AircraftViewModel by viewModels()
-    private val sharedViewModel: SharedViewModel by navGraphViewModels(R.id.main_nav)
+    private val viewModel: AircraftViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     // 3. Adapter-Instanz deklarieren
     private lateinit var aircraftAdapter: AircraftAdapter
@@ -85,24 +85,6 @@ class AircraftFragment : Fragment() {
             // Navigiere zum Hinzufügen-Fragment (ohne eine ID zu übergeben)
             val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()
             findNavController().navigate(action)
-        }
-    }
-
-    private fun observeAircraftList() {
-        // Starte eine Coroutine, die an den Lebenszyklus des Fragments gebunden ist
-        viewLifecycleOwner.lifecycleScope.launch {
-            // Dieser Block wird ausgeführt, wenn das Fragment mindestens im RESUMED-Zustand ist
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                // Sammle die Daten aus dem Flow des ViewModels
-                viewModel.allAircraft.collect { aircraftList ->
-                    // 7. Daten an den Adapter übergeben
-                    aircraftAdapter.submitList(aircraftList)
-
-                    // 8. Sichtbarkeit der "Liste leer"-Ansicht steuern
-                    binding.recyclerViewAircraft.isVisible = aircraftList.isNotEmpty()
-                    binding.textViewEmpty.isVisible = aircraftList.isEmpty()
-                }
-            }
         }
     }
 

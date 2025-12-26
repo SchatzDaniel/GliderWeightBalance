@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.navGraphViewModels
 import com.example.weightbalance2.databinding.FragmentScrollingBinding
 
@@ -16,7 +17,7 @@ class ScrollingFragment : Fragment() {
     // Diese Property ist nur zwischen onCreateView und onDestroyView gültig.
     private val binding get() = _binding!!
 
-    private val sharedViewModel: SharedViewModel by navGraphViewModels(R.id.main_nav)
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

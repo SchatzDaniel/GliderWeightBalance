@@ -18,14 +18,16 @@
     <string name="BallastSeitenflosse">Ballast Seitenflosse</string>
     <string name="Sauerstoffflasche">Sauerstoffflasche</string>
     <string name="extraInstrumente">extra Instrumente</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="title_activity_aircraft">Flugzeuge</string>
+    <string name="title_activity_add_aircraft">Neues Flugzeug</string>
     <string name="Flugzeug">Flugzeug</string>
     <string name="Leermasse">Leermasse</string>
     <string name="Rumpf">Rumpf</string>
     <string name="Höhenleitwerk">Höhenleitwerk</string>
     <string name="Hebelarme">Hebelarme in mm</string>
     <string name="mm">mm</string>
-    <string name="Settings">Settings</string>
+    <string name="Settings">Einstellungen</string>
     <string name="Grenzwerte">Grenzwerte</string>
     <string name="max_total_mass">Maximal zulässige Gesamtmasse in kg</string>
     <string name="max_non_lifting_mass">Maximal zulässige Masse nicht tragender Teile in kg</string>
@@ -37,4 +39,5 @@
     <string name="no_aircrafts">Keine Flugzeuge vorhanden.</string>
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
     <string name="miAircraftTitle">Flugzeuge verwalten</string>
+    <string name="no_aircraft_selected_title">Kein Flugzeug</string>
 </resources>
