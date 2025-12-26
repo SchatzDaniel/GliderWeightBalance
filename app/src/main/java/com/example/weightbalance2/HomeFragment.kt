@@ -64,7 +64,7 @@ class HomeFragment : Fragment(){
                     binding.twGesamtgewichtOutput.text = String.format("%.1f", result.value)
 
                     // Führe hier die Prüfung gegen maxTotalMass durch
-                    val maxMass = sharedViewModel.maxTotalMass.value ?: 0.0
+                    val maxMass = sharedViewModel.selectedAircraft.value?.maxTotalMass ?: 0.0
                     if (result.value > maxMass && maxMass > 0.0) {
                         // Rote Warnfarben setzen
                         binding.twGesamtgewichtOutput.setTextColor(
@@ -97,8 +97,8 @@ class HomeFragment : Fragment(){
                         binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
 
                         // Hole min und max CG sicher
-                        val minCG = sharedViewModel.minCG.value ?: 0.0
-                        val maxCG = sharedViewModel.maxCG.value ?: 0.0
+                        val minCG = sharedViewModel.selectedAircraft.value?.minCg ?: 0.0
+                        val maxCG = sharedViewModel.selectedAircraft.value?.maxCg ?: 0.0
 
                         // Färbung für die Schwerpunktlage
                         if ((minCG > 0.0 || maxCG > 0.0) && (result.value < minCG || result.value > maxCG)) {
@@ -147,7 +147,8 @@ class HomeFragment : Fragment(){
                     is CalculationResult.Success -> {
                         binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
                         // Prüfe gegen maxNonLiftingMass... (deine bestehende Logik)
-                        val maxNonLiftingMass = sharedViewModel.maxNonLiftingMass.value ?: 0.0
+                        val maxNonLiftingMass =
+                            sharedViewModel.selectedAircraft.value?.maxNonLiftingMass ?: 0.0
                         if (result.value > maxNonLiftingMass) {
                             binding.twMasseNTTeileErgebnis.setTextColor(
                                 ContextCompat.getColor(requireContext(), R.color.error_text_color)
