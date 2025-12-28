@@ -19,6 +19,7 @@ class HomeFragment : Fragment(){
     private val binding get() = _binding!!
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val viewModel: AircraftViewModel by activityViewModels()
 
     // Variable, um die Standard-Textfarbe zu speichern
     private var defaultTextColor: ColorStateList? = null
@@ -36,6 +37,17 @@ class HomeFragment : Fragment(){
         navController = Navigation.findNavController(view)
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
 
+        if (sharedViewModel.selectedAircraft.value == null) {
+            viewModel.loadLastSelectedAircraft().observe(viewLifecycleOwner) { lastAircraft ->
+                // Wenn ein Flugzeug gefunden wurde, setze es im SharedViewModel.
+                // Der Observer im SharedViewModel kümmert sich dann um das Speichern der ID
+                // und das Auslösen der Neuberechnung.
+                if (lastAircraft != null) {
+                    sharedViewModel.selectAircraft(lastAircraft)
+                }
+            }
+        }
+
         sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
             val mainActivity = activity as? MainActivity
 
@@ -52,10 +64,7 @@ class HomeFragment : Fragment(){
                 }
                 mainActivity?.setToolbarTitle(title)
             }
-
-
-            sharedViewModel.recalc()
-        }
+    }
 
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
             when (result) {

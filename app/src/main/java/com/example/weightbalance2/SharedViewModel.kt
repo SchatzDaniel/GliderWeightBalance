@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.example.weightbalance2.data.model.Aircraft
 import androidx.core.content.edit
+import com.example.weightbalance2.data.database.AppDatabase
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -32,6 +33,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         _selectedAircraft.value = aircraft
     }
 
+    private val aircraftDao = AppDatabase.getDatabase(application).aircraftDao()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     private val persistentValues = listOf(
@@ -154,9 +156,11 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
         // 2. Beobachte das ausgewählte Flugzeug. Dies ist der zweite zentrale Trigger.
         selectedAircraft.observeForever { aircraft ->
-            // Wenn sich das Flugzeug ändert (oder zum ersten Mal gesetzt wird),
-            // reicht ein einfacher Aufruf von recalc().
-            // Die Funktion ist schlau genug, um zu wissen, was zu tun ist.
+            // Speichere die ID in SharedPreferences, wenn ein Flugzeug ausgewählt wird.
+            // Wenn die Auswahl aufgehoben wird (aircraft == null), speichere einen ungültigen Wert wie -1.
+            prefs.edit { putInt("last_selected_aircraft_id", aircraft?.id ?: -1) }
+
+            // Die Neuberechnung wird wie bisher ausgelöst.
             recalc()
         }
     }
