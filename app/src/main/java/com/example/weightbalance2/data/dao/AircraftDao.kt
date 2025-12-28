@@ -2,6 +2,7 @@ package com.example.weightbalance2.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -25,5 +26,7 @@ interface AircraftDao {
 
     @Update
     suspend fun updateAircraft(aircraft: Aircraft)
-    // TODO: Add delete and edit function
+
+    @Delete
+    suspend fun deleteAircraft(aircraft: Aircraft)
 }

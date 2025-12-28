@@ -60,4 +60,11 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
             repository.updateAircraft(aircraft)
         }
     }
+
+    fun deleteAircraft(aircraft: Aircraft){
+        viewModelScope.launch {
+            repository.deleteAircraft(aircraft)
+        }
+
+    }
 }

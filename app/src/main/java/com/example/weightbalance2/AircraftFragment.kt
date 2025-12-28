@@ -1,10 +1,10 @@
 package com.example.weightbalance2
 
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.view.LayoutInflater // Wichtig: LayoutInflater importieren
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
+import android.view.ViewGroup // Wichtig: ViewGroup importieren
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,82 +13,104 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weightbalance2.data.model.Aircraft
 import com.example.weightbalance2.databinding.FragmentAircraftBinding
 import kotlinx.coroutines.launch
 
 class AircraftFragment : Fragment() {
 
-    // 1. View Binding deklarieren
+    // 1. View Binding deklarieren (korrekte Methode für Fragments)
     private var _binding: FragmentAircraftBinding? = null
     private val binding get() = _binding!!
 
-    // 2. ViewModel-Instanz holen
+    // 2. ViewModel-Instanzen holen
     private val viewModel: AircraftViewModel by activityViewModels()
     private val sharedViewModel: SharedViewModel by activityViewModels()
 
     // 3. Adapter-Instanz deklarieren
     private lateinit var aircraftAdapter: AircraftAdapter
 
+    // onCreateView hinzufügen, um das Binding korrekt zu initialisieren
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Layout mit View Binding inflaten
         _binding = FragmentAircraftBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Initialisiere den Adapter mit ZWEI verschiedenen Klick-Aktionen.
-        aircraftAdapter = AircraftAdapter(
-            onItemClicked = { aircraft ->
-                // AKTION 1: Flugzeug als aktiv markieren
-                // 1. Setze das Flugzeug im SharedViewModel
-                sharedViewModel.selectAircraft(aircraft)
 
-                // 2. Gib dem Nutzer eine visuelle Bestätigung.
-                Toast.makeText(
-                    requireContext(),
-                    "Flugzeug '${aircraft.registration}' als aktiv ausgewählt.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            },
-            onEditClicked = { aircraft ->
-                // AKTION 2: Auf "Bearbeiten" klicken und zum Bearbeiten-Screen navigieren
-                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(aircraft.id)
-                findNavController().navigate(action)
-            }
-        )
+        // Schritt 1: Adapter initialisieren und dem RecyclerView zuweisen.
+        // Das passiert jetzt nur einmal.
+        setupRecyclerView()
 
-        // 2. RecyclerView einrichten
-        binding.recyclerViewAircraft.adapter = aircraftAdapter
-        binding.recyclerViewAircraft.layoutManager = LinearLayoutManager(requireContext())
-
-        // 3. ViewModel beobachten, um die Liste zu aktualisieren
+        // Schritt 2: Daten beobachten und die UI (Liste und Sichtbarkeit) aktualisieren.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allAircraft.collect { aircrafts ->
+                    // a) Die neue Liste an den Adapter übergeben.
                     aircraftAdapter.submitList(aircrafts)
 
-                    // Sichtbarkeit der "Liste leer"-Ansicht steuern
+                    // b) Die Sichtbarkeit der Views basierend auf der Liste steuern.
+                    // Dieser Block wird JEDES MAL ausgeführt, wenn sich die Liste ändert.
                     binding.recyclerViewAircraft.isVisible = aircrafts.isNotEmpty()
                     binding.textViewEmpty.isVisible = aircrafts.isEmpty()
                 }
             }
         }
 
-        // 4. Click Listener für den "Hinzufügen"-Button
+        // Schritt 3: Click Listener für den "Hinzufügen"-Button
         binding.fabAddAircraft.setOnClickListener {
-            // Navigiere zum Hinzufügen-Fragment (ohne eine ID zu übergeben)
             val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()
             findNavController().navigate(action)
         }
     }
 
-    // 9. Speicherbereinigung, um Memory Leaks zu verhindern
+    private fun setupRecyclerView() {
+        aircraftAdapter = AircraftAdapter(
+            // Normaler Klick: Flugzeug auswählen und zum Home-Screen navigieren
+            onItemClicked = { aircraft ->
+                sharedViewModel.selectAircraft(aircraft)
+                findNavController().navigateUp()
+            },
+            // Klick auf Bearbeiten-Button
+            onEditClicked = { aircraft ->
+                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(
+                    aircraft.id)
+                findNavController().navigate(action)
+            },
+            // Langes Drücken: Zeige den Bestätigungsdialog zum Löschen
+            onItemLongClicked = { aircraft ->
+                showDeleteConfirmationDialog(aircraft)
+            }
+        )
+
+        // Weise den Adapter und das Layout dem RecyclerView zu.
+        binding.recyclerViewAircraft.apply {
+            adapter = aircraftAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+
+    private fun showDeleteConfirmationDialog(aircraft: Aircraft) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.delete_aircraft_title, aircraft.registration))
+            .setMessage(R.string.delete_aircraft_confirmation_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                viewModel.deleteAircraft(aircraft)
+                if (sharedViewModel.selectedAircraft.value?.id == aircraft.id) {
+                    sharedViewModel.selectAircraft(null)
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
+        _binding = null // Wichtig für Speicherbereinigung
     }
 }

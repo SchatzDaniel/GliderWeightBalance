@@ -20,4 +20,7 @@ class AircraftRepository(private val aircraftDao: AircraftDao) {
         aircraftDao.updateAircraft(aircraft)
     }
 
+    suspend fun deleteAircraft(aircraft: Aircraft) {
+        aircraftDao.deleteAircraft(aircraft)
+    }
 }

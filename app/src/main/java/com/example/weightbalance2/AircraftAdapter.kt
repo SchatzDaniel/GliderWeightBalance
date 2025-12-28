@@ -10,7 +10,8 @@ import com.example.weightbalance2.databinding.ItemAircraftCardBinding
 
 class AircraftAdapter(
     private val onItemClicked: (Aircraft) -> Unit,  // Für den Klick auf das ganze Element
-    private val onEditClicked: (Aircraft) -> Unit   // Für den Klick auf den Bearbeiten-Button
+    private val onEditClicked: (Aircraft) -> Unit,   // Für den Klick auf den Bearbeiten-Button
+    private val onItemLongClicked: (Aircraft) -> Unit
 ) : ListAdapter<Aircraft, AircraftAdapter.AircraftViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AircraftViewHolder {
@@ -22,15 +23,18 @@ class AircraftAdapter(
 
     override fun onBindViewHolder(holder: AircraftViewHolder, position: Int) {
         val current = getItem(position)
-
         holder.bind(current)
 
-        // Setze die beiden Click Listener
+        // Setze die Click Listener
         holder.itemView.setOnClickListener {
             onItemClicked(current)
         }
         holder.binding.btnEdit.setOnClickListener {
             onEditClicked(current)
+        }
+        holder.itemView.setOnLongClickListener {
+            onItemLongClicked(current)
+            true
         }
     }
 

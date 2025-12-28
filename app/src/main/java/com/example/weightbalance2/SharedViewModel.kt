@@ -9,7 +9,6 @@ import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.example.weightbalance2.data.model.Aircraft
 import androidx.core.content.edit
-import com.example.weightbalance2.data.database.AppDatabase
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -29,11 +28,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
      * Setzt das ausgewählte Flugzeug. Diese Methode wird vom AircraftFragment aufgerufen.
      * @param aircraft Das vom Benutzer ausgewählte Flugzeug.
      */
-    fun selectAircraft(aircraft: Aircraft) {
+    fun selectAircraft(aircraft: Aircraft?) {
         _selectedAircraft.value = aircraft
     }
 
-    private val aircraftDao = AppDatabase.getDatabase(application).aircraftDao()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     private val persistentValues = listOf(
@@ -127,9 +125,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _nonLiftingMass = MutableLiveData<CalculationResult >()
     val nonLiftingMass: LiveData<CalculationResult  > = _nonLiftingMass
-
-    private fun getLiveData(key: String): LiveData<Double> =
-        persistentValues.first { it.key == key }.liveData
 
     // Die Definition von PersistentValue bleibt, aber sie ist jetzt nur für Massen zuständig
     // kann später nützlich sein, zb. für Massenpresets

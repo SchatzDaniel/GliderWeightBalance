@@ -46,4 +46,8 @@
     <string name="aircraft_limits">Grenzwerte</string>
     <string name="aircraft_masses">Massen in kg</string>
     <string name="save_button_text">Speichern</string>
+    <string name="delete_aircraft_title">%1$s löschen?</string>
+    <string name="delete_aircraft_confirmation_message">Bist du sicher, dass du das Flugzeug löschen möchtest?</string>
+    <string name="delete">Löschen</string>
+    <string name="cancel">Abbrechen</string>
 </resources>
