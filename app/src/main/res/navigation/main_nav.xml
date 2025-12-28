@@ -8,17 +8,20 @@
     <fragment
         android:id="@+id/addAircraftFragment"
         android:name="com.example.weightbalance2.AddAircraftFragment"
-        android:label="@string/title_activity_add_aircraft">
+        android:label="@string/title_activity_add_aircraft"
+        app:showAsAction="ifRoom">
         <argument
             android:name="aircraftId"
             app:argType="integer"
             android:defaultValue="-1" />
     </fragment>
-
+    <!--
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.weightbalance2.SettingsFragment"
-        android:label="@string/title_activity_settings" />
+        android:label="@string/title_activity_settings"
+        app:showAsAction="ifRoom"/>
+        -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.weightbalance2.HomeFragment"
