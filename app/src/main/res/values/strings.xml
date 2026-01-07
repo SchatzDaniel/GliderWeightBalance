@@ -50,4 +50,7 @@
     <string name="delete_aircraft_confirmation_message">Bist du sicher, dass du das Flugzeug löschen möchtest?</string>
     <string name="delete">Löschen</string>
     <string name="cancel">Abbrechen</string>
+    <string name="no_aircraft_selected">Kein Flugzeug ausgewählt</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -12,7 +12,7 @@ class AircraftRepository(private val aircraftDao: AircraftDao) {
         aircraftDao.insertAircraft(aircraft)
     }
 
-    fun getAircraftById(id: Int): LiveData<Aircraft> {
+    fun getAircraftById(id: Int): LiveData<Aircraft?> {
         return aircraftDao.getAircraftById(id)
     }
 

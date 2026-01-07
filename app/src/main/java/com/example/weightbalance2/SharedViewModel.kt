@@ -9,6 +9,8 @@ import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.example.weightbalance2.data.model.Aircraft
 import androidx.core.content.edit
+import androidx.lifecycle.MediatorLiveData
+import com.example.weightbalance2.data.database.AppDatabase
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -21,16 +23,8 @@ sealed class CalculationResult {
 
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _selectedAircraft = MutableLiveData<Aircraft?>()
-    val selectedAircraft: LiveData<Aircraft?> get() = _selectedAircraft
-
-    /**
-     * Setzt das ausgewählte Flugzeug. Diese Methode wird vom AircraftFragment aufgerufen.
-     * @param aircraft Das vom Benutzer ausgewählte Flugzeug.
-     */
-    fun selectAircraft(aircraft: Aircraft?) {
-        _selectedAircraft.value = aircraft
-    }
+    private val _selectedAircraft = MediatorLiveData<Aircraft?>()
+    val selectedAircraft: LiveData<Aircraft?> = _selectedAircraft
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
@@ -158,8 +152,33 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             // Die Neuberechnung wird wie bisher ausgelöst.
             recalc()
         }
+        loadInitialAircraft()
     }
 
+    private fun loadInitialAircraft() {
+        val lastId = prefs.getInt("last_selected_aircraft_id", -1)
+        if (lastId == -1) {
+            // Fall 1: Es war nie ein Flugzeug ausgewählt. Setze den Zustand aktiv auf null.
+            _selectedAircraft.value = null
+        } else {
+            // Fall 2: Es gab eine ID. Wir müssen sie aus der Datenbank laden.
+            // Dafür brauchen wir eine Referenz auf das Repository oder eine Funktion, die das tut.
+            // Der einfachste Weg ist, eine temporäre DAO-Instanz zu erstellen.
+            val aircraftDao = AppDatabase.getDatabase(getApplication()).aircraftDao()
+            val source = aircraftDao.getAircraftById(lastId) // Gibt LiveData<Aircraft?> zurück
+
+            _selectedAircraft.addSource(source) { aircraft ->
+                // Dieser Block wird ausgeführt, wenn die DB-Abfrage ein Ergebnis liefert.
+                _selectedAircraft.value = aircraft
+                // Entferne die Quelle, da wir nur den einmaligen initialen Wert brauchen.
+                _selectedAircraft.removeSource(source)
+            }
+        }
+    }
+
+    fun selectAircraft(aircraft: Aircraft?) {
+        _selectedAircraft.value = aircraft
+    }
 
     // Hilfsfunktion für recalc
     private fun getValue(key: String): Double = persistentValues.first { it.key == key }.liveData.value ?: 0.0

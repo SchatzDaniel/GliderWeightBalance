@@ -1,3 +1,5 @@
+// In HomeFragment.kt
+
 package com.example.weightbalance2
 
 import android.content.res.ColorStateList
@@ -8,20 +10,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-
+import com.example.weightbalance2.data.model.Aircraft
 import com.example.weightbalance2.databinding.FragmentHomeBinding
 
-class HomeFragment : Fragment(){
+class HomeFragment : Fragment() {
 
     lateinit var navController: NavController
-
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
-    private val viewModel: AircraftViewModel by activityViewModels()
-
-    // Variable, um die Standard-Textfarbe zu speichern
     private var defaultTextColor: ColorStateList? = null
 
     override fun onCreateView(
@@ -37,35 +35,37 @@ class HomeFragment : Fragment(){
         navController = Navigation.findNavController(view)
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
 
-        if (sharedViewModel.selectedAircraft.value == null) {
-            viewModel.loadLastSelectedAircraft().observe(viewLifecycleOwner) { lastAircraft ->
-                // Wenn ein Flugzeug gefunden wurde, setze es im SharedViewModel.
-                // Der Observer im SharedViewModel kümmert sich dann um das Speichern der ID
-                // und das Auslösen der Neuberechnung.
-                if (lastAircraft != null) {
-                    sharedViewModel.selectAircraft(lastAircraft)
-                }
-            }
+        sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
+            updateUiForSelectedAircraft(aircraft)
         }
 
-        sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
-            val mainActivity = activity as? MainActivity
-
-            if (aircraft == null) {
-                // Fall 1: Kein Flugzeug ausgewählt
-                mainActivity?.setToolbarTitle(getString(R.string.no_aircraft_selected_title))
-            } else {
-                // Fall 2: Ein Flugzeug ist ausgewählt
-                val title = buildString {
-                    append(aircraft.registration) // Innerhalb des else-Blocks ist 'aircraft' sicher nicht null
-                    append(" (")
-                    append(aircraft.aircraftType)
-                    append(")")
-                }
-                mainActivity?.setToolbarTitle(title)
-            }
+        setupCalculationObservers()
     }
 
+    /**
+     * Eine zentrale Funktion, die die UI aktualisiert, die vom Flugzeug abhängt.
+     */
+    private fun updateUiForSelectedAircraft(aircraft: Aircraft?) {
+        // Diese Funktion bleibt unverändert und funktioniert jetzt zuverlässig.
+        val mainActivity = activity as? MainActivity
+        if (aircraft == null) {
+            mainActivity?.setToolbarTitle(getString(R.string.no_aircraft_selected_title))
+            childFragmentManager.beginTransaction()
+                .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())
+                .commit()
+        } else {
+            val title = "${aircraft.registration} (${aircraft.aircraftType})"
+            mainActivity?.setToolbarTitle(title)
+            childFragmentManager.beginTransaction()
+                .replace(R.id.bottom_fragment_container, ScrollingFragment())
+                .commit()
+        }
+    }
+
+    /**
+     * Bündelt die restlichen Observer, um onViewCreated sauber zu halten.
+     */
+    private fun setupCalculationObservers() {
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is CalculationResult.Success -> {
@@ -99,84 +99,81 @@ class HomeFragment : Fragment(){
         }
 
         sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
-            sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
-                when (result) {
-                    is CalculationResult.Success -> {
-                        // -- 1. Schwerpunktlage (das hast du schon) --
-                        binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
+            when (result) {
+                is CalculationResult.Success -> {
+                    // -- 1. Schwerpunktlage (das hast du schon) --
+                    binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
 
-                        // Hole min und max CG sicher
-                        val minCG = sharedViewModel.selectedAircraft.value?.minCg ?: 0.0
-                        val maxCG = sharedViewModel.selectedAircraft.value?.maxCg ?: 0.0
+                    // Hole min und max CG sicher
+                    val minCG = sharedViewModel.selectedAircraft.value?.minCg ?: 0.0
+                    val maxCG = sharedViewModel.selectedAircraft.value?.maxCg ?: 0.0
 
-                        // Färbung für die Schwerpunktlage
-                        if ((minCG > 0.0 || maxCG > 0.0) && (result.value < minCG || result.value > maxCG)) {
-                            binding.twSchwerpunktlageErgebnis.setTextColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.error_text_color
-                                )
+                    // Färbung für die Schwerpunktlage
+                    if ((minCG > 0.0 || maxCG > 0.0) && (result.value < minCG || result.value > maxCG)) {
+                        binding.twSchwerpunktlageErgebnis.setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.error_text_color
                             )
-                            binding.twSchwerpunktlageErgebnis.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.error_background_color
-                                )
+                        )
+                        binding.twSchwerpunktlageErgebnis.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.error_background_color
                             )
-                        } else {
-                            binding.twSchwerpunktlageErgebnis.setTextColor(defaultTextColor)
-                            binding.twSchwerpunktlageErgebnis.setBackgroundResource(android.R.color.transparent)
-                        }
-
-                        // -- 2. Prozentuale Lage (NEU & KORRIGIERT) --
-                        val range = maxCG - minCG
-                        if (range > 0) {
-                            // Nur berechnen, wenn der Bereich gültig ist (verhindert Division durch Null)
-                            val percentage = (result.value - minCG) / range * 100
-                            binding.twPercentResult.text =
-                                String.format("%.1f %%", percentage) // "XX.X %"
-                        } else {
-                            // Zeige nichts an, wenn min/maxCG nicht gesetzt sind
-                            binding.twPercentResult.text = ""
-                        }
+                        )
+                    } else {
+                        binding.twSchwerpunktlageErgebnis.setTextColor(defaultTextColor)
+                        binding.twSchwerpunktlageErgebnis.setBackgroundResource(android.R.color.transparent)
                     }
 
-                    is CalculationResult.Error -> {
-                        // Fehlerfall für BEIDE Textfelder
-                        binding.twSchwerpunktlageErgebnis.text = getString(R.string.error_text)
+                    // -- 2. Prozentuale Lage (NEU & KORRIGIERT) --
+                    val range = maxCG - minCG
+                    if (range > 0) {
+                        // Nur berechnen, wenn der Bereich gültig ist (verhindert Division durch Null)
+                        val percentage = (result.value - minCG) / range * 100
                         binding.twPercentResult.text =
-                            getString(R.string.error_text) // Oder "" wenn du es leer haben willst
+                            String.format("%.1f %%", percentage) // "XX.X %"
+                    } else {
+                        // Zeige nichts an, wenn min/maxCG nicht gesetzt sind
+                        binding.twPercentResult.text = ""
                     }
                 }
+
+                is CalculationResult.Error -> {
+                    // Fehlerfall für BEIDE Textfelder
+                    binding.twSchwerpunktlageErgebnis.text = getString(R.string.error_text)
+                    binding.twPercentResult.text =
+                        getString(R.string.error_text) // Oder "" wenn du es leer haben willst
+                }
             }
+        }
 
-// Beobachte nonLiftingMass
-            sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
-                when (result) {
-                    is CalculationResult.Success -> {
-                        binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
-                        // Prüfe gegen maxNonLiftingMass... (deine bestehende Logik)
-                        val maxNonLiftingMass =
-                            sharedViewModel.selectedAircraft.value?.maxNonLiftingMass ?: 0.0
-                        if (result.value > maxNonLiftingMass) {
-                            binding.twMasseNTTeileErgebnis.setTextColor(
-                                ContextCompat.getColor(requireContext(), R.color.error_text_color)
+        sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is CalculationResult.Success -> {
+                    binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
+                    // Prüfe gegen maxNonLiftingMass... (deine bestehende Logik)
+                    val maxNonLiftingMass =
+                        sharedViewModel.selectedAircraft.value?.maxNonLiftingMass ?: 0.0
+                    if (result.value > maxNonLiftingMass) {
+                        binding.twMasseNTTeileErgebnis.setTextColor(
+                            ContextCompat.getColor(requireContext(), R.color.error_text_color)
+                        )
+                        binding.twMasseNTTeileErgebnis.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.error_background_color
                             )
-                            binding.twMasseNTTeileErgebnis.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.error_background_color
-                                )
-                            )
-                        } else {
-                            binding.twMasseNTTeileErgebnis.setTextColor(defaultTextColor)
-                            binding.twMasseNTTeileErgebnis.setBackgroundResource(android.R.color.transparent)
-                        }
+                        )
+                    } else {
+                        binding.twMasseNTTeileErgebnis.setTextColor(defaultTextColor)
+                        binding.twMasseNTTeileErgebnis.setBackgroundResource(android.R.color.transparent)
                     }
+                }
 
-                    is CalculationResult.Error -> {
-                        binding.twMasseNTTeileErgebnis.text = getString(R.string.error_text)
-                    }
+                is CalculationResult.Error -> {
+                    binding.twMasseNTTeileErgebnis.text = getString(R.string.error_text)
                 }
             }
         }

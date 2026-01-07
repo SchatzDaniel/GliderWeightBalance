@@ -22,7 +22,7 @@ interface AircraftDao {
     fun getAllAircraft(): Flow<List<Aircraft>>
 
     @Query("SELECT * FROM aircraft_table WHERE id = :id")
-    fun getAircraftById(id: Int): LiveData<Aircraft>
+    fun getAircraftById(id: Int): LiveData<Aircraft?>
 
     @Update
     suspend fun updateAircraft(aircraft: Aircraft)

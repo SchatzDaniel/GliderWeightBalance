@@ -32,14 +32,16 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
     }
 
     // NEUE FUNKTION: Lade das zuletzt ausgewählte Flugzeug
-    fun loadLastSelectedAircraft(): LiveData<out Aircraft?> {
+    fun loadLastSelectedAircraft(): LiveData<Aircraft?> {
         val lastId = prefs.getInt("last_selected_aircraft_id", -1)
-        if (lastId != -1) {
+        return if (lastId != -1) {
             // Wenn eine gültige ID gespeichert wurde, lade das Flugzeug.
-            return repository.getAircraftById(lastId)
+            // Der Aufruf von repository.getAircraftById(lastId) passt jetzt,
+            // da diese Funktion auch LiveData<Aircraft?> zurückgibt.
+            repository.getAircraftById(lastId)
         } else {
             // Wenn keine ID gespeichert war, gib ein LiveData-Objekt mit null zurück.
-            return MutableLiveData(null)
+            MutableLiveData(null)
         }
     }
 
@@ -51,7 +53,7 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun loadAircraftById(id: Int): LiveData<Aircraft> {
+    fun loadAircraftById(id: Int): LiveData<Aircraft?> {
         return repository.getAircraftById(id) // Angenommen, Sie haben ein Repository
     }
 
