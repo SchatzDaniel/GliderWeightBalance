@@ -4,7 +4,6 @@
 
 Eine Android-App zur einfachen Berechnung und Verwaltung von Gewicht und Schwerpunkt (Weight & Balance) für eine Flotte von Segelflugzeugen. Diese App wurde als Übungsprojekt entwickelt, um moderne Android-Entwicklungspraktiken anzuwenden.
 
-![Screenshot der App](https://raw.githubusercontent.com/SchatzDaniel/GliderWeightBalance/main/screenshots/app_screenshot_1.jpg)
 
 ---
 
@@ -23,7 +22,7 @@ Der Entwickler übernimmt keine Haftung für Schäden, die aus der Nutzung diese
 *   **Dynamische Berechnung:** Gib die aktuelle Beladung (Pilot, Passagier, Wasserballast etc.) ein und erhalte eine sofortige Live-Berechnung der Gesamtmasse und des Schwerpunkts.
 *   **Anpassbare Flugzeug-Parameter:** Definiere für jedes Flugzeug individuelle Stammdaten, inklusive minimaler und maximaler Schwerpunktgrenzen und der spezifischen Hebelarme.
 *   **Moderne & intuitive UI:** Eine klare, aufgeräumte Benutzeroberfläche basierend auf Material Design 3.
-*   **Einfache Bedienung:** Flugzeuge können durch langes gedrückthalten gelöscht werden.
+*   **Intuitive Bedienung:** Verwalte deine Liste mit einfachen Gesten. Ein Flugzeug kann durch langes Gedrückthalten eines Eintrags einfach und sicher gelöscht werden.
 
 ---
 
