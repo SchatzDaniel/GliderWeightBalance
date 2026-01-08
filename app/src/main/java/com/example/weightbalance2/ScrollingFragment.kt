@@ -59,39 +59,49 @@ class ScrollingFragment : Fragment() {
      */
     private fun bindInput(editText: EditText, liveData: MutableLiveData<Double>) {
         // RICHTUNG 1: ViewModel -> UI
-        // Aktualisiere das EditText-Feld, wenn sich die LiveData ändert.
         liveData.observe(viewLifecycleOwner) { value ->
-            // Entferne den Listener vorübergehend, um eine Endlosschleife zu verhindern.
             editText.removeTextChangedListener(textWatchers[editText])
 
-            val currentText = editText.text.toString()
-            // Konvertiere den Wert aus dem ViewModel in einen darstellbaren String.
-            val newText = when {
-                value == 0.0 -> "" // Zeige nichts an, wenn der Wert 0.0 ist.
-                else -> value.toString().removeSuffix(".0") // Entferne ".0" für Ganzzahlen.
-            }
+            // Korrektur: Wir müssen den Text im Feld genauso behandeln wie die Eingabe des Benutzers.
+            val currentText = editText.text.toString().replace(',', '.')
+            val currentValue = currentText.toDoubleOrNull() ?: 0.0
 
-            // Aktualisiere das Feld nur, wenn sich der Text wirklich geändert hat.
-            if (currentText != newText) {
+            // Wir aktualisieren die UI nur, wenn der *numerische Wert* abweicht.
+            // Das verhindert, dass "75." und "75" als unterschiedlich gelten.
+            if (currentValue != value) {
+                val newText = when {
+                    value == 0.0 -> ""
+                    // Wandle für die Anzeige den Punkt wieder in ein Komma um (je nach lokaler Konvention).
+                    // Dies ist benutzerfreundlicher für deutsche Nutzer.
+                    else -> value.toString().replace('.', ',').removeSuffix(",0")
+                }
                 editText.setText(newText)
-                // Setze den Cursor am Ende, um ein Springen zu verhindern.
                 editText.setSelection(newText.length)
             }
 
-            // Füge den Listener wieder hinzu, damit Nutzereingaben wieder erfasst werden.
             textWatchers[editText]?.let { editText.addTextChangedListener(it) }
         }
 
         // RICHTUNG 2: UI -> ViewModel
-        // Aktualisiere die LiveData, wenn der Benutzer im EditText etwas ändert.
         val textWatcher = editText.doAfterTextChanged { text ->
-            // Konvertiere die Nutzereingabe in ein Double und speichere es im ViewModel.
-            // Ein leeres Feld wird zu 0.0.
-            liveData.value = text.toString().toDoubleOrNull() ?: 0.0
+            val textAsString = text.toString()
+            // KORREKTUR: Wir behandeln das Komma und erlauben Eingaben, die mit "." oder "," enden.
+            val correctedText = textAsString.replace(',', '.')
+
+            // Wenn der Text nur "0" ist, aber der Nutzer "0." oder "0," eingeben will,
+            // dann ist der numerische Wert 0.0, aber die Eingabe soll respektiert werden.
+            if (textAsString.isEmpty() && liveData.value != 0.0) {
+                liveData.value = 0.0
+            } else if (correctedText.isNotEmpty() && correctedText.last() != '.') {
+                // Konvertiere nur, wenn die Eingabe nicht auf einen Punkt endet.
+                liveData.value = correctedText.toDoubleOrNull() ?: (liveData.value ?: 0.0)
+            } else if (correctedText.isEmpty()) {
+                liveData.value = 0.0
+            }
         }
-        // Speichere den TextWatcher, um ihn oben entfernen zu können.
         textWatchers[editText] = textWatcher
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

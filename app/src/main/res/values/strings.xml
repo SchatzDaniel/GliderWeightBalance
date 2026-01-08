@@ -23,16 +23,18 @@
     <string name="title_activity_add_aircraft">Neues Flugzeug</string>
     <string name="Flugzeug">Flugzeug</string>
     <string name="Leermasse">Leermasse</string>
-    <string name="Rumpf">Rumpf</string>
-    <string name="Höhenleitwerk">Höhenleitwerk</string>
-    <string name="Hebelarme">Hebelarme in mm</string>
+    <string name="emptyMassArm">Leermassen-SP</string>
+    <string name="fuselage_mass">Rumpfmasse</string>
+    <string name="stabilizer_mass">Höhenleitwerkmasse</string>
+    <string name="Hebelarme">Hebelarme</string>
     <string name="mm">mm</string>
     <string name="Settings">Einstellungen</string>
     <string name="Grenzwerte">Grenzwerte</string>
-    <string name="max_total_mass">Maximal zulässige Gesamtmasse in kg</string>
-    <string name="max_non_lifting_mass">Maximal zulässige Masse nicht tragender Teile in kg</string>
+    <string name="max_total_mass">Maximal Abflugmasse</string>
+    <string name="max_non_lifting_mass">Max. nicht tragend</string>
     <string name="min_cg">Minimal zulässige Schwerpunktlage in mm hinter B.E.</string>
     <string name="max_cg">Maximal zulässige Schwerpunktlage in mm hinter B.E:</string>
+    <string name="cg_limit">Zulässiger Schwerpunktbereich</string>
     <string name="error_text">Error</string>
     <string name="percent">%</string>
     <string name="edit_aircraft">Flugzeug bearbeiten</string>
@@ -40,11 +42,11 @@
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
     <string name="miAircraftTitle">Flugzeuge verwalten</string>
     <string name="no_aircraft_selected_title">Kein Flugzeug</string>
-    <string name="aicraft_specs">Flugzeugdaten</string>
+    <string name="aicraft_specs">Allgemeine Informationen</string>
     <string name="registration">Kennzeichen</string>
     <string name="aircraft_type">Typ</string>
     <string name="aircraft_limits">Grenzwerte</string>
-    <string name="aircraft_masses">Massen in kg</string>
+    <string name="aircraft_masses">Basisdaten</string>
     <string name="save_button_text">Speichern</string>
     <string name="delete_aircraft_title">%1$s löschen?</string>
     <string name="delete_aircraft_confirmation_message">Bist du sicher, dass du das Flugzeug löschen möchtest?</string>
@@ -53,4 +55,7 @@
     <string name="no_aircraft_selected">Kein Flugzeug ausgewählt</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="input_mandatory">Muss ausgefüllt werden</string>
+    <string name="min">MIN</string>
+    <string name="max">MAX</string>
 </resources>

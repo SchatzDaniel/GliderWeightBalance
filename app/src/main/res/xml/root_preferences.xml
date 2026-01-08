@@ -33,12 +33,12 @@
             android:inputType="numberDecimal" />
         <EditTextPreference
             app:key="fuselage_mass"
-            app:title="@string/Rumpf"
+            app:title="@string/fuselage_mass"
             app:useSimpleSummaryProvider="true"
             android:inputType="numberDecimal" />
         <EditTextPreference
             app:key="stabilizer_mass"
-            app:title="@string/Höhenleitwerk"
+            app:title="@string/stabilizer_mass"
             app:useSimpleSummaryProvider="true"
             android:inputType="numberDecimal" />
 

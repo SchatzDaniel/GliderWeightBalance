@@ -61,22 +61,22 @@ class AddAircraftFragment : Fragment() {
         binding.editTextRegistration.setText(aircraft.registration)
         binding.editTextAircraftType.setText(aircraft.aircraftType)
 
-        binding.maxTotalMass.setText(aircraft.maxTotalMass?.toString() ?: "")
-        binding.maxNonLiftingMass.setText(aircraft.maxNonLiftingMass?.toString() ?: "")
-        binding.minCg.setText(aircraft.minCg?.toString() ?: "")
-        binding.maxCg.setText(aircraft.maxCg?.toString() ?: "")
-        binding.emptyMass.setText(aircraft.emptyWeight?.toString() ?: "")
-        binding.fuselageMass.setText(aircraft.fuselageMass?.toString() ?: "")
-        binding.stabilizerMass.setText(aircraft.stabilizerMass?.toString() ?: "")
-        binding.emptyArm.setText(aircraft.emptyWeightArm?.toString() ?: "")
-        binding.pilotArm.setText(aircraft.pilotMassArm?.toString() ?: "")
-        binding.trimBallastArm.setText(aircraft.trimBallastMassArm?.toString() ?: "")
-        binding.lowerBaggageArm.setText(aircraft.lowerBaggageMassArm?.toString() ?: "")
-        binding.upperBaggageArm.setText(aircraft.upperBaggageMassArm?.toString() ?: "")
-        binding.waterBallastArm.setText(aircraft.waterBallastMassArm?.toString() ?: "")
-        binding.stabilizerBallastArm.setText(aircraft.stabilizerBallastMassArm?.toString() ?: "")
-        binding.oxygenArm.setText(aircraft.oxygenMassArm?.toString() ?: "")
-        binding.instrumentArm.setText(aircraft.instrumentMassArm?.toString() ?: "")
+        binding.editTextMaxTotalMass.setText(aircraft.maxTotalMass?.toString() ?: "")
+        binding.editTextMaxNonLiftingMass.setText(aircraft.maxNonLiftingMass?.toString() ?: "")
+        binding.editTextMinCg.setText(aircraft.minCg?.toString() ?: "")
+        binding.editTextMaxCg.setText(aircraft.maxCg?.toString() ?: "")
+        binding.editTextEmptyMass.setText(aircraft.emptyWeight?.toString() ?: "")
+        binding.editTextFuselageMass.setText(aircraft.fuselageMass?.toString() ?: "")
+        binding.editTextStabilizerMass.setText(aircraft.stabilizerMass?.toString() ?: "")
+        binding.editTextEmptyMassArm.setText(aircraft.emptyWeightArm?.toString() ?: "")
+        binding.editTextPilotArm.setText(aircraft.pilotMassArm?.toString() ?: "")
+        binding.editTextTrimBallastArm.setText(aircraft.trimBallastMassArm?.toString() ?: "")
+        binding.editTextLowerBaggageArm.setText(aircraft.lowerBaggageMassArm?.toString() ?: "")
+        binding.editTextUpperBaggageArm.setText(aircraft.upperBaggageMassArm?.toString() ?: "")
+        binding.editTextWaterBallastArm.setText(aircraft.waterBallastMassArm?.toString() ?: "")
+        binding.editTextStabilizerBallastArm.setText(aircraft.stabilizerBallastMassArm?.toString() ?: "")
+        binding.editTextOxygenArm.setText(aircraft.oxygenMassArm?.toString() ?: "")
+        binding.editTextInstrumentArm.setText(aircraft.instrumentMassArm?.toString() ?: "")
     }
 
 
@@ -105,22 +105,22 @@ class AddAircraftFragment : Fragment() {
             aircraftType = aircraftType,
 
             // toDoubleOrNull() gibt bei leerem String automatisch null zurück
-            maxTotalMass = binding.maxTotalMass.text.toString().toDoubleOrNull(),
-            maxNonLiftingMass = binding.maxNonLiftingMass.text.toString().toDoubleOrNull(),
-            minCg = binding.minCg.text.toString().toDoubleOrNull(),
-            maxCg = binding.maxCg.text.toString().toDoubleOrNull(),
-            emptyWeight = binding.emptyMass.text.toString().toDoubleOrNull(),
-            fuselageMass = binding.fuselageMass.text.toString().toDoubleOrNull(),
-            stabilizerMass = binding.stabilizerMass.text.toString().toDoubleOrNull(),
-            emptyWeightArm = binding.emptyArm.text.toString().toDoubleOrNull(),
-            pilotMassArm = binding.pilotArm.text.toString().toDoubleOrNull(),
-            trimBallastMassArm = binding.trimBallastArm.text.toString().toDoubleOrNull(),
-            lowerBaggageMassArm = binding.lowerBaggageArm.text.toString().toDoubleOrNull(),
-            upperBaggageMassArm = binding.upperBaggageArm.text.toString().toDoubleOrNull(),
-            waterBallastMassArm = binding.waterBallastArm.text.toString().toDoubleOrNull(),
-            stabilizerBallastMassArm = binding.stabilizerBallastArm.text.toString().toDoubleOrNull(),
-            oxygenMassArm = binding.oxygenArm.text.toString().toDoubleOrNull(),
-            instrumentMassArm = binding.instrumentArm.text.toString().toDoubleOrNull()
+            maxTotalMass = binding.editTextMaxTotalMass .text.toString().toDoubleOrNull(),
+            maxNonLiftingMass = binding.editTextMaxNonLiftingMass   .text.toString().toDoubleOrNull(),
+            minCg = binding.editTextMinCg.text.toString().toDoubleOrNull(),
+            maxCg = binding.editTextMaxCg.text.toString().toDoubleOrNull(),
+            emptyWeight = binding.editTextEmptyMass .text.toString().toDoubleOrNull(),
+            fuselageMass = binding.editTextFuselageMass.text.toString().toDoubleOrNull(),
+            stabilizerMass = binding.editTextStabilizerMass.text.toString().toDoubleOrNull(),
+            emptyWeightArm = binding.editTextEmptyMassArm.text.toString().toDoubleOrNull(),
+            pilotMassArm = binding.editTextPilotArm.text.toString().toDoubleOrNull(),
+            trimBallastMassArm = binding.editTextTrimBallastArm.text.toString().toDoubleOrNull(),
+            lowerBaggageMassArm = binding.editTextLowerBaggageArm.text.toString().toDoubleOrNull(),
+            upperBaggageMassArm = binding.editTextUpperBaggageArm.text.toString().toDoubleOrNull(),
+            waterBallastMassArm = binding.editTextWaterBallastArm.text.toString().toDoubleOrNull(),
+            stabilizerBallastMassArm = binding.editTextStabilizerBallastArm.text.toString().toDoubleOrNull(),
+            oxygenMassArm = binding.editTextOxygenArm.text.toString().toDoubleOrNull(),
+            instrumentMassArm = binding.editTextInstrumentArm.text.toString().toDoubleOrNull()
         )
 
         // --- Schritt 3: Speichern oder Aktualisieren ---
