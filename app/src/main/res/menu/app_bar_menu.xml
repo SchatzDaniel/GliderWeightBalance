@@ -11,4 +11,8 @@
         android:id="@+id/settingsFragment"
         app:icon="@drawable/ic_action_name"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/show_disclaimer"
+        android:title="@string/menu_item_disclaimer"
+        app:showAsAction="never"/>
 </menu>
