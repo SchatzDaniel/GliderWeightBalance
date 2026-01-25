@@ -1,349 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_scrolling"
-    android:padding="16dp"
-    tools:context=".MainActivity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ScrollingFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/ConstraintLayout2">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Optional: Ein TextView, das anzeigt, wenn kein Flugzeug ausgewählt ist -->
         <TextView
-            android:id="@+id/twPilot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:labelFor="@id/pilotMassInput"
-            android:text="@string/Pilot"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBaseline_toBaselineOf="@id/pilotMassInput"/>
-
-        <EditText
-            android:id="@+id/pilotMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:importantForAutofill="no"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/cockpitBaggageMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/cockpitBaggageMassInput"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <EditText
-            android:id="@+id/cockpitBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/trimBallastMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/trimBallastMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/pilotMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/trimBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/trimPillowMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/trimPillowMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/cockpitBaggageMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/trimPillowMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/parachuteMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/parachuteMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/trimBallastMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/parachuteMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/lowerBaggageMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/lowerBaggageMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/trimPillowMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/lowerBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/upperBaggageMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/upperBaggageMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/parachuteMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/upperBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/waterBallastMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/waterBallastMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/lowerBaggageMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/waterBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/stabilizerBallastMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/stabilizerBallastMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/upperBaggageMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/stabilizerBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/oxygenMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/oxygenMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/waterBallastMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/oxygenMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintEnd_toEndOf="@+id/instrumentMassInput"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/instrumentMassInput"
-            app:layout_constraintTop_toBottomOf="@+id/stabilizerBallastMassInput"
-            android:importantForAutofill="no" />
-
-        <EditText
-            android:id="@+id/instrumentMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="8"
-            android:inputType="numberDecimal"
-            android:minHeight="48dp"
-            app:layout_constraintStart_toEndOf="@+id/twBallastSeitenflosse"
-            app:layout_constraintTop_toBottomOf="@+id/oxygenMassInput"
-            android:importantForAutofill="no"/>
-
-        <TextView
-            android:id="@+id/twKG3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/pilotMassInput"
-            app:layout_constraintStart_toEndOf="@+id/pilotMassInput" />
-
-        <TextView
-            android:id="@+id/textViewZuladungCockpit"
-            android:labelFor="@id/cockpitBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ZuladungCockpit"
-            app:layout_constraintBaseline_toBaselineOf="@+id/cockpitBaggageMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twTrimmplatten"
-            android:labelFor="@id/trimBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Trimmplatten"
-            app:layout_constraintBaseline_toBaselineOf="@+id/trimBallastMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twBleikissen"
-            android:labelFor="@id/trimPillowMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Bleikissen"
-            app:layout_constraintBaseline_toBaselineOf="@+id/trimPillowMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twFallschirm"
-            android:labelFor="@id/parachuteMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Fallschirm"
-            app:layout_constraintBaseline_toBaselineOf="@+id/parachuteMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twGepäckraumUnten"
-            android:labelFor="@id/lowerBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/GepäckraumUnten"
-            app:layout_constraintBaseline_toBaselineOf="@+id/lowerBaggageMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twGepäckraumOben"
-            android:labelFor="@id/upperBaggageMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/GepäckraumOben"
-            app:layout_constraintBaseline_toBaselineOf="@+id/upperBaggageMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twWasserballast"
-            android:labelFor="@id/waterBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Wasserballast"
-            app:layout_constraintBaseline_toBaselineOf="@+id/waterBallastMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twBallastSeitenflosse"
-            android:labelFor="@id/stabilizerBallastMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/BallastSeitenflosse"
-            app:layout_constraintBaseline_toBaselineOf="@+id/stabilizerBallastMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twKG4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/cockpitBaggageMassInput"
-            app:layout_constraintStart_toEndOf="@+id/cockpitBaggageMassInput"
-            tools:ignore="DuplicateIds" />
-
-        <TextView
-            android:id="@+id/twKG5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/trimBallastMassInput"
-            app:layout_constraintStart_toEndOf="@+id/trimBallastMassInput" />
-
-        <TextView
-            android:id="@+id/twKG6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/trimPillowMassInput"
-            app:layout_constraintStart_toEndOf="@+id/trimPillowMassInput" />
-
-        <TextView
-            android:id="@+id/twKG7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/parachuteMassInput"
-            app:layout_constraintStart_toEndOf="@+id/parachuteMassInput" />
-
-        <TextView
-            android:id="@+id/twKG8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/lowerBaggageMassInput"
-            app:layout_constraintStart_toEndOf="@+id/lowerBaggageMassInput" />
-
-        <TextView
-            android:id="@+id/twKG9"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/upperBaggageMassInput"
-            app:layout_constraintStart_toEndOf="@+id/upperBaggageMassInput" />
-
-        <TextView
-            android:id="@+id/twKG10"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Liter"
-            app:layout_constraintBaseline_toBaselineOf="@+id/waterBallastMassInput"
-            app:layout_constraintStart_toEndOf="@+id/waterBallastMassInput" />
-
-        <TextView
-            android:id="@+id/twKG11"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/stabilizerBallastMassInput"
-            app:layout_constraintStart_toEndOf="@+id/stabilizerBallastMassInput" />
-
-        <TextView
-            android:id="@+id/twKG12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/oxygenMassInput"
-            app:layout_constraintStart_toEndOf="@+id/oxygenMassInput" />
-
-        <TextView
-            android:id="@+id/twKG13"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/kg"
-            app:layout_constraintBaseline_toBaselineOf="@+id/instrumentMassInput"
-            app:layout_constraintStart_toEndOf="@+id/instrumentMassInput" />
-
-        <TextView
-            android:id="@+id/twExtraInstrumente"
-            android:labelFor="@id/instrumentMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/extraInstrumente"
-            app:layout_constraintBaseline_toBaselineOf="@+id/instrumentMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/twSauerstoffflasche"
-            android:labelFor="@id/oxygenMassInput"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Sauerstoffflasche"
-            app:layout_constraintBaseline_toBaselineOf="@+id/oxygenMassInput"
-            app:layout_constraintStart_toStartOf="parent" />
-        <View
+            android:id="@+id/textView_no_aircraft_selected"
             android:layout_width="match_parent"
-            android:layout_height="128dp"
-            app:layout_constraintTop_toBottomOf="@id/instrumentMassInput"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="wrap_content"
+            android:text="Bitte wähle zuerst ein Flugzeug aus."
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Die RecyclerView wird alle Eingabefelder für die Stationen enthalten -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView_mass_inputs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_mass_input" />
+
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>

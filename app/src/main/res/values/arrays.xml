@@ -14,18 +14,4 @@
         <item>SauerstoffflascheHebel</item>
         <item>InstrumenteHebel</item>
     </string-array>
-
-    <string-array name="flight_settings">
-        <item>@+id/etPilot</item>
-        <item>@+id/editTextZuladungCockpit</item>
-        <item>@+id/editTextTrimmplatten</item>
-        <item>@+id/editTextBleikissen</item>
-        <item>@+id/editTextFallschirm</item>
-        <item>@+id/editTextGepäckraumUnten</item>
-        <item>@+id/editTextGepäckraumOben</item>
-        <item>@+id/editTextWasserballast</item>
-        <item>@+id/editTextBallastSeitenflosse</item>
-        <item>@+id/editTextSauerstoffflasche</item>
-        <item>@+id/editTextExtraInstrumente</item>
-    </string-array>
 </resources>

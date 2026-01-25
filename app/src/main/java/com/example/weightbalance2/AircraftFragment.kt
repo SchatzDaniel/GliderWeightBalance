@@ -13,7 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weightbalance2.data.model.Aircraft
+import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.databinding.FragmentAircraftBinding
 import kotlinx.coroutines.launch
 
@@ -50,7 +50,7 @@ class AircraftFragment : Fragment() {
         // Schritt 2: Daten beobachten und die UI (Liste und Sichtbarkeit) aktualisieren.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.allAircraft.collect { aircrafts ->
+                viewModel.allProfiles.collect { aircrafts ->
                     // a) Die neue Liste an den Adapter übergeben.
                     aircraftAdapter.submitList(aircrafts)
 
@@ -72,19 +72,20 @@ class AircraftFragment : Fragment() {
     private fun setupRecyclerView() {
         aircraftAdapter = AircraftAdapter(
             // Normaler Klick: Flugzeug auswählen und zum Home-Screen navigieren
-            onItemClicked = { aircraft ->
-                sharedViewModel.selectAircraft(aircraft)
+            onItemClicked = { aircraftProfile ->
+                sharedViewModel.selectProfile(aircraftProfile)
                 findNavController().navigateUp()
+
             },
             // Klick auf Bearbeiten-Button
-            onEditClicked = { aircraft ->
+            onEditClicked = { aircraftProfile ->
                 val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(
-                    aircraft.id)
+                    aircraftProfile.aircraft.id)
                 findNavController().navigate(action)
             },
             // Langes Drücken: Zeige den Bestätigungsdialog zum Löschen
-            onItemLongClicked = { aircraft ->
-                showDeleteConfirmationDialog(aircraft)
+            onItemLongClicked = { aircraftProfile ->
+                showDeleteConfirmationDialog(aircraftProfile)
             }
         )
 
@@ -95,14 +96,14 @@ class AircraftFragment : Fragment() {
         }
     }
 
-    private fun showDeleteConfirmationDialog(aircraft: Aircraft) {
+    private fun showDeleteConfirmationDialog(aircraftProfile: AircraftProfile) {
         AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.delete_aircraft_title, aircraft.registration))
+            .setTitle(getString(R.string.delete_aircraft_title, aircraftProfile.aircraft.registration))
             .setMessage(R.string.delete_aircraft_confirmation_message)
             .setPositiveButton(R.string.delete) { _, _ ->
-                viewModel.deleteAircraft(aircraft)
-                if (sharedViewModel.selectedAircraft.value?.id == aircraft.id) {
-                    sharedViewModel.selectAircraft(null)
+                viewModel.deleteAircraftProfile(aircraftProfile)
+                if (sharedViewModel.selectedProfile.value?.aircraft?.id == aircraftProfile.aircraft.id) {
+                    sharedViewModel.selectProfile(null)
                 }
             }
             .setNegativeButton(R.string.cancel, null)

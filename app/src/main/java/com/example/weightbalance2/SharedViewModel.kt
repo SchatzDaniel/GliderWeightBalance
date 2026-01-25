@@ -1,20 +1,15 @@
-// SharedViewModel.kt
 package com.example.weightbalance2
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.preference.PreferenceManager
-import com.example.weightbalance2.data.model.Aircraft
 import androidx.core.content.edit
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.*
+import androidx.preference.PreferenceManager
+import com.example.weightbalance2.data.dao.AircraftProfileDao
 import com.example.weightbalance2.data.database.AppDatabase
+import com.example.weightbalance2.data.model.AircraftProfile
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
- * Kann entweder ein gültiger [Success]-Wert oder ein [Error] sein.
  */
 sealed class CalculationResult {
     data class Success(val value: Double) : CalculationResult()
@@ -23,267 +18,124 @@ sealed class CalculationResult {
 
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _selectedAircraft = MediatorLiveData<Aircraft?>()
-    val selectedAircraft: LiveData<Aircraft?> = _selectedAircraft
-
+    private val aircraftProfileDao: AircraftProfileDao = AppDatabase.getDatabase(application).aircraftProfileDao()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
-    private val persistentValues = listOf(
-        PersistentValue(
-            key = "pilot_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("pilot_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "cockpit_baggage_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("cockpit_baggage_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "trim_ballast_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("trim_ballast_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "trim_pillow_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("trim_pillow_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "parachute_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("parachute_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "lower_baggage_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("lower_baggage_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "upper_baggage_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("upper_baggage_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "water_ballast_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("water_ballast_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "stabilizer_ballast_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("stabilizer_ballast_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "oxygen_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("oxygen_mass", value.toString()) } }
-        ),
-        PersistentValue(
-            key = "instrument_mass",
-            liveData = MutableLiveData(0.0),
-            observer = { value ->
-                prefs.edit { putString("instrument_mass", value.toString()) } }
-        )
-    )
+    // 1. Das ausgewählte Flugzeugprofil. Dies ist jetzt die "Single Source of Truth".
+    private val _selectedProfile = MediatorLiveData<AircraftProfile?>()
+    val selectedProfile: LiveData<AircraftProfile?> = _selectedProfile
 
-    // Eingabe-LiveData vom ScrollingFragment
-    val pilotMass = persistentValues.first { it.key == "pilot_mass" }.liveData
-    val cockpitBaggageMass = persistentValues.first { it.key == "cockpit_baggage_mass" }.liveData
-    val trimBallastMass = persistentValues.first { it.key == "trim_ballast_mass" }.liveData
-    val trimPillowMass = persistentValues.first { it.key == "trim_pillow_mass" }.liveData
-    val parachuteMass = persistentValues.first { it.key == "parachute_mass" }.liveData
-    val lowerBaggageMass = persistentValues.first { it.key == "lower_baggage_mass" }.liveData
-    val upperBaggageMass = persistentValues.first { it.key == "upper_baggage_mass" }.liveData
-    val waterBallastMass = persistentValues.first { it.key == "water_ballast_mass" }.liveData
-    val stabilizerBallastMass = persistentValues.first { it.key == "stabilizer_ballast_mass" }.liveData
-    val oxygenMass = persistentValues.first { it.key == "oxygen_mass" }.liveData
-    val instrumentMass = persistentValues.first { it.key == "instrument_mass" }.liveData
+    // 2. Die Massen, die der Benutzer eingibt. Die Liste wird jetzt dynamisch
+    //    aus dem ausgewählten Profil generiert.
+    private val _stationMasses = MutableLiveData<Map<Int, Double>>() // Map<stationId, mass>
+    val stationMasses: LiveData<Map<Int, Double>> = _stationMasses
 
-    // LiveData für alle Berechnungsergebnisse. Diese werden von aussen (HomeFragment) beobachtet.
+    // --- BERECHNUNGSERGEBNISSE (BLEIBEN GLEICH) ---
     private val _totalMass = MutableLiveData<CalculationResult>()
     val totalMass: LiveData<CalculationResult> = _totalMass
 
     private val _cg = MutableLiveData<CalculationResult>()
     val cg: LiveData<CalculationResult> = _cg
 
-    private val _nonLiftingMass = MutableLiveData<CalculationResult >()
-    val nonLiftingMass: LiveData<CalculationResult  > = _nonLiftingMass
-
-    // Die Definition von PersistentValue bleibt, aber sie ist jetzt nur für Massen zuständig
-    // kann später nützlich sein, zb. für Massenpresets
-    private data class PersistentValue(
-        val key: String,
-        val liveData: MutableLiveData<Double>,
-        val observer: Observer<Double>
-    )
+    // NonLiftingMass wird vereinfacht, da es nicht mehr aus festen Feldern berechnet wird.
+    private val _nonLiftingMass = MutableLiveData<CalculationResult>()
+    val nonLiftingMass: LiveData<CalculationResult > = _nonLiftingMass
 
     init {
-        // 1. Initialisiere alle persistenten Werte (Benutzereingaben) in einer einzigen Schleife.
-        persistentValues.forEach { persistentValue ->
-            // a) Lade den zuletzt gespeicherten Wert aus den SharedPreferences.
-            persistentValue.liveData.value = prefs.getString(persistentValue.key, "0.0")?.toDoubleOrNull() ?: 0.0
-
-            // b) Registriere den Observer, der bei Änderung den neuen Wert sofort speichert.
-            persistentValue.liveData.observeForever(persistentValue.observer)
-
-            // c) Registriere einen weiteren Observer, der bei Änderung die Neuberechnung anstößt.
-            persistentValue.liveData.observeForever {
-                recalc()
-            }
-        }
-
-        // 2. Beobachte das ausgewählte Flugzeug. Dies ist der zweite zentrale Trigger.
-        selectedAircraft.observeForever { aircraft ->
-            // Speichere die ID in SharedPreferences, wenn ein Flugzeug ausgewählt wird.
-            // Wenn die Auswahl aufgehoben wird (aircraft == null), speichere einen ungültigen Wert wie -1.
-            prefs.edit { putInt("last_selected_aircraft_id", aircraft?.id ?: -1) }
-
-            // Die Neuberechnung wird wie bisher ausgelöst.
-            recalc()
-        }
+        // Lade das zuletzt ausgewählte Flugzeug beim Start der App
         loadInitialAircraft()
+
+        // Registriere die Beobachter, die eine Neuberechnung auslösen
+        _selectedProfile.observeForever { recalc() }
+        _stationMasses.observeForever { recalc() }
     }
 
+    /**
+     * Lädt das Profil, das beim letzten Mal ausgewählt war.
+     */
     private fun loadInitialAircraft() {
         val lastId = prefs.getInt("last_selected_aircraft_id", -1)
-        if (lastId == -1) {
-            // Fall 1: Es war nie ein Flugzeug ausgewählt. Setze den Zustand aktiv auf null.
-            _selectedAircraft.value = null
-        } else {
-            // Fall 2: Es gab eine ID. Wir müssen sie aus der Datenbank laden.
-            // Dafür brauchen wir eine Referenz auf das Repository oder eine Funktion, die das tut.
-            // Der einfachste Weg ist, eine temporäre DAO-Instanz zu erstellen.
-            val aircraftDao = AppDatabase.getDatabase(getApplication()).aircraftDao()
-            val source = aircraftDao.getAircraftById(lastId) // Gibt LiveData<Aircraft?> zurück
-
-            _selectedAircraft.addSource(source) { aircraft ->
-                // Dieser Block wird ausgeführt, wenn die DB-Abfrage ein Ergebnis liefert.
-                _selectedAircraft.value = aircraft
-                // Entferne die Quelle, da wir nur den einmaligen initialen Wert brauchen.
-                _selectedAircraft.removeSource(source)
+        if (lastId != -1) {
+            // Lade das Profil aus der DB.
+            val source = aircraftProfileDao.getProfileById(lastId).asLiveData()
+            _selectedProfile.addSource(source) { profile ->
+                // Sobald das Profil geladen ist, setze es als ausgewählt.
+                _selectedProfile.value = profile
+                // Entferne die Quelle, um Speicherlecks zu vermeiden.
+                _selectedProfile.removeSource(source)
             }
         }
     }
 
-    fun selectAircraft(aircraft: Aircraft?) {
-        _selectedAircraft.value = aircraft
+    /**
+     * Wird vom AircraftFragment aufgerufen, wenn der Benutzer ein Flugzeug auswählt.
+     */
+    fun selectProfile(profile: AircraftProfile?) {
+        _selectedProfile.value = profile
+        // Speichere die ID für den nächsten App-Start
+        prefs.edit { putInt("last_selected_aircraft_id", profile?.aircraft?.id ?: -1) }
+        // Setze die Benutzereingaben zurück, da ein neues Flugzeug andere Stationen hat.
+        _stationMasses.value = emptyMap()
     }
 
-    // Hilfsfunktion für recalc
-    private fun getValue(key: String): Double = persistentValues.first { it.key == key }.liveData.value ?: 0.0
+    /**
+     * Wird vom ScrollingFragment aufgerufen, wenn der Benutzer eine Masse ändert.
+     */
+    fun updateStationMass(stationId: Int, mass: Double) {
+        val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
+        currentMasses[stationId] = mass
+        _stationMasses.value = currentMasses
+    }
 
-    // Haupt Berechnungsfunktion
-    fun recalc() {
-        val aircraft = selectedAircraft.value
-        // SCHUTZBEDINGUNG: Breche sofort ab, wenn kein Flugzeug ausgewählt ist.
-        // In diesem Fall sind die Basisdaten (Leermasse, Hebelarme) nicht vorhanden.
-        if (aircraft == null) {
-            // Setze auf definierte Standardwerte, anstatt einen Fehler zu erzeugen.
+
+    /**
+     * Die NEUE, VIEL EINFACHERE Berechnungsfunktion.
+     */
+    private fun recalc() {
+        val profile = _selectedProfile.value
+        val masses = _stationMasses.value ?: emptyMap()
+
+        // SCHUTZBEDINGUNG: Wenn kein Flugzeug da ist, gibt es nichts zu berechnen.
+        if (profile == null || profile.aircraft.emptyWeight == null) {
             _totalMass.value = CalculationResult.Success(0.0)
             _cg.value = CalculationResult.Success(0.0)
-            _nonLiftingMass.value = CalculationResult.Success(0.0)
+            _nonLiftingMass.value = CalculationResult.Success(0.0) // Anpassung ggf. nötig
             return
         }
 
-        // --- 1. Werte sammeln ---
-
-        // Massen und Arme aus dem ScrollingFragment
-        val masses = persistentValues.map { it.key to getValue(it.key) }.toMap()
-        val arms = mapOf(
-            "pilot_mass" to aircraft.pilotMassArm,
-            "lower_baggage_mass" to aircraft.lowerBaggageMassArm,
-            "upper_baggage_mass" to aircraft.upperBaggageMassArm,
-            "trim_ballast_mass" to aircraft.trimBallastMassArm,
-            "water_ballast_mass" to aircraft.waterBallastMassArm,
-            "stabilizer_ballast_mass" to aircraft.stabilizerBallastMassArm,
-            "oxygen_mass" to aircraft.oxygenMassArm,
-            "instrument_mass" to aircraft.instrumentMassArm,
-            // Füge "trim_pillow_mass" und "parachute_mass" hinzu, die den Hebelarm des Piloten verwenden
-            "trim_pillow_mass" to aircraft.pilotMassArm,
-            "cockpit_baggage_mass" to aircraft.pilotMassArm,
-            "parachute_mass" to aircraft.pilotMassArm
-        )
-
-        // --- 2. Fehlerprüfungen durchführen ---
-
-        // Regel 1: Leermasse fehlt
-        if (aircraft.emptyWeight == null) {
-            _totalMass.value = CalculationResult.Error
-            _cg.value = CalculationResult.Error
-            _nonLiftingMass.value = CalculationResult.Error // Alle Ergebnisse betroffen
-            return // Berechnung abbrechen
-        }
-
-        // Regel 2: Hebelarm fehlt für eine eingegebene Masse
-        val hasCgInputError = (aircraft.emptyWeight > 0.0 && aircraft.emptyWeightArm == null) || // PRÜFE AUCH DEN LEERMASSENHEBELARM
-                masses.any { (key, mass) -> mass > 0.0 && arms[key] == null }
-
-        // Regel 3: fuselageMass oder stabilizerMass fehlt
-        val hasNonLiftingInputError = aircraft.fuselageMass == null || aircraft.stabilizerMass == null
-        if (hasNonLiftingInputError) {
-            _nonLiftingMass.value = CalculationResult.Error // Nur nonLiftingMass ist betroffen
-        }
-
-        // --- 3. Berechnungen durchführen ---
-
-        // TotalMass
-        val mGes = aircraft.emptyWeight + masses.values.sum()
+        // --- 1. TotalMass berechnen ---
+        val totalPayloadMass = masses.values.sum()
+        val mGes = profile.aircraft.emptyWeight + totalPayloadMass
         _totalMass.value = CalculationResult.Success(mGes)
 
-        // CG (Schwerpunkt)
-        if (hasCgInputError) {
-            _cg.value = CalculationResult.Error
+        // --- 2. Schwerpunkt (CG) berechnen ---
+        if (profile.aircraft.emptyWeightArm == null) {
+            _cg.value = CalculationResult.Error // Fehler, wenn Leermassen-Hebelarm fehlt
         } else {
-            // Wenn 'emptyWeightArm' nicht null ist, kann die Berechnung sicher stattfinden
-            val emptyArm = aircraft.emptyWeightArm
-            if (emptyArm != null) {
-                val totalMoment = (aircraft.emptyWeight * emptyArm) + // Kein "!!" mehr nötig
-                        masses.entries.sumOf { (key, mass) -> mass * (arms[key] ?: 0.0) }
+            // Berechne das Moment der Zuladung
+            val payloadMoment = profile.stations.sumOf { station ->
+                val mass = masses[station.stationId] ?: 0.0
+                mass * station.arm
+            }
 
-                if (mGes > 0) {
-                    _cg.value = CalculationResult.Success(totalMoment / mGes)
-                } else {
-                    _cg.value = CalculationResult.Success(0.0)
-                }
+            // Berechne das Gesamtmoment
+            val totalMoment = (profile.aircraft.emptyWeight * profile.aircraft.emptyWeightArm) + payloadMoment
+
+            if (mGes > 0) {
+                _cg.value = CalculationResult.Success(totalMoment / mGes)
             } else {
-                // Dieser Fall sollte durch 'hasCgInputError' abgedeckt sein,
-                // ist aber eine zusätzliche Sicherheitsschicht.
-                _cg.value = CalculationResult.Error
+                _cg.value = CalculationResult.Success(0.0)
             }
         }
 
-        // Non-Lifting Mass
-        if (hasNonLiftingInputError) {
+        // --- 3. Non-Lifting Mass (Vereinfachte Logik) ---
+        // Die alte Logik war zu spezifisch. Eine generische Lösung könnte so aussehen,
+        // falls du sie noch brauchst. Ansonsten kann sie auch entfernt werden.
+        if(profile.aircraft.fuselageMass != null && profile.aircraft.stabilizerMass != null) {
+            val nonLifting = (profile.aircraft.fuselageMass + profile.aircraft.stabilizerMass)
+            _nonLiftingMass.value = CalculationResult.Success(nonLifting)
+        } else {
             _nonLiftingMass.value = CalculationResult.Error
-        } else {
-            // Smart-Cast: Der Compiler weiß innerhalb dieses Blocks,
-            // dass die Werte nicht null sind.
-            val fuselageMass = aircraft.fuselageMass
-            val stabilizerMass = aircraft.stabilizerMass
-            if (fuselageMass != null && stabilizerMass != null) {
-                val currentWaterMass = masses["water_ballast_mass"] ?: 0.0
-                val nonLifting = mGes - aircraft.emptyWeight -
-                        currentWaterMass + fuselageMass + stabilizerMass
-                _nonLiftingMass.value = CalculationResult.Success(nonLifting)
-            } else {
-                _nonLiftingMass.value = CalculationResult.Error
-            }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        persistentValues.forEach { it.liveData.removeObserver(it.observer) }
     }
 }

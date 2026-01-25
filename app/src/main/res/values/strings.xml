@@ -61,4 +61,17 @@
     <string name="disclaimer_do_not_show_again">Nicht mehr anzeigen</string>
     <string name="disclaimer_accept_button">Akzeptieren</string>
     <string name="menu_item_disclaimer">Haftungsausschluss</string>
+    <string name="add_station">Neuen Hebelarm hinzufügen</string>
+    <string name="station_name">Name der Station</string>
+    <string name="delete_station">Station löschen</string>
+    <string name="em_dash">—</string>
+    <string name="liter">Liter</string>
+    <string name="max_payload">Maximale Beladung</string>
+    <string name="edit_station">Massenstation bearbeiten</string>
+    <string name="arm">Hebelarm</string>
+    <string name="max_input">Maximale Zuladung</string>
+    <string name="unit">Einheit der Zuladung</string>
+    <string name="save">Speichern</string>
+    <string name="label_max_mass">Max. Masse: %1$s %2$s</string>
+    <string name="label_arm">"Hebelarm: %s mm"</string>
 </resources>

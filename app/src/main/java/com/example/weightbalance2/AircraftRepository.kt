@@ -1,26 +1,41 @@
 package com.example.weightbalance2
 
-import androidx.lifecycle.LiveData
 import com.example.weightbalance2.data.dao.AircraftDao
-import com.example.weightbalance2.data.model.Aircraft
+import com.example.weightbalance2.data.dao.AircraftProfileDao
+import com.example.weightbalance2.data.dao.PayloadStationDao
+import com.example.weightbalance2.data.model.AircraftProfile
+import kotlinx.coroutines.flow.Flow
 
-class AircraftRepository(private val aircraftDao: AircraftDao) {
+class AircraftRepository(
+    private val aircraftDao: AircraftDao,
+    private val stationDao: PayloadStationDao,
+    private val profileDao: AircraftProfileDao
+) {
 
-    val allAircraft = aircraftDao.getAllAircraft()
+    fun getAllProfiles(): Flow<List<AircraftProfile>> =
+        profileDao.getAllProfiles()
 
-    suspend fun addAircraft(aircraft: Aircraft) {
-        aircraftDao.insertAircraft(aircraft)
+    fun getProfileById(id: Int): Flow<AircraftProfile?> =
+        profileDao.getProfileById(id)
+
+    suspend fun saveProfile(profile: AircraftProfile) {
+        val aircraft = profile.aircraft
+
+        if (aircraft.id == 0) {
+            val newId = aircraftDao.insert(aircraft)
+            val stationsWithId = profile.stations.map {
+                it.copy(aircraftOwnerId = newId.toInt())
+            }
+            stationDao.insertAll(stationsWithId)
+        } else {
+            aircraftDao.update(aircraft)
+            stationDao.deleteForAircraft(aircraft.id)
+            stationDao.insertAll(profile.stations)
+        }
     }
 
-    fun getAircraftById(id: Int): LiveData<Aircraft?> {
-        return aircraftDao.getAircraftById(id)
-    }
-
-    suspend fun updateAircraft(aircraft: Aircraft) {
-        aircraftDao.updateAircraft(aircraft)
-    }
-
-    suspend fun deleteAircraft(aircraft: Aircraft) {
-        aircraftDao.deleteAircraft(aircraft)
+    suspend fun deleteProfile(profile: AircraftProfile) {
+        aircraftDao.delete(profile.aircraft)
+        // PayloadStations werden per ON DELETE CASCADE automatisch entfernt
     }
 }

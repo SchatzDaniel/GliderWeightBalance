@@ -10,8 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.example.weightbalance2.data.model.Aircraft
+import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.databinding.FragmentHomeBinding
+import androidx.navigation.findNavController
 
 class HomeFragment : Fragment() {
 
@@ -32,11 +33,11 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(view)
+        navController = view.findNavController()
         defaultTextColor = binding.twGesamtgewichtOutput.textColors
 
-        sharedViewModel.selectedAircraft.observe(viewLifecycleOwner) { aircraft ->
-            updateUiForSelectedAircraft(aircraft)
+        sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { aircraftProfile ->
+            updateUiForSelectedProfile(aircraftProfile)
         }
 
         setupCalculationObservers()
@@ -45,16 +46,16 @@ class HomeFragment : Fragment() {
     /**
      * Eine zentrale Funktion, die die UI aktualisiert, die vom Flugzeug abhängt.
      */
-    private fun updateUiForSelectedAircraft(aircraft: Aircraft?) {
+    private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile? ) {
         // Diese Funktion bleibt unverändert und funktioniert jetzt zuverlässig.
         val mainActivity = activity as? MainActivity
-        if (aircraft == null) {
+        if (aircraftProfile == null) {
             mainActivity?.setToolbarTitle(getString(R.string.no_aircraft_selected_title))
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())
                 .commit()
         } else {
-            val title = "${aircraft.registration} (${aircraft.aircraftType})"
+            val title = "${aircraftProfile.aircraft.registration} (${aircraftProfile.aircraft.aircraftType})"
             mainActivity?.setToolbarTitle(title)
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, ScrollingFragment())
@@ -73,7 +74,7 @@ class HomeFragment : Fragment() {
                     binding.twGesamtgewichtOutput.text = String.format("%.1f", result.value)
 
                     // Führe hier die Prüfung gegen maxTotalMass durch
-                    val maxMass = sharedViewModel.selectedAircraft.value?.maxTotalMass ?: 0.0
+                    val maxMass = sharedViewModel.selectedProfile.value?.aircraft?.maxTotalMass ?: 0.0
                     if (result.value > maxMass && maxMass > 0.0) {
                         // Rote Warnfarben setzen
                         binding.twGesamtgewichtOutput.setTextColor(
@@ -91,9 +92,7 @@ class HomeFragment : Fragment() {
                 }
 
                 is CalculationResult.Error -> {
-                    // Fehlerfall
-                    binding.twGesamtgewichtOutput.text =
-                        getString(R.string.error_text) // z.B. "Error"
+                    binding.twGesamtgewichtOutput.text = R.string.error_text.toString()
                 }
             }
         }
@@ -105,8 +104,8 @@ class HomeFragment : Fragment() {
                     binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
 
                     // Hole min und max CG sicher
-                    val minCG = sharedViewModel.selectedAircraft.value?.minCg ?: 0.0
-                    val maxCG = sharedViewModel.selectedAircraft.value?.maxCg ?: 0.0
+                    val minCG = sharedViewModel.selectedProfile.value?.aircraft?.minCg ?: 0.0
+                    val maxCG = sharedViewModel.selectedProfile.value?.aircraft?.maxCg ?: 0.0
 
                     // Färbung für die Schwerpunktlage
                     if ((minCG > 0.0 || maxCG > 0.0) && (result.value < minCG || result.value > maxCG)) {
@@ -155,7 +154,7 @@ class HomeFragment : Fragment() {
                     binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
                     // Prüfe gegen maxNonLiftingMass... (deine bestehende Logik)
                     val maxNonLiftingMass =
-                        sharedViewModel.selectedAircraft.value?.maxNonLiftingMass ?: 0.0
+                        sharedViewModel.selectedProfile.value?.aircraft?.maxNonLiftingMass ?: 0.0
                     if (result.value > maxNonLiftingMass) {
                         binding.twMasseNTTeileErgebnis.setTextColor(
                             ContextCompat.getColor(requireContext(), R.color.error_text_color)

@@ -37,6 +37,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
         android:contentDescription="@string/add_aircraft_fab_desc"
-        app:srcCompat="@drawable/ic_add_aircraft" />
+        app:srcCompat="@drawable/ic_add"
+        android:backgroundTint="?attr/colorSecondary"
+        android:foregroundTint="?attr/colorOnSecondary"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

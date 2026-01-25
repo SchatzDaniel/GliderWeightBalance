@@ -19,14 +19,6 @@ data class Aircraft(
     val fuselageMass: Double?,
     val stabilizerMass: Double?,
 
-    val emptyWeightArm: Double?,
-    val pilotMassArm: Double?,
-    val trimBallastMassArm: Double?,
-    val lowerBaggageMassArm: Double?,
-    val upperBaggageMassArm: Double?,
-    val waterBallastMassArm: Double?,
-    val stabilizerBallastMassArm: Double?,
-    val oxygenMassArm: Double?,
-    val instrumentMassArm: Double?,
+    val emptyWeightArm: Double?
 )
 

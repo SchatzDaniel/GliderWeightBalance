@@ -4,69 +4,69 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weightbalance2.data.database.AppDatabase
-import com.example.weightbalance2.data.model.Aircraft
+import com.example.weightbalance2.data.model.AircraftProfile
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class AircraftViewModel(application: Application) : AndroidViewModel(application) {
-
-    // The ViewModel now depends on the Repository, not the Dao directly
     private val repository: AircraftRepository
     private val prefs = application.getSharedPreferences("WeightBalancePrefs", Context.MODE_PRIVATE)
 
-    val allAircraft: StateFlow<List<Aircraft>>
+    // allProfiles kann ein StateFlow bleiben, wenn du es in anderen Flows nutzen willst
+    val allProfiles: StateFlow<List<AircraftProfile>>
 
     init {
         val aircraftDao = AppDatabase.getDatabase(application).aircraftDao()
-        repository = AircraftRepository(aircraftDao)
-        allAircraft = repository.allAircraft.stateIn(
+        val stationDao = AppDatabase.getDatabase(application).payloadStationDao()
+        val profileDao = AppDatabase.getDatabase(application).aircraftProfileDao()
+
+        repository = AircraftRepository(aircraftDao, stationDao, profileDao)
+
+        allProfiles = repository.getAllProfiles().stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
     }
 
-    // NEUE FUNKTION: Lade das zuletzt ausgewählte Flugzeug
-    fun loadLastSelectedAircraft(): LiveData<Aircraft?> {
+    /**
+     * LÄDT das zuletzt ausgewählte Profil und gibt es als LiveData zurück.
+     * Die Umwandlung von Flow zu LiveData findet jetzt HIER statt.
+     */
+    fun loadLastSelectedAircraftProfile(): LiveData<AircraftProfile?> {
         val lastId = prefs.getInt("last_selected_aircraft_id", -1)
-        return if (lastId != -1) {
-            // Wenn eine gültige ID gespeichert wurde, lade das Flugzeug.
-            // Der Aufruf von repository.getAircraftById(lastId) passt jetzt,
-            // da diese Funktion auch LiveData<Aircraft?> zurückgibt.
-            repository.getAircraftById(lastId)
-        } else {
-            // Wenn keine ID gespeichert war, gib ein LiveData-Objekt mit null zurück.
-            MutableLiveData(null)
-        }
+        return repository.getProfileById(lastId).asLiveData()
     }
 
-    fun addAircraft(aircraft: Aircraft) {
-        // Launch a coroutine without specifying a dispatcher
-        // The repository will handle which dispatcher to use
+    /**
+     * LÄDT ein Profil anhand seiner ID und gibt es als LiveData zurück.
+     * Dies ist die Funktion, die dein AddAircraftFragment aufruft.
+     */
+    fun loadAircraftProfileById(id: Int): LiveData<AircraftProfile?> {
+        return repository.getProfileById(id).asLiveData()
+    }
+
+    /**
+     * SPEICHERT oder aktualisiert ein komplettes Profil.
+     * Dies ist eine "fire-and-forget" Aktion, sie benötigt keinen Rückgabewert für die UI.
+     */
+    fun saveOrUpdateProfile(profile: AircraftProfile) {
         viewModelScope.launch {
-            repository.addAircraft(aircraft)
+            repository.saveProfile(profile)
         }
     }
 
-    fun loadAircraftById(id: Int): LiveData<Aircraft?> {
-        return repository.getAircraftById(id) // Angenommen, Sie haben ein Repository
-    }
-
-    fun updateAircraft(aircraft: Aircraft) {
+    /**
+     * LÖSCHT ein komplettes Profil.
+     */
+    fun deleteAircraftProfile(aircraftProfile: AircraftProfile){
         viewModelScope.launch {
-            repository.updateAircraft(aircraft)
+            repository.deleteProfile(aircraftProfile)
         }
-    }
-
-    fun deleteAircraft(aircraft: Aircraft){
-        viewModelScope.launch {
-            repository.deleteAircraft(aircraft)
-        }
-
     }
 }
