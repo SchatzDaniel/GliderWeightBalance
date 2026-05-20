@@ -82,7 +82,8 @@ class AddAircraftFragment : Fragment() {
                     name = "Neue Station",
                     arm = 0.0,
                     unit = "kg",
-                    maxMass = null
+                    maxMass = null,
+                    displayOrder = stationsAdapter.itemCount
                 )
                 stationsAdapter.addStation(newStation)
             }
@@ -134,10 +135,15 @@ class AddAircraftFragment : Fragment() {
         }
 
         // --- Schritt 2: Lese die Stations-Daten aus dem Adapter ---
-        val stations = stationsAdapter.getCurrentStations()
-        if (stations.any { it.name.isBlank() }) {
-            Toast.makeText(context, "Bitte alle Stationsnamen angeben.", Toast.LENGTH_SHORT).show()
-            return
+        val stationsFromAdapter = stationsAdapter.getCurrentStations()
+        val stationsForRoom = stationsFromAdapter.map { station ->
+            if (station.stationId < 0) {
+                // Falls die ID negativ ist, setze sie auf 0,
+                // damit Room einen neuen Eintrag mit Auto-ID erstellt
+                station.copy(stationId = 0)
+            } else {
+                station
+            }
         }
 
         // --- Schritt 3: Erstelle die Aircraft- und Profile-Objekte ---
@@ -156,7 +162,7 @@ class AddAircraftFragment : Fragment() {
         )
 
         // Bündle das Flugzeug und seine Stationen in einem Profil
-        val profileToSave = AircraftProfile(aircraft, stations)
+        val profileToSave = AircraftProfile(aircraft, stationsForRoom)
 
         // --- Schritt 4: Speichern oder Aktualisieren über das ViewModel ---
         aircraftViewModel.saveOrUpdateProfile(profileToSave)

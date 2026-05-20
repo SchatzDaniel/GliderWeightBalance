@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PayloadStationDao {
 
-    @Query("SELECT * FROM payload_stations WHERE aircraftOwnerId = :aircraftId")
+    @Query("SELECT * FROM payload_stations WHERE aircraftOwnerId = :aircraftId ORDER BY displayOrder ASC")
     fun getStationsForAircraft(aircraftId: Int): Flow<List<PayloadStation>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -11,5 +11,6 @@ data class PayloadStation(
     val name: String,         // z.B. "Copilot", "Gepäck"
     val arm: Double,          // Der Hebelarm in mm
     val maxMass: Double? = null, // Optional: max. Masse für diese Station
-    val unit: String? = null
+    val unit: String? = null,
+    val displayOrder: Int = 0 // Für die Reihenfolge der Stationen
 )

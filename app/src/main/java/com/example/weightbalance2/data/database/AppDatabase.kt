@@ -14,7 +14,7 @@ import com.example.weightbalance2.data.model.PayloadStation
 
 @Database(
     entities = [Aircraft::class, PayloadStation::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -33,7 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "aircraft_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance
@@ -51,6 +51,15 @@ abstract class AppDatabase : RoomDatabase() {
                 maxMass REAL
             )
         """.trimIndent())
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Fügt die neue Spalte zur bestehenden Tabelle hinzu
+                // WICHTIG: Prüfe ob deine Tabelle "PayloadStation" oder "payload_stations" heißt!
+                // Laut deinem MIGRATION_1_2 Code heißt sie "payload_stations"
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN displayOrder INTEGER NOT NULL DEFAULT 0")
             }
         }
     }
