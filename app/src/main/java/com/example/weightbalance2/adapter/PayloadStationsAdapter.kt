@@ -72,6 +72,7 @@ class PayloadStationsAdapter(
             dialogBinding.dialogEditTextStationArm.setText(station.arm.toString())
             dialogBinding.dialogEditTextStationUnit.setText(station.unit)
             dialogBinding.dialogEditTextStationMaxInput.setText(station.maxMass?.toString() ?: "")
+            dialogBinding.cbIsNonLifting.isChecked = station.isNonLifting
 
             MaterialAlertDialogBuilder(context)
                 .setTitle(R.string.edit_station)
@@ -85,13 +86,15 @@ class PayloadStationsAdapter(
                     val newArm = dialogBinding.dialogEditTextStationArm.text.toString().toDoubleOrNull() ?: station.arm
                     val newUnit = dialogBinding.dialogEditTextStationUnit.text.toString().trim()
                     val newMaxMass = dialogBinding.dialogEditTextStationMaxInput.text.toString().toDoubleOrNull()
+                    val isNonLifting = dialogBinding.cbIsNonLifting.isChecked
 
                     if (newName.isNotBlank() && newUnit.isNotBlank()) {
                         val updatedStation = station.copy(
                             name = newName,
                             arm = newArm,
                             unit = newUnit,
-                            maxMass = newMaxMass
+                            maxMass = newMaxMass,
+                            isNonLifting = isNonLifting
                         )
                         onStationUpdated(updatedStation)
                         dialog.dismiss()

@@ -128,12 +128,24 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             }
         }
 
-        // --- 3. Non-Lifting Mass (Vereinfachte Logik) ---
-        // Die alte Logik war zu spezifisch. Eine generische Lösung könnte so aussehen,
-        // falls du sie noch brauchst. Ansonsten kann sie auch entfernt werden.
-        if(profile.aircraft.fuselageMass != null && profile.aircraft.stabilizerMass != null) {
-            val nonLifting = (profile.aircraft.fuselageMass + profile.aircraft.stabilizerMass)
-            _nonLiftingMass.value = CalculationResult.Success(nonLifting)
+        // --- 3. Non-Lifting Mass (Dynamische Berechnung) ---
+        // Grundlage: Leermasse des Rumpfes/Leitwerks + alle markierten Stationen
+        val emptyFuselage = profile.aircraft.fuselageMass ?: 0.0
+        val emptyStabilizer = profile.aircraft.stabilizerMass ?: 0.0
+
+        // Berechne die Summe der Massen aller Stationen, die als "Non-Lifting" markiert sind
+        val payloadNonLiftingMass = profile.stations.sumOf { station ->
+            if (station.isNonLifting) {
+                masses[station.stationId] ?: 0.0
+            } else {
+                0.0
+            }
+        }
+
+        val totalNonLiftingMass = emptyFuselage + emptyStabilizer + payloadNonLiftingMass
+
+        if (totalNonLiftingMass > 0) {
+            _nonLiftingMass.value = CalculationResult.Success(totalNonLiftingMass)
         } else {
             _nonLiftingMass.value = CalculationResult.Error
         }
