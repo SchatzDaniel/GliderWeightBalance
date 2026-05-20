@@ -9,6 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="error_text_color">#FFFFFFFF</color> <!-- White -->
     <color name="error_background_color">#FFFF0000</color> <!-- Red -->
+    <color name="error_background_light">#15FF0000</color> <!-- Sehr helles Rot -->
+    <color name="error_text_color2">#D32F2F</color> <!-- Kräftiges Material Rot -->
     <color name="default_text_color">#FF000000</color> <!-- Or your default -->
     <color name="default_background_color">#00000000</color>
 </resources>
