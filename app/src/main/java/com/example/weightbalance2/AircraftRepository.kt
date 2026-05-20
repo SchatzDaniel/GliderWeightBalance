@@ -23,14 +23,14 @@ class AircraftRepository(
 
         if (aircraft.id == 0) {
             val newId = aircraftDao.insert(aircraft)
-            val stationsWithId = profile.stations.map {
+            val stationsWithId = profile.sortedStations.map {
                 it.copy(aircraftOwnerId = newId.toInt())
             }
             stationDao.insertAll(stationsWithId)
         } else {
             aircraftDao.update(aircraft)
             stationDao.deleteForAircraft(aircraft.id)
-            stationDao.insertAll(profile.stations)
+            stationDao.insertAll(profile.sortedStations)
         }
     }
 

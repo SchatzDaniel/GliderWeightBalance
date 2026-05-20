@@ -1,10 +1,10 @@
 package com.example.weightbalance2
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.weightbalance2.data.database.AppDatabase
 import com.example.weightbalance2.data.model.AircraftProfile
@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 
 class AircraftViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: AircraftRepository
-    private val prefs = application.getSharedPreferences("WeightBalancePrefs", Context.MODE_PRIVATE)
 
     // allProfiles kann ein StateFlow bleiben, wenn du es in anderen Flows nutzen willst
     val allProfiles: StateFlow<List<AircraftProfile>>
@@ -35,20 +34,13 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
-     * LÄDT das zuletzt ausgewählte Profil und gibt es als LiveData zurück.
-     * Die Umwandlung von Flow zu LiveData findet jetzt HIER statt.
-     */
-    fun loadLastSelectedAircraftProfile(): LiveData<AircraftProfile?> {
-        val lastId = prefs.getInt("last_selected_aircraft_id", -1)
-        return repository.getProfileById(lastId).asLiveData()
-    }
-
-    /**
      * LÄDT ein Profil anhand seiner ID und gibt es als LiveData zurück.
      * Dies ist die Funktion, die dein AddAircraftFragment aufruft.
      */
     fun loadAircraftProfileById(id: Int): LiveData<AircraftProfile?> {
-        return repository.getProfileById(id).asLiveData()
+        return repository.getProfileById(id).asLiveData().map { profile ->
+            profile?.copy(stations = profile.sortedStations.sortedBy { it.displayOrder })
+        }
     }
 
     /**

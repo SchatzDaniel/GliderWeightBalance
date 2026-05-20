@@ -113,7 +113,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             _cg.value = CalculationResult.Error // Fehler, wenn Leermassen-Hebelarm fehlt
         } else {
             // Berechne das Moment der Zuladung
-            val payloadMoment = profile.stations.sumOf { station ->
+            val payloadMoment = profile.sortedStations.sumOf { station ->
                 val mass = masses[station.stationId] ?: 0.0
                 mass * station.arm
             }

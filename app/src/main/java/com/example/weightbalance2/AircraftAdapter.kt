@@ -75,7 +75,7 @@ class AircraftAdapter(
                 append("Leermasse: ${aircraft.emptyWeight ?: "N/A"} kg")
                 append(" | CG: ${aircraft.emptyWeightArm ?: "N/A"} mm")
                 // Zeige an, wie viele Stationen für dieses Flugzeug konfiguriert sind
-                append("\nStationen: ${profile.stations.size}")
+                append("\nStationen: ${profile.sortedStations.size}")
             }
         }
     }

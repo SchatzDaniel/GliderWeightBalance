@@ -74,4 +74,5 @@
     <string name="save">Speichern</string>
     <string name="label_max_mass">Max. Masse: %1$s %2$s</string>
     <string name="label_arm">"Hebelarm: %s mm"</string>
+    <string name="Move">Verschieben</string>
 </resources>

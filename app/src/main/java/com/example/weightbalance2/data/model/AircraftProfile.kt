@@ -13,4 +13,7 @@ data class AircraftProfile(
         entityColumn = "aircraftOwnerId" // von PayloadStation
     )
     val stations: List<PayloadStation>
-)
+){
+    val sortedStations: List<PayloadStation>
+        get() = stations.sortedBy { it.displayOrder }
+}

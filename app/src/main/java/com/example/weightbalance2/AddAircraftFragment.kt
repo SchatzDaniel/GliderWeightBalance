@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weightbalance2.adapter.DragManageAdapter
 import com.example.weightbalance2.data.model.Aircraft
 import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.data.model.PayloadStation
@@ -89,8 +91,17 @@ class AddAircraftFragment : Fragment() {
                 stationsAdapter.addStation(newStation)
             }
         )
-        binding.recyclerViewStations.adapter = stationsAdapter
-        binding.recyclerViewStations.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerViewStations.apply {
+            adapter = stationsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+            isNestedScrollingEnabled = false
+        }
+
+        // ItemTouchHelper initialisieren und an die RecyclerView heften
+        val callback = DragManageAdapter(stationsAdapter)
+        val touchHelper = ItemTouchHelper(callback)
+        stationsAdapter.itemTouchHelper = touchHelper
+        touchHelper.attachToRecyclerView(binding.recyclerViewStations)
     }
 
 
@@ -113,7 +124,7 @@ class AddAircraftFragment : Fragment() {
         binding.editTextEmptyMassArm.setText(profile.aircraft.emptyWeightArm?.toString() ?: "")
 
         // Übergib die Liste der Stationen an den Adapter. Die RecyclerView kümmert sich um den Rest.
-        stationsAdapter.submitList(profile.stations)
+        stationsAdapter.submitList(profile.sortedStations)
     }
 
 

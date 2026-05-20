@@ -56,7 +56,7 @@ class ScrollingFragment : Fragment() {
 
                 // WICHTIG: Setze die internen Eingaben im Adapter zurück, bevor eine neue Liste kommt.
                 massInputAdapter.resetMasses()
-                massInputAdapter.submitList(profile.stations)
+                massInputAdapter.submitList(profile.sortedStations)
             }
         }
     }

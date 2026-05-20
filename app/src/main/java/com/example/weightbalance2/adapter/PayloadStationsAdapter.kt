@@ -1,9 +1,12 @@
 package com.example.weightbalance2.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weightbalance2.R
 import com.example.weightbalance2.data.model.PayloadStation
@@ -15,11 +18,15 @@ import kotlin.text.isNotBlank
 import kotlin.text.toDoubleOrNull
 import kotlin.text.trim
 
+interface ItemMoveCallback {
+    fun onRowMoved(fromPosition: Int, toPosition: Int)
+}
+
 class PayloadStationsAdapter(
     private val onStationUpdated: (PayloadStation) -> Unit,
     private val onStationDeleted: (PayloadStation) -> Unit,
     private val onAddItem: () -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemMoveCallback {
 
     companion object {
         private const val VIEW_TYPE_STATION = 1
@@ -27,11 +34,13 @@ class PayloadStationsAdapter(
     }
 
     private val stations = mutableListOf<PayloadStation>()
+    var itemTouchHelper: ItemTouchHelper? = null
 
     // --- ViewHolder für eine normale Station ---
     inner class StationViewHolder(private val binding: ItemPayloadStationBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        @SuppressLint("ClickableViewAccessibility")
         fun bind(station: PayloadStation) {
             binding.textViewStationName.text = station.name
             binding.textViewStationArm.text = itemView.context.getString(R.string.label_arm, station.arm.toString())
@@ -45,6 +54,14 @@ class PayloadStationsAdapter(
 
             binding.stationCard.setOnClickListener {
                 showEditDialog(station, itemView.context)
+            }
+
+            binding.ivDragHandle.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    // Sobald das Icon berührt wird, sagen wir dem Helper: Start Drag!
+                    itemTouchHelper?.startDrag(this)
+                }
+                false
             }
         }
 
@@ -162,5 +179,22 @@ class PayloadStationsAdapter(
 
     fun getCurrentStations(): List<PayloadStation> {
         return stations.toList() // Gib eine unveränderliche Kopie zurück
+    }
+
+    override fun onRowMoved(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < stations.size && toPosition < stations.size) {
+            // 1. Verschiebe das Element in der Liste
+            val fromItem = stations.removeAt(fromPosition)
+            stations.add(toPosition, fromItem)
+
+            // 2. WICHTIG: Aktualisiere die displayOrder für ALLE Elemente in der Liste
+            // damit die neue Reihenfolge permanent im Objekt gespeichert wird
+            stations.forEachIndexed { index, station ->
+                stations[index] = station.copy(displayOrder = index)
+            }
+
+            // 3. Benachrichtige die UI
+            notifyItemMoved(fromPosition, toPosition)
+        }
     }
 }

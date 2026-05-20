@@ -14,59 +14,75 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <!-- Name der Station (wichtigster Text) -->
-        <TextView
-            android:id="@+id/textViewStationName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/icon_edit"
-            tools:text="Vorderer Pilot"/>
-
-        <!-- Bearbeiten-Icon, signalisiert Klickbarkeit -->
         <ImageView
-            android:id="@+id/icon_edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_edit_aircraft"
-            app:tint="?attr/colorControlNormal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/textViewStationName"
-            app:layout_constraintBottom_toBottomOf="@id/textViewStationName"
-            android:contentDescription="@string/edit_station"/>
+            android:id="@+id/iv_drag_handle"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_reorder"
+            app:tint="?attr/colorOnSurfaceVariant"
+            android:contentDescription="@string/Move"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp"/>
 
-        <!-- Details: Hebelarm -->
-        <TextView
-            android:id="@+id/textViewStationArm"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewStationName"
-            tools:text="Hebelarm: 1200 mm"/>
+            android:padding="16dp">
 
-        <!-- Details: Maximale Masse (optional) -->
-        <TextView
-            android:id="@+id/textViewStationMaxMass"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewStationArm"
-            tools:text="Max. Masse: 110 kg"
-            android:visibility="gone"
-            tools:visibility="visible"/>
+            <!-- Name der Station (wichtigster Text) -->
+            <TextView
+                android:id="@+id/textViewStationName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/icon_edit"
+                tools:text="Vorderer Pilot"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Bearbeiten-Icon, signalisiert Klickbarkeit -->
+            <ImageView
+                android:id="@+id/icon_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_aircraft"
+                app:tint="?attr/colorControlNormal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/textViewStationName"
+                app:layout_constraintBottom_toBottomOf="@id/textViewStationName"
+                android:contentDescription="@string/edit_station"/>
+
+            <!-- Details: Hebelarm -->
+            <TextView
+                android:id="@+id/textViewStationArm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewStationName"
+                tools:text="Hebelarm: 1200 mm"/>
+
+            <!-- Details: Maximale Masse (optional) -->
+            <TextView
+                android:id="@+id/textViewStationMaxMass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewStationArm"
+                tools:text="Max. Masse: 110 kg"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
 
 </com.google.android.material.card.MaterialCardView>
