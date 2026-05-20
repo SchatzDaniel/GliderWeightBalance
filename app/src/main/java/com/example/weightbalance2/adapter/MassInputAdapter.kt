@@ -37,7 +37,8 @@ class MassInputAdapter(private val onMassChanged: OnMassChanged) :
             // Alten Watcher entfernen, um Schleifen zu vermeiden
             binding.massInputEditText.removeTextChangedListener(textWatcher)
 
-            binding.massInputEditText.hint = station.name
+            binding.massTextInputLayout.hint = station.name
+            binding.massInputEditText.hint = null
             binding.massInputEditText.setText(currentMasses[station.stationId] ?: "")
 
             textWatcher = object : TextWatcher {
