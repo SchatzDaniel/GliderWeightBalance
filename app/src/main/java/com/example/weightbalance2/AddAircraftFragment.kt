@@ -22,6 +22,7 @@ class AddAircraftFragment : Fragment() {
 
     // ViewModel-Instanz erstellen
     private val aircraftViewModel: AircraftViewModel by activityViewModels()
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     // Safe Args verwenden, um die übergebene ID sicher zu erhalten
     private val navArgs: AddAircraftFragmentArgs by navArgs()
@@ -166,6 +167,7 @@ class AddAircraftFragment : Fragment() {
 
         // --- Schritt 4: Speichern oder Aktualisieren über das ViewModel ---
         aircraftViewModel.saveOrUpdateProfile(profileToSave)
+        sharedViewModel.selectProfile(profileToSave)
 
         // --- Schritt 5: Feedback und Navigation ---
         if (currentAircraftProfile == null) {
