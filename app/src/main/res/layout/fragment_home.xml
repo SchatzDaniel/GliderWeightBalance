@@ -23,7 +23,8 @@
             android:id="@+id/dashboardContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp">
+            android:padding="20dp"
+            android:layout_marginTop="4dp">
 
             <!-- Schwerpunktlage Sektion -->
             <TextView
@@ -31,7 +32,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/Schwerpunktlage"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textStyle="bold"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -64,7 +66,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="in Prozent"
+                android:text="@string/percent"
                 android:textAppearance="?attr/textAppearanceLabelSmall"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/twSchwerpunktlage" />
@@ -93,7 +95,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/MasseNTTeile"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/innerDivider" />
 
@@ -162,7 +165,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
-        android:text="Stationen &amp; Gewichte"
+        android:text="@string/Gewichte"
         android:textAppearance="?attr/textAppearanceLabelLarge"
         android:textColor="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"

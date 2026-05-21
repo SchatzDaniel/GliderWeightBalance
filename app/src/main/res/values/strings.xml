@@ -36,7 +36,7 @@
     <string name="max_cg">Maximal zulässige Schwerpunktlage in mm hinter B.E:</string>
     <string name="cg_limit">Zulässiger Schwerpunktbereich</string>
     <string name="error_text">Error</string>
-    <string name="percent">%</string>
+    <string name="percent">in Prozent</string>
     <string name="edit_aircraft">Flugzeug bearbeiten</string>
     <string name="no_aircrafts">Keine Flugzeuge vorhanden.</string>
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
