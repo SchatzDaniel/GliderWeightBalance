@@ -13,6 +13,7 @@ Diese App dient ausschließlich als Hilfsmittel zur Unterstützung von Massen- u
 Die Ergebnisse ersetzen nicht die Berechnung und Angaben im offiziellen Flughandbuch des jeweiligen Luftfahrzeugs.
 Der Nutzer ist selbst verantwortlich für die korrekte Eingabe der Daten sowie für die Überprüfung der Ergebnisse anhand der originalen Flugzeugdokumentation.
 Der Entwickler übernimmt keine Haftung für Schäden, die aus der Nutzung dieser App entstehen.
+
 ---
 
 ## ✨ Features
