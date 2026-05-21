@@ -63,6 +63,14 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             _selectedProfile.addSource(source) { profile ->
                 // Sobald das Profil geladen ist, setze es als ausgewählt.
                 _selectedProfile.value = profile
+
+                // stationMasses initialisieren, damit recalc() beim App-Start Werte zum Rechnen hat
+                if (profile != null) {
+                    val initialMasses = profile.stations
+                        .filter { it.defaultValue != null }
+                        .associate { it.stationId to (it.defaultValue ?: 0.0) }
+                    _stationMasses.value = initialMasses
+                }
                 // Entferne die Quelle, um Speicherlecks zu vermeiden.
                 _selectedProfile.removeSource(source)
             }
