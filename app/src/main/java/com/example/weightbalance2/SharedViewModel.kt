@@ -120,9 +120,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
         // SCHUTZBEDINGUNG: Wenn kein Flugzeug da ist, gibt es nichts zu berechnen.
         if (profile == null || profile.aircraft.emptyWeight == null) {
-            _totalMass.value = CalculationResult.Success(0.0)
-            _cg.value = CalculationResult.Success(0.0)
-            _nonLiftingMass.value = CalculationResult.Success(0.0) // Anpassung ggf. nötig
+            _totalMass.value = CalculationResult.Error
+            _cg.value = CalculationResult.Error
+            _nonLiftingMass.value = CalculationResult.Error
             return
         }
 

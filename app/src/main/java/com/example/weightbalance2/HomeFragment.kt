@@ -15,7 +15,7 @@ import androidx.navigation.findNavController
 
 class HomeFragment : Fragment() {
 
-    lateinit var navController: NavController
+    private lateinit var navController: NavController
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -70,12 +70,13 @@ class HomeFragment : Fragment() {
             when (result) {
                 is CalculationResult.Success -> {
                     // Gültiger Wert empfangen
-                    binding.twGesamtgewichtOutput.text = String.format("%.1f", result.value)
+                    binding.twGesamtgewichtOutput.text =
+                        String.format(java.util.Locale.getDefault(),"%.1f", result.value)
                     updateDashboardVisuals()
                 }
 
                 is CalculationResult.Error -> {
-                    binding.twGesamtgewichtOutput.text = R.string.error_text.toString()
+                    binding.twGesamtgewichtOutput.text = getString(R.string.error_text)
                 }
             }
         }
@@ -84,7 +85,8 @@ class HomeFragment : Fragment() {
             when (result) {
                 is CalculationResult.Success -> {
                     // -- 1. Schwerpunktlage (das hast du schon) --
-                    binding.twSchwerpunktlageErgebnis.text = String.format("%.2f", result.value)
+                    binding.twSchwerpunktlageErgebnis.text =
+                        String.format(java.util.Locale.getDefault(),"%.2f", result.value)
                     updateDashboardVisuals()
 
                     // -- 2. Prozentuale Lage (NEU & KORRIGIERT) --
@@ -95,7 +97,7 @@ class HomeFragment : Fragment() {
                         // Nur berechnen, wenn der Bereich gültig ist (verhindert Division durch Null)
                         val percentage = (result.value - minCG) / range * 100
                         binding.twPercentResult.text =
-                            String.format("%.1f %%", percentage) // "XX.X %"
+                            String.format(java.util.Locale.getDefault(),"%.1f %%", percentage)
                     } else {
                         // Zeige nichts an, wenn min/maxCG nicht gesetzt sind
                         binding.twPercentResult.text = ""
@@ -114,7 +116,8 @@ class HomeFragment : Fragment() {
         sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
             when (result) {
                 is CalculationResult.Success -> {
-                    binding.twMasseNTTeileErgebnis.text = String.format("%.1f", result.value)
+                    binding.twMasseNTTeileErgebnis.text =
+                        String.format(java.util.Locale.getDefault(),"%.1f", result.value)
                     updateDashboardVisuals()
                 }
 
