@@ -165,6 +165,9 @@ class HomeFragment : Fragment() {
             val errorColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_text_color2))
             val errorBg = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_background_light))
 
+            binding.dashboardCard.cardElevation = 0f
+            binding.dashboardCard.maxCardElevation = 0f
+
             binding.dashboardCard.setCardBackgroundColor(errorBg)
             binding.dashboardCard.setStrokeColor(errorColor)
             binding.dashboardCard.strokeWidth = 8
@@ -174,6 +177,10 @@ class HomeFragment : Fragment() {
             binding.twSchwerpunktlageErgebnis.setTextColor(if (isCgError) errorColor else defaultTextColor!!)
             binding.twMasseNTTeileErgebnis.setTextColor(if (isNonLiftingError) errorColor else defaultTextColor!!)
         } else {
+            val defaultElevation = 4 * resources.displayMetrics.density
+            binding.dashboardCard.cardElevation = defaultElevation
+            binding.dashboardCard.maxCardElevation = defaultElevation
+
             val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
             binding.dashboardCard.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
             binding.dashboardCard.strokeWidth = 0
