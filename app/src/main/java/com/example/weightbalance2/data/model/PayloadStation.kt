@@ -13,5 +13,6 @@ data class PayloadStation(
     val maxMass: Double? = null, // Optional: max. Masse für diese Station
     val unit: String? = null,
     val displayOrder: Int = 0, // Für die Reihenfolge der Stationen
-    val isNonLifting: Boolean = false // Für die Berechnung des Non-Lifting Mass
+    val isNonLifting: Boolean = false, // Für die Berechnung des Non-Lifting Mass
+    val defaultValue: Double? = null // Speichert das "Standardgewicht" für diese Station
 )

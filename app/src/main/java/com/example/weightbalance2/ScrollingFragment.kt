@@ -33,11 +33,13 @@ class ScrollingFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        massInputAdapter = MassInputAdapter { stationId, newMass ->
-            // Dies wird jedes Mal aufgerufen, wenn der Benutzer etwas eingibt.
-            // Leite die Änderung direkt an das ViewModel weiter.
-            sharedViewModel.updateStationMass(stationId, newMass)
-        }
+        massInputAdapter = MassInputAdapter(
+            onMassChanged = { stationId, newMass ->
+                sharedViewModel.updateStationMass(stationId, newMass)
+            },
+            onMassPersist = { stationId, newMass ->
+                sharedViewModel.persistStationMass(stationId, newMass.toString())
+            })
         binding.recyclerViewMassInputs.adapter = massInputAdapter
     }
 

@@ -4,21 +4,23 @@ import android.app.Application
 import androidx.core.content.edit
 import androidx.lifecycle.*
 import androidx.preference.PreferenceManager
-import com.example.weightbalance2.data.dao.AircraftProfileDao
+import com.example.weightbalance2.data.dao.PayloadStationDao
 import com.example.weightbalance2.data.database.AppDatabase
 import com.example.weightbalance2.data.model.AircraftProfile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
  */
 sealed class CalculationResult {
     data class Success(val value: Double) : CalculationResult()
-    object Error : CalculationResult()
+    data object Error : CalculationResult()
 }
 
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val aircraftProfileDao: AircraftProfileDao = AppDatabase.getDatabase(application).aircraftProfileDao()
+    private val aircraftProfileDao = AppDatabase.getDatabase(application).aircraftProfileDao()
+    private val payloadStationDao: PayloadStationDao = AppDatabase.getDatabase(application).payloadStationDao()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(application)
 
     // 1. Das ausgewählte Flugzeugprofil. Dies ist jetzt die "Single Source of Truth".
@@ -75,7 +77,17 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         // Speichere die ID für den nächsten App-Start
         prefs.edit { putInt("last_selected_aircraft_id", profile?.aircraft?.id ?: -1) }
         // Setze die Benutzereingaben zurück, da ein neues Flugzeug andere Stationen hat.
-        _stationMasses.value = emptyMap()
+
+        if (profile != null) {
+            // Erstelle eine Map aus allen Stationen, die einen Standardwert hinterlegt haben
+            val initialMasses = profile.stations
+                .filter { it.defaultValue != null }
+                .associate { it.stationId to (it.defaultValue ?: 0.0) }
+
+            _stationMasses.value = initialMasses
+        } else {
+            _stationMasses.value = emptyMap()
+        }
     }
 
     /**
@@ -87,6 +99,17 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         _stationMasses.value = currentMasses
     }
 
+    fun persistStationMass(stationId: Int, massText: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val mass = massText.replace(',', '.').toDoubleOrNull()
+            val station = payloadStationDao.getStationById(stationId)
+
+            if (station != null) {
+                val updatedStation = station.copy(defaultValue = mass)
+                payloadStationDao.update(updatedStation)
+            }
+        }
+    }
 
     /**
      * Die NEUE, VIEL EINFACHERE Berechnungsfunktion.

@@ -14,7 +14,7 @@ import com.example.weightbalance2.data.model.PayloadStation
 
 @Database(
     entities = [Aircraft::class, PayloadStation::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -33,7 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "aircraft_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance
@@ -68,6 +68,12 @@ abstract class AppDatabase : RoomDatabase() {
                 // Fügt die Spalte isNonLifting hinzu.
                 // In SQLite gibt es kein Boolean, daher nutzen wir INTEGER (0 = false, 1 = true).
                 db.execSQL("ALTER TABLE payload_stations ADD COLUMN isNonLifting INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN defaultValue REAL")
             }
         }
     }
