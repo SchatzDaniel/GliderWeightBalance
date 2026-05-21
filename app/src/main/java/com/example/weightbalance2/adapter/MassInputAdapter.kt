@@ -40,6 +40,11 @@ class MassInputAdapter(
             binding.massTextInputLayout.hint = station.name
             binding.massTextInputLayout.suffixText = station.unit
             binding.massInputEditText.hint = null
+            if (station.maxMass != null && station.maxMass > 0) {
+                binding.massTextInputLayout.helperText = "maximal: ${station.maxMass} ${station.unit}"
+            } else {
+                binding.massTextInputLayout.helperText = null
+            }
 
             // 3. Den anzuzeigenden Text bestimmen
             // Priorität:
@@ -72,6 +77,9 @@ class MassInputAdapter(
                     // Umwandlung für die Logik (Komma zu Punkt)
                     val mass = text.replace(',', '.').toDoubleOrNull() ?: 0.0
 
+                    // Wenn Beladung über Limit, dann Helpertext Rot
+                    updateHelperColor(station, mass)
+
                     // A) Live-Update für das Dashboard (SharedViewModel)
                     onMassChanged(station.stationId, mass)
 
@@ -81,6 +89,25 @@ class MassInputAdapter(
                 }
             }
             binding.massInputEditText.addTextChangedListener(textWatcher)
+            // Am Ende der bind-Funktion in MassInputAdapter.kt:
+            val currentMass = textToSet.replace(',', '.').toDoubleOrNull() ?: 0.0
+            updateHelperColor(station, currentMass) // Hilfsfunktion oder den Farb-Block hier aufrufen
+        }
+
+        fun updateHelperColor(station: PayloadStation, currentMass: Double) {
+            if (station.maxMass != null && currentMass > station.maxMass) {
+                // Rot, wenn über Limit
+                binding.massTextInputLayout.setHelperTextColor(
+                    android.content.res.ColorStateList.valueOf(android.graphics.Color.RED)
+                )
+            } else {
+                // Standardfarbe (Grau), wenn alles okay oder kein Limit
+                binding.massTextInputLayout.setHelperTextColor(
+                    android.content.res.ColorStateList.valueOf(
+                        binding.root.context.getColor(com.example.weightbalance2.R.color.helper_text_default)
+                    )
+                )
+            }
         }
     }
 
