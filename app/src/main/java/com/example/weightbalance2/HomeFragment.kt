@@ -59,7 +59,9 @@ class HomeFragment : Fragment() {
     private fun setupCalculationObservers() {
         // 1. Gesamtgewicht Observer
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
-            val maxMass = sharedViewModel.selectedProfile.value?.aircraft?.maxTotalMass ?: 0.0
+            val aircraft = sharedViewModel.selectedProfile.value?.aircraft
+            val maxMass = aircraft?.maxTotalMass ?: 0.0
+            val hasLimit = aircraft?.maxTotalMass != null
 
             when (result) {
                 is CalculationResult.Success -> {
@@ -77,12 +79,13 @@ class HomeFragment : Fragment() {
                         binding.cardStatusTotal,
                         progress,
                         isOutsideLimits,
-                        isError = false
+                        isError = false,
+                        hasLimit
                     )
                 }
                 is CalculationResult.Error -> {
                     binding.twGesamtgewichtOutput.text = "---"
-                    binding.statusTotal.text = getString(R.string.error_text)
+                    binding.statusTotal.text = getString(R.string.status_error)
 
                     updateCardVisuals(
                         binding.cardTotalMass,
@@ -91,7 +94,8 @@ class HomeFragment : Fragment() {
                         binding.cardStatusTotal,
                         progressValue = null,
                         isOutsideLimits = false,
-                        isError = true
+                        isError = true,
+                        hasLimit
                     )
                 }
             }
@@ -103,6 +107,7 @@ class HomeFragment : Fragment() {
             val minCG = profile.minCg ?: 0.0
             val maxCG = profile.maxCg ?: 0.0
             val range = maxCG - minCG
+            val hasLimit = profile.maxCg != null && profile.minCg != null
 
             when (result) {
                 is CalculationResult.Success -> {
@@ -123,13 +128,14 @@ class HomeFragment : Fragment() {
                         binding.cardStatusCg,
                         percentage.toInt(),
                         isOutsideLimits,
-                        isError = false
+                        isError = false,
+                        hasLimit
                     )
                 }
                 is CalculationResult.Error -> {
                     binding.twSchwerpunktlageErgebnis.text = "---"
                     binding.twCgPercent.text = "---"
-                    binding.statusCg.text = getString(R.string.error_text)
+                    binding.statusCg.text = getString(R.string.status_error)
 
                     updateCardVisuals(
                         binding.cardCg,
@@ -138,7 +144,8 @@ class HomeFragment : Fragment() {
                         binding.cardStatusCg,
                         progressValue = null,
                         isOutsideLimits = false,
-                        isError = true
+                        isError = true,
+                        hasLimit
                     )
                 }
             }
@@ -146,7 +153,9 @@ class HomeFragment : Fragment() {
 
         // 3. Masse n.t.T. Observer
         sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
-            val maxNonLifting = sharedViewModel.selectedProfile.value?.aircraft?.maxNonLiftingMass ?: 0.0
+            val aircraft = sharedViewModel.selectedProfile.value?.aircraft
+            val maxNonLifting = aircraft?.maxNonLiftingMass ?: 0.0
+            val hasLimit = aircraft?.maxNonLiftingMass != null
 
             when (result) {
                 is CalculationResult.Success -> {
@@ -163,12 +172,13 @@ class HomeFragment : Fragment() {
                         binding.cardStatusNonLifting,
                         progress,
                         isOutsideLimits,
-                        isError = false
+                        isError = false,
+                        hasLimit
                     )
                 }
                 is CalculationResult.Error -> {
                     binding.twMasseNTTeileErgebnis.text = "---"
-                    binding.statusNonLifting.text = getString(R.string.error_text)
+                    binding.statusNonLifting.text = getString(R.string.status_error)
 
                     updateCardVisuals(
                         binding.cardNonLifting,
@@ -177,7 +187,8 @@ class HomeFragment : Fragment() {
                         binding.cardStatusNonLifting,
                         progressValue = null,
                         isOutsideLimits = false,
-                        isError = true
+                        isError = true,
+                        hasLimit
                     )
                 }
             }
@@ -194,13 +205,14 @@ class HomeFragment : Fragment() {
         statusCard: com.google.android.material.card.MaterialCardView,
         progressValue: Int?,
         isOutsideLimits: Boolean,
-        isError: Boolean
+        isError: Boolean,
+        limitExists: Boolean
     ) {
         val context = requireContext()
 
         // 1. Logik für Sichtbarkeit und Fortschritt der ProgressBar
         when {
-            isError || progressValue == null -> {
+            isError || !limitExists ||progressValue == null -> {
                 progressIndicator.visibility = View.INVISIBLE
             }
             else -> {
@@ -210,7 +222,7 @@ class HomeFragment : Fragment() {
         }
 
         // 2. Styling basierend auf dem Zustand (Priorität: Error > OutsideLimits > OK)
-        if (isError || isOutsideLimits) {
+        if (isError || isOutsideLimits || !limitExists) {
             // FEHLER-STYLING (ROT)
             val colorRed = ContextCompat.getColor(context, R.color.error_text_color2)
             val bgRed = ContextCompat.getColor(context, R.color.error_background_light)
@@ -220,14 +232,17 @@ class HomeFragment : Fragment() {
             card.setStrokeColor(ColorStateList.valueOf(colorRed))
             card.strokeWidth = 8
             card.cardElevation = 0f
+            progressIndicator.setIndicatorColor(colorRed)
 
-            // Status Badge Text setzen
-            statusLabel.text = if (isError) getString(R.string.error_text) else "n.i.O."
+            // Dynamischer Status-Text
+            statusLabel.text = when {
+                isError -> getString(R.string.status_error)
+                !limitExists -> getString(R.string.status_limit_missing) // Signalisiert: Berechnung ok, aber keine Grenze
+                else -> getString(R.string.status_out_of_limits)
+            }
+
             statusLabel.setTextColor(colorRed)
             statusCard.setStrokeColor(ColorStateList.valueOf(colorRed))
-
-            // Progress Farbe färben
-            progressIndicator.setIndicatorColor(colorRed)
 
         } else {
             // OK-STYLING (GRÜN / STANDARD)
@@ -242,7 +257,7 @@ class HomeFragment : Fragment() {
 
             // Progress & Status auf OK
             progressIndicator.setIndicatorColor(colorPrimary)
-            statusLabel.text = "O.K."
+            statusLabel.text = getString(R.string.status_ok)
             statusLabel.setTextColor(colorGreen)
             statusCard.setStrokeColor(ColorStateList.valueOf(colorGreen))
         }

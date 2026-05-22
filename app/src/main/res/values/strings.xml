@@ -35,7 +35,7 @@
     <string name="min_cg">Minimal zulässige Schwerpunktlage in mm hinter B.E.</string>
     <string name="max_cg">Maximal zulässige Schwerpunktlage in mm hinter B.E:</string>
     <string name="cg_limit">Zulässiger Schwerpunktbereich</string>
-    <string name="error_text">Error</string>
+    <string name="status_error">Error</string>
     <string name="percent">in Prozent</string>
     <string name="edit_aircraft">Flugzeug bearbeiten</string>
     <string name="no_aircrafts">Keine Flugzeuge vorhanden.</string>
@@ -77,5 +77,7 @@
     <string name="Move">Verschieben</string>
     <string name="strIsNonLifting">Zählt zu nicht-tragenden Teilen</string>
     <string name="new_aircraft">Neues Flugzeug</string>
-    <string name="ok">O.K.</string>
+    <string name="status_ok">O.K.</string>
+    <string name="status_limit_missing">Limit ?</string>
+    <string name="status_out_of_limits">n.i.O.</string>
 </resources>

@@ -78,7 +78,7 @@
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="2dp"
-                        android:text="@string/ok"
+                        android:text="@string/status_ok"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="#4CAF50" />
@@ -157,7 +157,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="4dp"
-                            android:text="@string/ok"
+                            android:text="@string/status_ok"
                             android:textSize="11sp"
                             android:textColor="#4CAF50" />
                     </com.google.android.material.card.MaterialCardView>
@@ -228,7 +228,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="4dp"
-                            android:text="@string/ok"
+                            android:text="@string/status_ok"
                             android:textSize="11sp"
                             android:textColor="#4CAF50" />
                     </com.google.android.material.card.MaterialCardView>
