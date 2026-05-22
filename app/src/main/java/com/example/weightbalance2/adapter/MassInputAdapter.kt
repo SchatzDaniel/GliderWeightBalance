@@ -96,12 +96,17 @@ class MassInputAdapter(
 
         fun updateHelperColor(station: PayloadStation, currentMass: Double) {
             if (station.maxMass != null && currentMass > station.maxMass) {
-                // Rot, wenn über Limit
-                binding.massTextInputLayout.setHelperTextColor(
-                    android.content.res.ColorStateList.valueOf(android.graphics.Color.RED)
-                )
+                // Fehlerzustand aktivieren
+                // Wir setzen einen leeren String als Error, damit der Rahmen rot wird,
+                // aber keine zusätzliche Fehlermeldung unter dem Helper-Text erscheint
+                binding.massTextInputLayout.error = "maximal: ${station.maxMass} ${station.unit}"
+                binding.massTextInputLayout.isErrorEnabled = true
             } else {
-                // Standardfarbe (Grau), wenn alles okay oder kein Limit
+                // Fehlerzustand deaktivieren
+                binding.massTextInputLayout.error = null
+                binding.massTextInputLayout.isErrorEnabled = false
+
+                // Standardfarbe für Helper-Text wiederherstellen
                 binding.massTextInputLayout.setHelperTextColor(
                     android.content.res.ColorStateList.valueOf(
                         binding.root.context.getColor(com.example.weightbalance2.R.color.helper_text_default)
