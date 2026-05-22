@@ -248,6 +248,7 @@ class HomeFragment : Fragment() {
             // OK-STYLING (GRÜN / STANDARD)
             val colorGreen = "#4CAF50".toColorInt()
             val colorPrimary = ContextCompat.getColor(context, R.color.purple_700)
+            val colorPrimaryBackground = ContextCompat.getColor(context, R.color.purple_200)
             val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
 
             // Karte zurücksetzen
@@ -257,6 +258,7 @@ class HomeFragment : Fragment() {
 
             // Progress & Status auf OK
             progressIndicator.setIndicatorColor(colorPrimary)
+            progressIndicator.trackColor = colorPrimaryBackground
             statusLabel.text = getString(R.string.status_ok)
             statusLabel.setTextColor(colorGreen)
             statusCard.setStrokeColor(ColorStateList.valueOf(colorGreen))
