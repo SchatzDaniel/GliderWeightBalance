@@ -1,5 +1,3 @@
-// In HomeFragment.kt
-
 package com.example.weightbalance2
 
 import android.content.res.ColorStateList
@@ -9,9 +7,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.databinding.FragmentHomeBinding
-import androidx.navigation.findNavController
+import java.util.Locale
+import androidx.core.graphics.toColorInt
 
 class HomeFragment : Fragment() {
 
@@ -33,7 +33,9 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = view.findNavController()
-        defaultTextColor = binding.twGesamtgewichtOutput.textColors
+
+        // Wir nehmen die Farbe eines Standard-Labels als Referenz
+        defaultTextColor = binding.labelTotal.textColors
 
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { aircraftProfile ->
             updateUiForSelectedProfile(aircraftProfile)
@@ -42,92 +44,208 @@ class HomeFragment : Fragment() {
         setupCalculationObservers()
     }
 
-    /**
-     * Eine zentrale Funktion, die die UI aktualisiert, die vom Flugzeug abhängt.
-     */
     private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile?) {
         if (aircraftProfile == null) {
-            // Titel-Setzen hier entfernen, macht jetzt MainActivity
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())
                 .commit()
         } else {
-            // Titel-Setzen hier entfernen
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, ScrollingFragment())
                 .commit()
         }
     }
 
-    /**
-     * Bündelt die restlichen Observer, um onViewCreated sauber zu halten.
-     */
     private fun setupCalculationObservers() {
+        // 1. Gesamtgewicht Observer
         sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
+            val maxMass = sharedViewModel.selectedProfile.value?.aircraft?.maxTotalMass ?: 0.0
+
             when (result) {
                 is CalculationResult.Success -> {
-                    // Gültiger Wert empfangen
-                    binding.twGesamtgewichtOutput.text =
-                        String.format(java.util.Locale.getDefault(),"%.1f", result.value)
-                    updateDashboardVisuals()
-                }
+                    val value = result.value
+                    binding.twGesamtgewichtOutput.text = String.format(Locale.getDefault(), "%.1f kg", value)
 
+                    // Progress & Validierung
+                    val isOutsideLimits = maxMass > 0.0 && value > maxMass
+                    val progress = if (maxMass > 0) (value / maxMass * 100).toInt() else 0
+
+                    updateCardVisuals(
+                        binding.cardTotalMass,
+                        binding.progressTotal,
+                        binding.statusTotal,
+                        binding.cardStatusTotal,
+                        progress,
+                        isOutsideLimits,
+                        isError = false
+                    )
+                }
                 is CalculationResult.Error -> {
-                    binding.twGesamtgewichtOutput.text = getString(R.string.error_text)
+                    binding.twGesamtgewichtOutput.text = "---"
+                    binding.statusTotal.text = getString(R.string.error_text)
+
+                    updateCardVisuals(
+                        binding.cardTotalMass,
+                        binding.progressTotal,
+                        binding.statusTotal,
+                        binding.cardStatusTotal,
+                        progressValue = null,
+                        isOutsideLimits = false,
+                        isError = true
+                    )
                 }
             }
         }
 
+        // 2. Schwerpunkt Observer
         sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
+            val profile = sharedViewModel.selectedProfile.value?.aircraft ?: return@observe
+            val minCG = profile.minCg ?: 0.0
+            val maxCG = profile.maxCg ?: 0.0
+            val range = maxCG - minCG
+
             when (result) {
                 is CalculationResult.Success -> {
-                    // -- 1. Schwerpunktlage (das hast du schon) --
-                    binding.twSchwerpunktlageErgebnis.text =
-                        String.format(java.util.Locale.getDefault(),"%.2f", result.value)
-                    updateDashboardVisuals()
+                    val value = result.value
+                    binding.twSchwerpunktlageErgebnis.text = String.format(Locale.getDefault(), "%.1f mm", value)
 
-                    // -- 2. Prozentuale Lage (NEU & KORRIGIERT) --
-                    val minCG = sharedViewModel.selectedProfile.value?.aircraft?.minCg ?: 0.0
-                    val maxCG = sharedViewModel.selectedProfile.value?.aircraft?.maxCg ?: 0.0
-                    val range = maxCG - minCG
-                    if (range > 0) {
-                        // Nur berechnen, wenn der Bereich gültig ist (verhindert Division durch Null)
-                        val percentage = (result.value - minCG) / range * 100
-                        binding.twPercentResult.text =
-                            String.format(java.util.Locale.getDefault(),"%.1f %%", percentage)
-                    } else {
-                        // Zeige nichts an, wenn min/maxCG nicht gesetzt sind
-                        binding.twPercentResult.text = ""
-                    }
+                    // Prozentuale Lage (MAC)
+                    val percentage = if (range > 0) (value - minCG) / range * 100 else 0.0
+                    binding.twCgPercent.text = String.format(Locale.getDefault(), "(%.1f%%)", percentage)
+
+                    // Validierung
+                    val isOutsideLimits = (minCG > 0.0 || maxCG > 0.0) && (value < minCG || value > maxCG)
+
+                    updateCardVisuals(
+                        binding.cardCg,
+                        binding.progressCg,
+                        binding.statusCg,
+                        binding.cardStatusCg,
+                        percentage.toInt(),
+                        isOutsideLimits,
+                        isError = false
+                    )
                 }
-
                 is CalculationResult.Error -> {
-                    // Fehlerfall für BEIDE Textfelder
-                    binding.twSchwerpunktlageErgebnis.text = getString(R.string.error_text)
-                    binding.twPercentResult.text =
-                        getString(R.string.error_text) // Oder "" wenn du es leer haben willst
+                    binding.twSchwerpunktlageErgebnis.text = "---"
+                    binding.twCgPercent.text = "---"
+                    binding.statusCg.text = getString(R.string.error_text)
+
+                    updateCardVisuals(
+                        binding.cardCg,
+                        binding.progressCg,
+                        binding.statusCg,
+                        binding.cardStatusCg,
+                        progressValue = null,
+                        isOutsideLimits = false,
+                        isError = true
+                    )
                 }
             }
         }
 
+        // 3. Masse n.t.T. Observer
         sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
+            val maxNonLifting = sharedViewModel.selectedProfile.value?.aircraft?.maxNonLiftingMass ?: 0.0
+
             when (result) {
                 is CalculationResult.Success -> {
-                    binding.twMasseNTTeileErgebnis.text =
-                        String.format(java.util.Locale.getDefault(),"%.1f", result.value)
-                    updateDashboardVisuals()
-                }
+                    val value = result.value
+                    binding.twMasseNTTeileErgebnis.text = String.format(Locale.getDefault(), "%.1f kg", value)
 
+                    val isOutsideLimits = maxNonLifting > 0.0 && value > maxNonLifting
+                    val progress = if (maxNonLifting > 0) (value / maxNonLifting * 100).toInt() else 0
+
+                    updateCardVisuals(
+                        binding.cardNonLifting,
+                        binding.progressNonLifting,
+                        binding.statusNonLifting,
+                        binding.cardStatusNonLifting,
+                        progress,
+                        isOutsideLimits,
+                        isError = false
+                    )
+                }
                 is CalculationResult.Error -> {
-                    binding.twMasseNTTeileErgebnis.text = getString(R.string.error_text)
+                    binding.twMasseNTTeileErgebnis.text = "---"
+                    binding.statusNonLifting.text = getString(R.string.error_text)
+
+                    updateCardVisuals(
+                        binding.cardNonLifting,
+                        binding.progressNonLifting,
+                        binding.statusNonLifting,
+                        binding.cardStatusNonLifting,
+                        progressValue = null,
+                        isOutsideLimits = false,
+                        isError = true
+                    )
                 }
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    /**
+     * Zentralisierte Funktion zum Stylen der einzelnen Dashboard-Karten
+     */
+    private fun updateCardVisuals(
+        card: com.google.android.material.card.MaterialCardView,
+        progressIndicator: com.google.android.material.progressindicator.LinearProgressIndicator,
+        statusLabel: android.widget.TextView,
+        statusCard: com.google.android.material.card.MaterialCardView,
+        progressValue: Int?,
+        isOutsideLimits: Boolean,
+        isError: Boolean
+    ) {
+        val context = requireContext()
+
+        // 1. Logik für Sichtbarkeit und Fortschritt der ProgressBar
+        when {
+            isError || progressValue == null -> {
+                progressIndicator.visibility = View.INVISIBLE
+            }
+            else -> {
+                progressIndicator.visibility = View.VISIBLE
+                progressIndicator.progress = progressValue.coerceIn(0, 100)
+            }
+        }
+
+        // 2. Styling basierend auf dem Zustand (Priorität: Error > OutsideLimits > OK)
+        if (isError || isOutsideLimits) {
+            // FEHLER-STYLING (ROT)
+            val colorRed = ContextCompat.getColor(context, R.color.error_text_color2)
+            val bgRed = ContextCompat.getColor(context, R.color.error_background_light)
+
+            // Karte Rot färben
+            card.setCardBackgroundColor(ColorStateList.valueOf(bgRed))
+            card.setStrokeColor(ColorStateList.valueOf(colorRed))
+            card.strokeWidth = 8
+            card.cardElevation = 0f
+
+            // Status Badge Text setzen
+            statusLabel.text = if (isError) getString(R.string.error_text) else "n.i.O."
+            statusLabel.setTextColor(colorRed)
+            statusCard.setStrokeColor(ColorStateList.valueOf(colorRed))
+
+            // Progress Farbe färben
+            progressIndicator.setIndicatorColor(colorRed)
+
+        } else {
+            // OK-STYLING (GRÜN / STANDARD)
+            val colorGreen = "#4CAF50".toColorInt()
+            val colorPrimary = ContextCompat.getColor(context, R.color.purple_700)
+            val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
+
+            // Karte zurücksetzen
+            card.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
+            card.strokeWidth = 0
+            card.cardElevation = 4 * resources.displayMetrics.density
+
+            // Progress & Status auf OK
+            progressIndicator.setIndicatorColor(colorPrimary)
+            statusLabel.text = "O.K."
+            statusLabel.setTextColor(colorGreen)
+            statusCard.setStrokeColor(ColorStateList.valueOf(colorGreen))
+        }
     }
 
     private fun getThemeColor(attr: Int): Int {
@@ -136,57 +254,8 @@ class HomeFragment : Fragment() {
         return typedValue.data
     }
 
-    private fun updateDashboardVisuals() {
-        val profile = sharedViewModel.selectedProfile.value ?: return
-
-        // 1. Werte aus dem ViewModel holen (CalculationResult entpacken)
-        val currentTotalMass = (sharedViewModel.totalMass.value as? CalculationResult.Success)?.value ?: 0.0
-        val currentCg = (sharedViewModel.cg.value as? CalculationResult.Success)?.value ?: 0.0
-        val currentNonLiftingMass = (sharedViewModel.nonLiftingMass.value as? CalculationResult.Success)?.value ?: 0.0
-
-        // 2. Grenzwerte aus dem Profil holen
-        val maxMass = profile.aircraft.maxTotalMass ?: 0.0
-        val minCG = profile.aircraft.minCg ?: 0.0
-        val maxCG = profile.aircraft.maxCg ?: 0.0
-        val maxNonLiftingMass = profile.aircraft.maxNonLiftingMass ?: 0.0
-
-        // 3. Fehlerprüfung
-        val isMassError = maxMass > 0.0 && currentTotalMass > maxMass
-        val isCgError = (minCG > 0.0 || maxCG > 0.0) && (currentCg < minCG || currentCg > maxCG)
-        val isNonLiftingError = maxNonLiftingMass > 0.0 && currentNonLiftingMass > maxNonLiftingMass
-
-        val hasError = isMassError || isCgError || isNonLiftingError
-
-        // 4. UI Aktualisierung
-        if (hasError) {
-            val errorColor = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_text_color2))
-            val errorBg = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_background_light))
-
-            binding.dashboardCard.cardElevation = 0f
-            binding.dashboardCard.maxCardElevation = 0f
-
-            binding.dashboardCard.setCardBackgroundColor(errorBg)
-            binding.dashboardCard.setStrokeColor(errorColor)
-            binding.dashboardCard.strokeWidth = 8
-
-            // Optional: Einzelne Texte rot färben, wenn sie den Fehler verursachen
-            binding.twGesamtgewichtOutput.setTextColor(if (isMassError) errorColor else defaultTextColor!!)
-            binding.twSchwerpunktlageErgebnis.setTextColor(if (isCgError) errorColor else defaultTextColor!!)
-            binding.twMasseNTTeileErgebnis.setTextColor(if (isNonLiftingError) errorColor else defaultTextColor!!)
-        } else {
-            val defaultElevation = 4 * resources.displayMetrics.density
-            binding.dashboardCard.cardElevation = defaultElevation
-            binding.dashboardCard.maxCardElevation = defaultElevation
-
-            val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
-            binding.dashboardCard.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
-            binding.dashboardCard.strokeWidth = 0
-
-            // Farben zurücksetzen
-            binding.twGesamtgewichtOutput.setTextColor(defaultTextColor!!)
-            binding.twSchwerpunktlageErgebnis.setTextColor(defaultTextColor!!)
-            binding.twMasseNTTeileErgebnis.setTextColor(defaultTextColor!!)
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
-
 }
