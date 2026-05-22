@@ -21,4 +21,7 @@ interface PayloadStationDao {
 
     @Query("DELETE FROM payload_stations WHERE aircraftOwnerId = :aircraftId")
     suspend fun deleteForAircraft(aircraftId: Int)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(station: PayloadStation): Long
 }

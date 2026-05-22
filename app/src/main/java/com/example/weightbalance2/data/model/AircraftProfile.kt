@@ -3,17 +3,30 @@ package com.example.weightbalance2.data.model
 import androidx.room.Embedded
 import androidx.room.Relation
 
-// Diese Klasse repräsentiert ein komplettes Flugzeug mit all seinen Teilen
 data class AircraftProfile(
-    @Embedded // Room versteht, dass dies Teil der Haupt-Abfrage ist
+    @Embedded
     val aircraft: Aircraft,
 
     @Relation(
-        parentColumn = "id", // von Aircraft
-        entityColumn = "aircraftOwnerId" // von PayloadStation
+        entity = PayloadStation::class,
+        parentColumn = "id", // von Aircraft (Primärschlüssel)
+        entityColumn = "aircraftOwnerId" // von PayloadStation (Fremdschlüssel)
     )
-    val stations: List<PayloadStation>
-){
+    val stations: List<StationWithPresets> // Hier nutzen wir eine neue Zwischenklasse
+) {
+    // Hilfsvariable für den einfachen Zugriff auf sortierte Stationen
     val sortedStations: List<PayloadStation>
-        get() = stations.sortedBy { it.displayOrder }
+        get() = stations.map { it.station }.sortedBy { it.displayOrder }
 }
+
+/**
+ * Eine Hilfsklasse, die eine Station und ihre zugehörigen Presets bündelt.
+ */
+data class StationWithPresets(
+    @Embedded val station: PayloadStation,
+    @Relation(
+        parentColumn = "stationId", // von PayloadStation
+        entityColumn = "parentStationId" // von Preset
+    )
+    val presets: List<Preset>
+)

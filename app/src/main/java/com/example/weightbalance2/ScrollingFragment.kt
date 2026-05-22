@@ -7,7 +7,8 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.weightbalance2.adapter.MassInputAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weightbalance2.adapter.CalculationsAdapter
 import com.example.weightbalance2.databinding.FragmentScrollingBinding
 
 class ScrollingFragment : Fragment() {
@@ -16,7 +17,9 @@ class ScrollingFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
-    private lateinit var massInputAdapter: MassInputAdapter
+
+    // Wir nutzen jetzt den neuen CalculationsAdapter
+    private lateinit var calculationsAdapter: CalculationsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -33,34 +36,38 @@ class ScrollingFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        massInputAdapter = MassInputAdapter(
-            onMassChanged = { stationId, newMass ->
-                sharedViewModel.updateStationMass(stationId, newMass)
-            },
-            onMassPersist = { stationId, newMass ->
-                sharedViewModel.persistStationMass(stationId, newMass.toString())
-            })
-        binding.recyclerViewMassInputs.adapter = massInputAdapter
+        // Initialisierung des neuen Adapters
+        calculationsAdapter = CalculationsAdapter { stationId, newWeight ->
+            // Wenn sich ein Gewicht im Adapter ändert (Preset-Wahl, Slider, etc.),
+            // informieren wir das SharedViewModel für die Gesamtberechnung.
+            sharedViewModel.updateStationMass(stationId, newWeight)
+        }
+
+        binding.recyclerViewMassInputs.apply {
+            adapter = calculationsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
     }
 
     private fun observeViewModel() {
-        // Beobachte das ausgewählte Flugzeugprofil.
+        // Wir beobachten das selectedProfile (welches jetzt StationWithPresets enthält)
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
             if (profile == null) {
-                // Kein Flugzeug ausgewählt: Zeige Platzhalter und leere die Liste.
                 binding.recyclerViewMassInputs.isVisible = false
                 binding.textViewNoAircraftSelected.isVisible = true
-                massInputAdapter.submitList(emptyList())
+                calculationsAdapter.submitList(emptyList())
             } else {
-                // Ein Flugzeug ist da: Zeige die RecyclerView und übergebe die Stationsliste.
                 binding.recyclerViewMassInputs.isVisible = true
                 binding.textViewNoAircraftSelected.isVisible = false
 
-                // WICHTIG: Setze die internen Eingaben im Adapter zurück, bevor eine neue Liste kommt.
-                massInputAdapter.resetMasses()
-                massInputAdapter.submitList(profile.sortedStations)
+                // Wir übergeben die Liste der Stationen (inkl. ihrer Presets) an den Adapter.
+                // Achte darauf, dass das Profil im ViewModel bereits sortiert wurde.
+                calculationsAdapter.submitList(profile.stations)
             }
         }
+
+        // Optional: Falls du die Gesamtmasse/Schwerpunkt direkt im Fragment anzeigen willst,
+        // kannst du hier weitere LiveData aus dem sharedViewModel beobachten.
     }
 
     override fun onDestroyView() {

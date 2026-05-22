@@ -67,8 +67,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 // stationMasses initialisieren, damit recalc() beim App-Start Werte zum Rechnen hat
                 if (profile != null) {
                     val initialMasses = profile.stations
-                        .filter { it.defaultValue != null }
-                        .associate { it.stationId to (it.defaultValue ?: 0.0) }
+                        .filter { it.station.defaultValue != null }
+                        .associate { it.station.stationId to (it.station.defaultValue ?: 0.0) }
                     _stationMasses.value = initialMasses
                 }
                 // Entferne die Quelle, um Speicherlecks zu vermeiden.
@@ -89,8 +89,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         if (profile != null) {
             // Erstelle eine Map aus allen Stationen, die einen Standardwert hinterlegt haben
             val initialMasses = profile.stations
-                .filter { it.defaultValue != null }
-                .associate { it.stationId to (it.defaultValue ?: 0.0) }
+                .filter { it.station.defaultValue != null }
+                .associate { it.station.stationId to (it.station.defaultValue ?: 0.0) }
 
             _stationMasses.value = initialMasses
         } else {
@@ -101,21 +101,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Wird vom ScrollingFragment aufgerufen, wenn der Benutzer eine Masse ändert.
      */
+    /**
+     * Wird vom ScrollingFragment aufgerufen, wenn der Benutzer eine Masse ändert.
+     */
     fun updateStationMass(stationId: Int, mass: Double) {
         val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
-        currentMasses[stationId] = mass
-        _stationMasses.value = currentMasses
-    }
 
-    fun persistStationMass(stationId: Int, massText: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val mass = massText.replace(',', '.').toDoubleOrNull()
-            val station = payloadStationDao.getStationById(stationId)
+        // Nur aktualisieren, wenn sich der Wert wirklich geändert hat (spart Rechenleistung)
+        if (currentMasses[stationId] != mass) {
+            currentMasses[stationId] = mass
 
-            if (station != null) {
-                val updatedStation = station.copy(defaultValue = mass)
-                payloadStationDao.update(updatedStation)
-            }
+            // WICHTIG: Wir müssen den Wert der LiveData neu setzen,
+            // damit observeForever { recalc() } im init-Block ausgelöst wird.
+            _stationMasses.value = currentMasses
         }
     }
 
@@ -165,9 +163,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         val emptyStabilizer = profile.aircraft.stabilizerMass ?: 0.0
 
         // Berechne die Summe der Massen aller Stationen, die als "Non-Lifting" markiert sind
-        val payloadNonLiftingMass = profile.stations.sumOf { station ->
-            if (station.isNonLifting) {
-                masses[station.stationId] ?: 0.0
+        val payloadNonLiftingMass = profile.stations.sumOf { swp ->
+            if (swp.station.isNonLifting) {
+                masses[swp.station.stationId] ?: 0.0
             } else {
                 0.0
             }

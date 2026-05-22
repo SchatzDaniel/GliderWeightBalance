@@ -2,17 +2,43 @@ package com.example.weightbalance2.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Ignore
 
-// Neue Klasse für eine Station (Hebelarm)
 @Entity(tableName = "payload_stations")
 data class PayloadStation(
     @PrimaryKey(autoGenerate = true) val stationId: Int = 0,
-    val aircraftOwnerId: Int, // Fremdschlüssel zum Flugzeug
-    val name: String,         // z.B. "Copilot", "Gepäck"
-    val arm: Double,          // Der Hebelarm in mm
-    val maxMass: Double? = null, // Optional: max. Masse für diese Station
+    val aircraftOwnerId: Int,
+    val name: String,
+    val arm: Double,
+    val maxMass: Double? = null,
     val unit: String? = null,
-    val displayOrder: Int = 0, // Für die Reihenfolge der Stationen
-    val isNonLifting: Boolean = false, // Für die Berechnung des Non-Lifting Mass
-    val defaultValue: Double? = null // Speichert das "Standardgewicht" für diese Station
-)
+    val displayOrder: Int = 0,
+    val isNonLifting: Boolean = false,
+    val defaultValue: Double? = null,
+    val hasSlider: Boolean = false,
+    val hasPresets: Boolean = false,
+    val hasAmountInput: Boolean = false,
+
+    @Ignore // Dieses Feld wird nicht in der Tabelle gespeichert, nur im Code genutzt
+    var presets: List<Preset> = emptyList()
+) {
+    // Sekundärer Konstruktor für Room, da Room @Ignore Felder nicht im Konstruktor mag
+    constructor(
+        stationId: Int,
+        aircraftOwnerId: Int,
+        name: String,
+        arm: Double,
+        maxMass: Double?,
+        unit: String?,
+        displayOrder: Int,
+        isNonLifting: Boolean,
+        defaultValue: Double?,
+        hasSlider: Boolean,
+        hasPresets: Boolean,
+        hasAmountInput: Boolean
+    ) : this(
+        stationId, aircraftOwnerId, name, arm, maxMass, unit,
+        displayOrder, isNonLifting, defaultValue, hasSlider,
+        hasPresets, hasAmountInput, emptyList()
+    )
+}

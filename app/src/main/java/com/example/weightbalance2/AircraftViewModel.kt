@@ -23,8 +23,9 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
         val aircraftDao = AppDatabase.getDatabase(application).aircraftDao()
         val stationDao = AppDatabase.getDatabase(application).payloadStationDao()
         val profileDao = AppDatabase.getDatabase(application).aircraftProfileDao()
+        val presetDao = AppDatabase.getDatabase(application).presetDao()
 
-        repository = AircraftRepository(aircraftDao, stationDao, profileDao)
+        repository = AircraftRepository(aircraftDao, stationDao, profileDao, presetDao)
 
         allProfiles = repository.getAllProfiles().stateIn(
             scope = viewModelScope,
@@ -39,7 +40,10 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
      */
     fun loadAircraftProfileById(id: Int): LiveData<AircraftProfile?> {
         return repository.getProfileById(id).asLiveData().map { profile ->
-            profile?.copy(stations = profile.sortedStations.sortedBy { it.displayOrder })
+            // Wir sortieren die Liste der StationWithPresets anhand der displayOrder der eingebetteten station
+            profile?.copy(
+                stations = profile.stations.sortedBy { it.station.displayOrder }
+            )
         }
     }
 

@@ -17,6 +17,7 @@ import com.example.weightbalance2.data.model.Aircraft
 import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.data.model.PayloadStation
 import com.example.weightbalance2.databinding.FragmentAddAircraftBinding
+import com.example.weightbalance2.data.model.StationWithPresets
 
 class AddAircraftFragment : Fragment() {
     private var _binding: FragmentAddAircraftBinding? = null
@@ -105,12 +106,24 @@ class AddAircraftFragment : Fragment() {
         touchHelper.attachToRecyclerView(binding.recyclerViewStations)
     }
 
-
     /**
      * Füllt die UI-Felder mit den Daten eines bestehenden Flugzeugs.
      */
     private fun populateUi(profile: AircraftProfile) {
         currentAircraftProfile = profile
+
+        // --- NEU: Mapping der Stationen inkl. Presets für den Adapter ---
+        val uiStations = profile.stations.map { swp ->
+            // Wir nehmen das PayloadStation Objekt und weisen ihm seine Presets zu
+            swp.station.apply {
+                this.presets = swp.presets
+            }
+        }.sortedBy { it.displayOrder }
+
+        // Fülle die Stammdaten
+        binding.editTextRegistration.setText(profile.aircraft.registration)
+        // ... (restliche Stammdaten bleiben gleich)
+        binding.editTextEmptyMassArm.setText(profile.aircraft.emptyWeightArm?.toString() ?: "")
 
         // Fülle die Stammdaten
         binding.editTextRegistration.setText(profile.aircraft.registration)
@@ -124,10 +137,9 @@ class AddAircraftFragment : Fragment() {
         binding.editTextStabilizerMass.setText(profile.aircraft.stabilizerMass?.toString() ?: "")
         binding.editTextEmptyMassArm.setText(profile.aircraft.emptyWeightArm?.toString() ?: "")
 
-        // Übergib die Liste der Stationen an den Adapter. Die RecyclerView kümmert sich um den Rest.
-        stationsAdapter.submitList(profile.sortedStations)
+        // Übergib die gemappte Liste an den Adapter
+        stationsAdapter.submitList(uiStations)
     }
-
 
     /**
      * Liest die Benutzereingaben, validiert sie und speichert oder aktualisiert das Flugzeug.
@@ -136,7 +148,6 @@ class AddAircraftFragment : Fragment() {
      * Liest die Benutzereingaben, validiert sie und speichert oder aktualisiert das Flugzeug.
      * Diese Version wurde refaktorisiert, um Code-Wiederholungen zu reduzieren.
      */
-
     private fun saveOrUpdateAircraft() {
         // --- Schritt 1: Lese und validiere die Pflichtfelder ---
         val registration = binding.editTextRegistration.text.toString().trim()
@@ -150,12 +161,9 @@ class AddAircraftFragment : Fragment() {
         // --- Schritt 2: Lese die Stations-Daten aus dem Adapter ---
         val stationsFromAdapter = stationsAdapter.getCurrentStations()
         val stationsForRoom = stationsFromAdapter.map { station ->
-            if (station.stationId < 0) {
-                // Falls die ID negativ ist, setze sie auf 0,
-                // damit Room einen neuen Eintrag mit Auto-ID erstellt
-                station.copy(stationId = 0)
-            } else {
-                station
+            val finalId = if (station.stationId < 0) 0 else station.stationId
+            station.copy(stationId = finalId).apply {
+                this.presets = station.presets // Presets für das ViewModel "mitschleppen"8
             }
         }
 
@@ -174,8 +182,14 @@ class AddAircraftFragment : Fragment() {
             emptyWeightArm = binding.editTextEmptyMassArm.text.toString().toDoubleOrNull()
         )
 
-        // Bündle das Flugzeug und seine Stationen in einem Profil
-        val profileToSave = AircraftProfile(aircraft, stationsForRoom)
+        // Bündle das Flugzeug und seine Stationen (inkl. deren Presets) in einem Profil
+        val profileToSave = AircraftProfile(
+            aircraft = aircraft,
+            stations = stationsForRoom.map { station ->
+                // Hier verpacken wir jede Station wieder in die Relations-Klasse
+                StationWithPresets(station = station, presets = station.presets)
+            }
+        )
 
         // --- Schritt 4: Speichern oder Aktualisieren über das ViewModel ---
         aircraftViewModel.saveOrUpdateProfile(profileToSave)

@@ -75,9 +75,16 @@
     <string name="label_max_mass">Max. Masse: %1$s %2$s</string>
     <string name="label_arm">"Hebelarm: %s mm"</string>
     <string name="Move">Verschieben</string>
-    <string name="strIsNonLifting">Zählt zu nicht-tragenden Teilen</string>
+    <string name="option_is_non_lifting">Zählt zu nicht-tragenden Teilen</string>
     <string name="new_aircraft">Neues Flugzeug</string>
     <string name="status_ok">O.K.</string>
     <string name="status_limit_missing">Limit ?</string>
     <string name="status_out_of_limits">n.i.O.</string>
+    <string name="option_has_slider">Schieberegler hinzufügen</string>
+    <string name="option_has_presets">Presets hinzufügen</string>
+    <string name="option_has_amount_input">Anzahl hinzufügen</string>
+    <string name="label_button_edit_preset">Presets verwalten</string>
+    <string name="label_button_add_preset">Neues Preset hinzufügen</string>
+    <string name="hint_preset_name">Bezeichnung (z.B. Fallschirm XY)</string>
+    <string name="hint_preset_weight">Gewicht</string>
 </resources>
