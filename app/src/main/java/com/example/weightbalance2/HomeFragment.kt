@@ -45,17 +45,14 @@ class HomeFragment : Fragment() {
     /**
      * Eine zentrale Funktion, die die UI aktualisiert, die vom Flugzeug abhängt.
      */
-    private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile? ) {
-        // Diese Funktion bleibt unverändert und funktioniert jetzt zuverlässig.
-        val mainActivity = activity as? MainActivity
+    private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile?) {
         if (aircraftProfile == null) {
-            mainActivity?.setToolbarTitle(getString(R.string.no_aircraft_selected_title))
+            // Titel-Setzen hier entfernen, macht jetzt MainActivity
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())
                 .commit()
         } else {
-            val title = "${aircraftProfile.aircraft.registration} (${aircraftProfile.aircraft.aircraftType})"
-            mainActivity?.setToolbarTitle(title)
+            // Titel-Setzen hier entfernen
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, ScrollingFragment())
                 .commit()

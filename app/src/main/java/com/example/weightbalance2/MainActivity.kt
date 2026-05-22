@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private var currentDestinationId: Int? = null
+    private val sharedViewModel: SharedViewModel by viewModels()
 
     // Konstanten für SharedPreferences
     companion object {
@@ -54,8 +56,36 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             currentDestinationId = destination.id
             invalidateOptionsMenu() // Menü neu vorbereiten
+            when (destination.id) {
+                R.id.homeFragment -> { // Prüfe die ID in deinem NavGraph!
+                    updateAppBarTitleWithSelectedProfile()
+                }
+                R.id.aircraftFragment -> {
+                    // Hier erlauben wir der Navigation das Standard-Label zu setzen
+                    // ODER wir setzen es manuell:
+                    setToolbarTitle(getString(R.string.title_activity_aircraft))
+                }
+                R.id.addAircraftFragment -> {
+                    // Hier nichts tun, da das Fragment den Titel
+                    // selbst in onViewCreated setzt ("Bearbeiten" vs "Neu")
+                }
+            }
         }
         checkAndShowDisclaimer()
+
+        // In der onCreate der MainActivity
+        sharedViewModel.selectedProfile.observe(this) { profile ->
+            if(navController.currentDestination?.id == R.id.homeFragment) {
+                if (profile != null) {
+                    val title =
+                        "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
+                    setToolbarTitle(title)
+                } else {
+                    setToolbarTitle(getString(R.string.no_aircraft_selected_title))
+                }
+            }
+        }
+
     }
 
     private fun checkAndShowDisclaimer() {
@@ -90,6 +120,18 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun updateAppBarTitleWithSelectedProfile() {
+        val profile = sharedViewModel.selectedProfile.value
+        if (profile != null) {
+            val title = "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
+            // Setze den Titel sowohl in der Actionbar als auch in der Toolbar
+            supportActionBar?.title = title
+            binding.toolbar.title = title
+        } else {
+            supportActionBar?.title = getString(R.string.no_aircraft_selected_title)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu):Boolean {
         menuInflater.inflate(R.menu.app_bar_menu, menu)
         return true
@@ -121,9 +163,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-    * Ermöglicht es den Fragmenten, den Titel der ActionBar zu setzen.
-    */
+     * Ermöglicht es den Fragmenten (und der MainActivity), den Titel konsistent zu setzen.
+     */
     fun setToolbarTitle(title: String) {
         binding.toolbar.title = title
+        supportActionBar?.title = title
     }
 }

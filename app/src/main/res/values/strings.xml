@@ -76,4 +76,5 @@
     <string name="label_arm">"Hebelarm: %s mm"</string>
     <string name="Move">Verschieben</string>
     <string name="strIsNonLifting">Zählt zu nicht-tragenden Teilen</string>
+    <string name="new_aircraft">Neues Flugzeug</string>
 </resources>

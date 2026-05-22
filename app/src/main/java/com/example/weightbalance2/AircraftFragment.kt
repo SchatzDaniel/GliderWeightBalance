@@ -42,9 +42,7 @@ class AircraftFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Schritt 1: Adapter initialisieren und dem RecyclerView zuweisen.
-        // Das passiert jetzt nur einmal.
+        activity?.title = getString(R.string.title_activity_aircraft)
         setupRecyclerView()
 
         // Schritt 2: Daten beobachten und die UI (Liste und Sichtbarkeit) aktualisieren.

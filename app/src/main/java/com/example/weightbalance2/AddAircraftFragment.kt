@@ -50,14 +50,14 @@ class AddAircraftFragment : Fragment() {
 
         // Appbar-Titel anpassen
         if (aircraftProfileId != (-1)) {
-            activity?.title = "Flugzeug bearbeiten"
+            activity?.title = getString(R.string.edit_aircraft)
             aircraftViewModel.loadAircraftProfileById(aircraftProfileId).observe(viewLifecycleOwner) { aircraftProfile ->
                 aircraftProfile?.let {
                     populateUi(it)
                 }
             }
         } else {
-            activity?.title = "Neues Flugzeug"
+            activity?.title = getString(R.string.new_aircraft)
         }
 
         // Click Listener für den Speicher-Button einrichten
