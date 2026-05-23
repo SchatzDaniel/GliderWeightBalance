@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="12dp"
@@ -23,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:text="Pilot" />
+                tools:text="Pilot" />
             <TextView
                 android:id="@+id/tvStationWeight"
                 android:layout_width="wrap_content"
@@ -31,7 +32,7 @@
                 android:layout_alignParentEnd="true"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 android:textColor="?attr/colorPrimary"
-                android:text="85 kg" />
+                tools:text="85 kg" />
         </RelativeLayout>
 
         <!-- Bereich für Presets & Menge -->
@@ -50,13 +51,13 @@
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:hint="Anz.">
+                tools:hint="Anz.">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAmount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:text="1" />
+                    tools:text="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -64,7 +65,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Preset wählen">
+                android:hint="@string/hint_select_preset">
                 <AutoCompleteTextView
                     android:id="@+id/spinnerPresets"
                     android:layout_width="match_parent"
@@ -80,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Gewicht eingeben">
+            android:hint="@string/hint_enter_weight">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etWeight"
                 android:layout_width="match_parent"
@@ -93,7 +94,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:thumbRadius="10dp"
+            app:thumbColor="?attr/colorPrimary"
+            app:thumbStrokeColor="?attr/colorOnPrimary"
+            app:thumbStrokeWidth="1dp"
+            app:haloRadius="20dp"
+            app:haloColor="#22000000"
+            app:trackHeight="4dp"
+            app:trackColorInactive="?attr/colorSurfaceVariant"
+            app:trackColorActive="?attr/colorPrimary" />
+
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

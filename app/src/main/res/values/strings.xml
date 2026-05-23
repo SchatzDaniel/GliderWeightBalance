@@ -87,4 +87,6 @@
     <string name="label_button_add_preset">Neues Preset hinzufügen</string>
     <string name="hint_preset_name">Bezeichnung (z.B. Fallschirm XY)</string>
     <string name="hint_preset_weight">Gewicht</string>
+    <string name="hint_enter_weight">Gewicht eingeben</string>
+    <string name="hint_select_preset">Preset wählen</string>
 </resources>

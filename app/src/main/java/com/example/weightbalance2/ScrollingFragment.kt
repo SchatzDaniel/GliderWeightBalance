@@ -18,7 +18,7 @@ class ScrollingFragment : Fragment() {
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
 
-    // Wir nutzen jetzt den neuen CalculationsAdapter
+    // Wir nutzen jetzt den neuen com.example.weightbalance2.adapter.CalculationsAdapter
     private lateinit var calculationsAdapter: CalculationsAdapter
 
     override fun onCreateView(
@@ -50,24 +50,21 @@ class ScrollingFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        // Wir beobachten das selectedProfile (welches jetzt StationWithPresets enthält)
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
             if (profile == null) {
                 binding.recyclerViewMassInputs.isVisible = false
                 binding.textViewNoAircraftSelected.isVisible = true
+                // Hier ist submitList okay, um die Liste zu leeren
                 calculationsAdapter.submitList(emptyList())
             } else {
                 binding.recyclerViewMassInputs.isVisible = true
                 binding.textViewNoAircraftSelected.isVisible = false
 
-                // Wir übergeben die Liste der Stationen (inkl. ihrer Presets) an den Adapter.
-                // Achte darauf, dass das Profil im ViewModel bereits sortiert wurde.
-                calculationsAdapter.submitList(profile.stations)
+                // WICHTIG: Nur diese eine Zeile nutzen!
+                // Sie gruppiert die Daten und aktualisiert die Anzeige.
+                calculationsAdapter.updateData(profile.stations)
             }
         }
-
-        // Optional: Falls du die Gesamtmasse/Schwerpunkt direkt im Fragment anzeigen willst,
-        // kannst du hier weitere LiveData aus dem sharedViewModel beobachten.
     }
 
     override fun onDestroyView() {
