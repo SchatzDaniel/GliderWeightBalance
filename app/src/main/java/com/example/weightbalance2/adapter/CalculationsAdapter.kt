@@ -79,19 +79,56 @@ class CalculationsAdapter(
             val station = swp.station
             binding.tvStationName.text = station.name
 
-            // FIX: Locale.getDefault() hinzugefügt, um die Warnung zu beheben
-            binding.tvStationWeight.text = String.format(Locale.getDefault(), "%.1f %s", station.defaultValue ?: 0.0, station.unit ?: "kg")
+            // Das kombinierte Eingabe-/Anzeigefeld oben rechts
+            val etWeightDisplay = binding.etManualInput
 
+            // --- WICHTIG: Das Feld oben rechts muss IMMER sichtbar sein ---
+            // Falls das übergeordnete TextInputLayout eine ID hat (z.B. layoutManualInput oben),
+            // stelle sicher, dass es sichtbar ist.
+            binding.layoutManualInput.visibility = View.VISIBLE
+            binding.tvUnitSuffix.text = station.unit ?: "kg"
+
+            val updateTextProgrammatically = { value: Double ->
+                if (!etWeightDisplay.hasFocus()) {
+                    val formatted = if (station.hasSlider) {
+                        String.format(Locale.getDefault(), "%.0f", value)
+                    } else {
+                        String.format(Locale.getDefault(), "%.1f", value)
+                    }
+                    etWeightDisplay.setText(formatted)
+                }
+            }
+
+            updateTextProgrammatically(station.defaultValue ?: 0.0)
+
+            // Haupt-TextWatcher (Manuelle Eingabe oben rechts)
+            etWeightDisplay.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (etWeightDisplay.hasFocus()) {
+                        val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
+                        if (station.hasPresets) {
+                            binding.spinnerPresets.setText("Keine Auswahl", false)
+                        }
+                        if (station.hasSlider && station.maxMass != null) {
+                            val sliderVal = weight.toFloat().coerceIn(0f, station.maxMass.toFloat())
+                            binding.weightSlider.value = sliderVal
+                        }
+                        onWeightChanged(station.stationId, weight)
+                    }
+                }
+                override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+                override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+            })
+
+            // --- LOGIK FÜR DIE ZUSATZ-CONTROLS (UNTERHALB) ---
             if (station.hasPresets && swp.presets.isNotEmpty()) {
                 binding.layoutPresetControls.visibility = View.VISIBLE
-                binding.layoutManualInput.visibility = View.GONE
                 binding.weightSlider.visibility = View.GONE
 
+                // Mengen-Feld
                 if (station.hasAmountInput) {
                     binding.layoutAmount.visibility = View.VISIBLE
-                    if (binding.etAmount.text.isNullOrEmpty()) {
-                        binding.etAmount.setText("1")
-                    }
+                    if (binding.etAmount.text.isNullOrEmpty()) binding.etAmount.setText("1")
                 } else {
                     binding.layoutAmount.visibility = View.GONE
                     binding.etAmount.setText("1")
@@ -99,75 +136,53 @@ class CalculationsAdapter(
 
                 val presetLabels = mutableListOf("Keine Auswahl")
                 presetLabels.addAll(swp.presets.map { it.label })
-
                 val adapter = ArrayAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, presetLabels)
                 binding.spinnerPresets.setAdapter(adapter)
 
-                val calculateAndPush = {
+                val calculateFromPresets = {
                     val selectedText = binding.spinnerPresets.text.toString()
                     val selectedPreset = swp.presets.find { it.label == selectedText }
-
-                    val total = if (selectedPreset != null) {
-                        val inputText = binding.etAmount.text.toString()
-                        val amount = if (station.hasAmountInput) {
-                            inputText.toDoubleOrNull() ?: 0.0
-                        } else {
-                            if (inputText.isBlank()) 1.0 else inputText.toDoubleOrNull() ?: 1.0
-                        }
-                        selectedPreset.weight * amount
-                    } else {
-                        0.0
+                    if (selectedPreset != null) {
+                        val amountText = binding.etAmount.text.toString()
+                        val amount = if (station.hasAmountInput) amountText.toDoubleOrNull() ?: 0.0 else 1.0
+                        val total = selectedPreset.weight * amount
+                        updateTextProgrammatically(total)
+                        onWeightChanged(station.stationId, total)
+                    } else if (selectedText == "Keine Auswahl" && binding.spinnerPresets.hasFocus()) {
+                        updateTextProgrammatically(0.0)
+                        onWeightChanged(station.stationId, 0.0)
                     }
-
-                    // FIX: Locale.getDefault() für konsistente Anzeige
-                    binding.tvStationWeight.text = String.format(Locale.getDefault(), "%.1f %s", total, station.unit ?: "kg")
-                    onWeightChanged(station.stationId, total)
                 }
 
-                binding.spinnerPresets.setOnItemClickListener { _, _, _, _ -> calculateAndPush() }
+                binding.spinnerPresets.setOnItemClickListener { _, _, _, _ -> calculateFromPresets() }
                 binding.etAmount.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) { calculateAndPush() }
+                    override fun afterTextChanged(s: Editable?) { calculateFromPresets() }
                     override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
                     override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
                 })
 
-            } else {
+            } else if (station.hasSlider && station.maxMass != null && station.maxMass > 0) {
                 binding.layoutPresetControls.visibility = View.GONE
-                binding.layoutManualInput.visibility = View.VISIBLE
+                binding.weightSlider.visibility = View.VISIBLE
 
-                if (station.hasSlider && station.maxMass != null && station.maxMass > 0) {
-                    binding.weightSlider.visibility = View.VISIBLE
-                    binding.weightSlider.valueFrom = 0f
-                    binding.weightSlider.valueTo = station.maxMass.toFloat()
-                    binding.weightSlider.stepSize = 1.0f // 1-Einheit Schritte
+                binding.weightSlider.valueFrom = 0f
+                binding.weightSlider.valueTo = station.maxMass.toFloat()
+                binding.weightSlider.stepSize = 1.0f
+                val currentVal = station.defaultValue?.toFloat() ?: 0f
+                binding.weightSlider.value = currentVal.coerceIn(0f, station.maxMass.toFloat())
 
-                    val currentVal = binding.etWeight.text.toString().toFloatOrNull()
-                        ?: station.defaultValue?.toFloat() ?: 0f
-                    binding.weightSlider.value = currentVal.coerceIn(0f, station.maxMass.toFloat())
-
-                    binding.weightSlider.addOnChangeListener { slider, value, fromUser ->
-                        if (fromUser) {
-                            slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                            val intValue = value.toInt()
-                            binding.etWeight.setText(intValue.toString())
-                            onWeightChanged(station.stationId, value.toDouble())
-                            // FIX: Locale.getDefault() & Ganzzahl-Formatierung %d
-                            binding.tvStationWeight.text = String.format(Locale.getDefault(), "%d %s", intValue, station.unit ?: "kg")
-                        }
-                    }
-                } else {
-                    binding.weightSlider.visibility = View.GONE
-                }
-
-                binding.etWeight.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val weight = s.toString().toDoubleOrNull() ?: 0.0
+                binding.weightSlider.addOnChangeListener { slider, value, fromUser ->
+                    if (fromUser) {
+                        slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        val weight = value.toDouble()
+                        updateTextProgrammatically(weight)
                         onWeightChanged(station.stationId, weight)
-                        binding.tvStationWeight.text = String.format(Locale.getDefault(), "%.1f %s", weight, station.unit ?: "kg")
                     }
-                    override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
-                    override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
-                })
+                }
+            } else {
+                // Fall: Nur manuelle Eingabe oben rechts
+                binding.layoutPresetControls.visibility = View.GONE
+                binding.weightSlider.visibility = View.GONE
             }
         }
     }

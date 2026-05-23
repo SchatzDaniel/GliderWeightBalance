@@ -18,40 +18,78 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
             <TextView
                 android:id="@+id/tvStationName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/layoutManualInput"
+                android:layout_marginEnd="8dp"
                 android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                 tools:text="Pilot" />
-            <TextView
-                android:id="@+id/tvStationWeight"
-                android:layout_width="wrap_content"
+
+            <!-- Der Container für die kombinierte Anzeige -->
+            <LinearLayout
+                android:id="@+id/layoutManualInput"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                android:textColor="?attr/colorPrimary"
-                tools:text="85 kg" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_outlined_box_filled"
+                android:paddingHorizontal="12dp">
+
+                <!-- Die Zahl: Nimmt den verfügbaren Platz links ein und schiebt nach rechts -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etManualInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:gravity="end"
+                    android:inputType="numberDecimal"
+                    android:paddingVertical="10dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    tools:text="120.5" />
+
+                <!-- Die Einheit: Feste Breite garantiert den vertikalen Links-Anschlag -->
+                <TextView
+                    android:id="@+id/tvUnitSuffix"
+                    android:layout_width="35dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="kg" />
+
+            </LinearLayout>
         </RelativeLayout>
 
-        <!-- Bereich für Presets & Menge -->
+        <!-- Bereich für Presets & Menge (Layout bleibt, aber wir steuern Sichtbarkeit) -->
         <LinearLayout
             android:id="@+id/layoutPresetControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:gravity="center_vertical"
             android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutAmount"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="70dp"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                tools:hint="Anz.">
+                android:hint="Anz.">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAmount"
                     android:layout_width="match_parent"
@@ -65,7 +103,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/hint_select_preset">
+                android:hint="Preset wählen">
                 <AutoCompleteTextView
                     android:id="@+id/spinnerPresets"
                     android:layout_width="match_parent"
@@ -74,37 +112,14 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
-        <!-- Bereich für Direkteingabe / Slider -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutManualInput"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/hint_enter_weight">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etWeight"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
-
         <com.google.android.material.slider.Slider
             android:id="@+id/weightSlider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="12dp"
             android:visibility="gone"
             app:thumbRadius="10dp"
-            app:thumbColor="?attr/colorPrimary"
-            app:thumbStrokeColor="?attr/colorOnPrimary"
-            app:thumbStrokeWidth="1dp"
-            app:haloRadius="20dp"
-            app:haloColor="#22000000"
-            app:trackHeight="4dp"
-            app:trackColorInactive="?attr/colorSurfaceVariant"
-            app:trackColorActive="?attr/colorPrimary" />
-
+            app:trackHeight="4dp" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
