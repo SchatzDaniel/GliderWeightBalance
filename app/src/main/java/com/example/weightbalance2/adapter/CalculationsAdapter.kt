@@ -97,7 +97,7 @@ class CalculationsAdapter(
 
             val updateTextProgrammatically = { value: Double ->
                 if (!etWeightDisplay.hasFocus()) {
-                    val formatted = if (station.hasSlider) {
+                    val formatted = if (value % 1.0 == 0.0) {
                         String.format(Locale.getDefault(), "%.0f", value)
                     } else {
                         String.format(Locale.getDefault(), "%.1f", value)
@@ -185,9 +185,15 @@ class CalculationsAdapter(
 
                 binding.weightSlider.valueFrom = 0f
                 binding.weightSlider.valueTo = station.maxMass.toFloat()
-                binding.weightSlider.stepSize = 1.0f
+                
+                // Dynamische stepSize: 0.1 wenn maxMass Kommastellen hat, sonst 1.0
+                val step = if (station.maxMass % 1.0 != 0.0) 0.1f else 1.0f
+                binding.weightSlider.stepSize = step
+                
                 val currentVal = station.defaultValue?.toFloat() ?: 0f
-                binding.weightSlider.value = currentVal.coerceIn(0f, station.maxMass.toFloat())
+                // Sicherstellen, dass der Wert ein Vielfaches der stepSize ist, um Crash zu vermeiden
+                val snappedVal = if (step > 0) Math.round(currentVal / step) * step else currentVal
+                binding.weightSlider.value = snappedVal.coerceIn(0f, station.maxMass.toFloat())
 
                 binding.weightSlider.addOnChangeListener { slider, value, fromUser ->
                     if (fromUser) {
@@ -227,21 +233,43 @@ class CalculationsAdapter(
             }
 
             val tvName = view.findViewById<TextView>(R.id.tvSmallStationName)
+            val tilInput = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilSmallManualInput)
             val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
-            val tvUnit = view.findViewById<TextView>(R.id.tvSmallUnitSuffix)
 
             tvName.text = swp.station.name
-            tvUnit.text = swp.station.unit ?: "kg"
             
-            val formattedValue = swp.station.defaultValue?.let {
-                String.format(Locale.getDefault(), "%.1f", it)
-            } ?: "0.0"
+            val unit = swp.station.unit ?: "kg"
+            tilInput.suffixText = unit
+
+            val maxMass = swp.station.maxMass ?: 0.0
+            val hintText = if (maxMass > 0) context.getString(R.string.max_weight_hint, String.format(Locale.getDefault(), "%.0f", maxMass), unit) else ""
+            tilInput.helperText = hintText
+
+            val formatValue = { value: Double ->
+                if (value % 1.0 == 0.0) {
+                    String.format(Locale.getDefault(), "%.0f", value)
+                } else {
+                    String.format(Locale.getDefault(), "%.1f", value)
+                }
+            }
+
+            val formattedValue = swp.station.defaultValue?.let { formatValue(it) } ?: "0"
             etInput.setText(formattedValue)
 
             etInput.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     if (etInput.hasFocus()) {
-                        val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
+                        val inputStr = s.toString().replace(",", ".")
+                        val weight = inputStr.toDoubleOrNull() ?: 0.0
+                        
+                        // Validierung
+                        if (maxMass > 0 && weight > maxMass) {
+                            tilInput.error = hintText
+                        } else {
+                            tilInput.error = null
+                            tilInput.helperText = hintText
+                        }
+
                         onWeightChanged(swp.station.stationId, weight, null, 1)
                     }
                 }

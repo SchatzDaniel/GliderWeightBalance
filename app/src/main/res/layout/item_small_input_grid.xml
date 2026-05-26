@@ -1,55 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:gravity="center_horizontal"
     android:padding="8dp">
 
     <!-- Bezeichnung der Station über dem Feld -->
     <TextView
         android:id="@+id/tvSmallStationName"
-        android:layout_width="wrap_content"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:textSize="12sp"
         android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
         tools:text="Vorderes Gepäck" />
 
-    <!-- Das Eingabefeld im gleichen Stil wie etManualInput -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Das Eingabefeld im gleichen Stil wie etManualInput, aber mit Validierung -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSmallManualInput"
+        style="@style/Widget.App.TextInputLayout.ErrorThick"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/bg_outlined_box_filled"
-        android:paddingHorizontal="8dp">
+        app:boxBackgroundColor="#1A000000"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusBottomEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxStrokeColor="?attr/colorControlNormal"
+        app:hintEnabled="false"
+        app:suffixText="kg"
+        app:suffixTextColor="?attr/colorPrimary"
+        app:suffixTextAppearance="@style/TextAppearance.App.SuffixBold"
+        app:helperTextEnabled="true"
+        app:errorEnabled="true"
+        app:errorIconDrawable="@null">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etSmallManualInput"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:gravity="end"
+            android:gravity="center_vertical|end"
+            android:includeFontPadding="false"
             android:inputType="numberDecimal"
-            android:paddingVertical="8dp"
-            android:paddingEnd="4dp"
-            android:paddingStart="4dp"
-            android:textSize="14sp"
+            android:paddingVertical="10dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary"
             tools:text="10.5" />
 
-        <TextView
-            android:id="@+id/tvSmallUnitSuffix"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            tools:text="kg" />
-
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

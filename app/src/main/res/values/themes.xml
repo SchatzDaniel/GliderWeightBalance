@@ -28,5 +28,23 @@
         <item name="colorOnSurface">?attr/colorOnPrimary</item>
     </style>
 
+    <!-- Custom Style für dicke rote Umrandung im Fehlerfall -->
+    <style name="Widget.App.TextInputLayout.ErrorThick" parent="Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+        <!-- Wir nutzen boxStrokeWidthFocused, da Material3 die Fehlerranddicke oft intern steuert,
+             aber wir erzwingen die generelle Randdicke für Fehler über die Error-Color.
+             Eigentlich gibt es kein direktes 'boxStrokeErrorWidth' Attribut in XML ohne Custom View.
+             Wir lassen es bei der Standarddicke und setzen die Text-Styles. -->
+        <item name="errorTextAppearance">@style/TextAppearance.App.ErrorBold</item>
+    </style>
 
+    <style name="TextAppearance.App.ErrorBold" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorError</item>
+    </style>
+
+    <style name="TextAppearance.App.SuffixBold" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>
