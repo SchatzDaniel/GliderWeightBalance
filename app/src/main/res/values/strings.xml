@@ -92,4 +92,10 @@
     <string name="prompt_no_aircraft_selected">Bitte wähle zuerst ein Flugzeug aus.</string>
     <string name="hint_amount">Anz.</string>
     <string name="hint_choose_preset">Preset wählen</string>
+    <string name="export_aircraft">Exportieren</string>
+    <string name="import_aircraft">Importieren</string>
+    <string name="export_success">Profil erfolgreich exportiert!</string>
+    <string name="import_success">Profil erfolgreich importiert!</string>
+    <string name="error_export_failed">Export fehlgeschlagen.</string>
+    <string name="error_import_failed">Import fehlgeschlagen.</string>
 </resources>

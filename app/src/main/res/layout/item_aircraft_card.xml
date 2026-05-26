@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    android:layout_width="match_parent"
+<com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="8dp"
     app:cardElevation="4dp"
     app:cardCornerRadius="12dp"
@@ -25,21 +25,32 @@
 
         <TextView
             android:id="@+id/tvAircraftDetails"
-            android:text="Leermasse: 240 kg\nCG: 345 mm"
+            tools:text="Leermasse: 240 kg\nCG: 345 mm"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvAircraftName"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"/>
 
         <ImageButton
+            android:id="@+id/btnExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/export_aircraft"
+            android:src="@drawable/ic_export"
+            app:layout_constraintEnd_toStartOf="@id/btnEdit"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
             android:id="@+id/btnEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/edit_aircraft"
             android:src="@drawable/ic_edit_aircraft"
-            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

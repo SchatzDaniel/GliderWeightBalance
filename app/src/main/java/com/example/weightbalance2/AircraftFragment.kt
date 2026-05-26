@@ -1,10 +1,13 @@
 package com.example.weightbalance2
 
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater // Wichtig: LayoutInflater importieren
-import android.view.View
-import android.view.ViewGroup // Wichtig: ViewGroup importieren
+import android.view.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -30,7 +33,16 @@ class AircraftFragment : Fragment() {
     // 3. Adapter-Instanz deklarieren
     private lateinit var aircraftAdapter: AircraftAdapter
 
-    // onCreateView hinzufügen, um das Binding korrekt zu initialisieren
+    private var pendingExportJson: String? = null
+
+    private val createDocumentLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { exportToFile(it) }
+    }
+
+    private val openDocumentLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { importFromFile(it) }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,6 +56,7 @@ class AircraftFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         activity?.title = getString(R.string.title_activity_aircraft)
         setupRecyclerView()
+        setupMenu()
 
         // Schritt 2: Daten beobachten und die UI (Liste und Sichtbarkeit) aktualisieren.
         viewLifecycleOwner.lifecycleScope.launch {
@@ -84,6 +97,11 @@ class AircraftFragment : Fragment() {
             // Langes Drücken: Zeige den Bestätigungsdialog zum Löschen
             onItemLongClicked = { aircraftProfile ->
                 showDeleteConfirmationDialog(aircraftProfile)
+            },
+            onExportClicked = { aircraftProfile ->
+                pendingExportJson = viewModel.exportProfileToJson(aircraftProfile)
+                val fileName = "${aircraftProfile.aircraft.registration.replace("/", "_")}_profile.json"
+                createDocumentLauncher.launch(fileName)
             }
         )
 
@@ -106,6 +124,53 @@ class AircraftFragment : Fragment() {
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.aircraft_menu, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_import -> {
+                        openDocumentLauncher.launch(arrayOf("application/json"))
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun exportToFile(uri: Uri) {
+        val json = pendingExportJson ?: return
+        try {
+            requireContext().contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(json.toByteArray())
+            }
+            Toast.makeText(requireContext(), R.string.export_success, Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), R.string.error_export_failed, Toast.LENGTH_SHORT).show()
+        } finally {
+            pendingExportJson = null
+        }
+    }
+
+    private fun importFromFile(uri: Uri) {
+        try {
+            requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+                val json = inputStream.bufferedReader().readText()
+                viewModel.importProfileFromJson(json,
+                    onSuccess = { Toast.makeText(requireContext(), R.string.import_success, Toast.LENGTH_SHORT).show() },
+                    onError = { error -> Toast.makeText(requireContext(), "${getString(R.string.error_import_failed)}: $error", Toast.LENGTH_LONG).show() }
+                )
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), R.string.error_import_failed, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroyView() {

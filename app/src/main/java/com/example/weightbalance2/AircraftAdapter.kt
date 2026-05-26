@@ -17,7 +17,8 @@ class AircraftAdapter(
     // Die Callbacks wurden angepasst, um AircraftProfile zu verwenden
     private val onItemClicked: (AircraftProfile) -> Unit,
     private val onEditClicked: (AircraftProfile) -> Unit,
-    private val onItemLongClicked: (AircraftProfile) -> Unit
+    private val onItemLongClicked: (AircraftProfile) -> Unit,
+    private val onExportClicked: (AircraftProfile) -> Unit
 ) : ListAdapter<AircraftProfile, AircraftAdapter.AircraftViewHolder>(DiffCallback) { // ViewHolder-Klasse richtig referenziert
 
     /**
@@ -44,6 +45,9 @@ class AircraftAdapter(
         }
         holder.binding.btnEdit.setOnClickListener {
             onEditClicked(currentProfile)
+        }
+        holder.binding.btnExport.setOnClickListener {
+            onExportClicked(currentProfile)
         }
         holder.itemView.setOnLongClickListener {
             onItemLongClicked(currentProfile)

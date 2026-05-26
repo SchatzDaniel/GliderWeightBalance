@@ -8,6 +8,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.weightbalance2.data.database.AppDatabase
 import com.example.weightbalance2.data.model.AircraftProfile
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -63,6 +64,40 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
     fun deleteAircraftProfile(aircraftProfile: AircraftProfile){
         viewModelScope.launch {
             repository.deleteProfile(aircraftProfile)
+        }
+    }
+
+    /**
+     * Konvertiert ein Profil in einen JSON-String.
+     */
+    fun exportProfileToJson(profile: AircraftProfile): String {
+        return Gson().toJson(profile)
+    }
+
+    /**
+     * Importiert ein Profil aus einem JSON-String.
+     */
+    fun importProfileFromJson(json: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val profile = Gson().fromJson(json, AircraftProfile::class.java)
+                
+                // IDs zurücksetzen, damit es als neues Flugzeug angelegt wird
+                val cleanProfile = profile.copy(
+                    aircraft = profile.aircraft.copy(id = 0),
+                    stations = profile.stations.map { swp ->
+                        swp.copy(
+                            station = swp.station.copy(stationId = 0, aircraftOwnerId = 0),
+                            presets = swp.presets.map { it.copy(presetId = 0, parentStationId = 0) }
+                        )
+                    }
+                )
+                
+                repository.saveProfile(cleanProfile)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Unbekannter Fehler beim Import")
+            }
         }
     }
 }
