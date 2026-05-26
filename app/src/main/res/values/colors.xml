@@ -12,4 +12,7 @@
     <color name="default_text_color">#FF000000</color> <!-- Or your default -->
     <color name="default_background_color">#00000000</color>
     <color name="helper_text_default">#757575</color> <!-- Ein neutrales Grau -->
+
+    <!-- Dashboard Header Farben -->
+    <color name="dashboard_header_background">#F3EDF7</color>
 </resources>

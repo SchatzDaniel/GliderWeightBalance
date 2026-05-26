@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Bezeichnung der Station über dem Feld -->
+    <TextView
+        android:id="@+id/tvSmallStationName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:textSize="12sp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+        tools:text="Vorderes Gepäck" />
+
+    <!-- Das Eingabefeld im gleichen Stil wie etManualInput -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_outlined_box_filled"
+        android:paddingHorizontal="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSmallManualInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:gravity="end"
+            android:inputType="numberDecimal"
+            android:paddingVertical="8dp"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary"
+            tools:text="10.5" />
+
+        <TextView
+            android:id="@+id/tvSmallUnitSuffix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            tools:text="kg" />
+
+    </LinearLayout>
+</LinearLayout>

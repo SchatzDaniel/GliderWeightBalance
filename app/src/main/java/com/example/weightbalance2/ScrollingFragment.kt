@@ -50,6 +50,10 @@ class ScrollingFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        sharedViewModel.headerHeight.observe(viewLifecycleOwner) { height ->
+            binding.recyclerViewMassInputs.setPadding(0, height, 0, 0)
+        }
+
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
             if (profile == null) {
                 binding.recyclerViewMassInputs.isVisible = false

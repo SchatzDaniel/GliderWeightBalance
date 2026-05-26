@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ein dunkles Lila/Grau für den Dashboard-Header im Dark Mode (Material 3 Surface Container) -->
+    <color name="dashboard_header_background">#2B2930</color>
+</resources>

@@ -54,6 +54,7 @@
                     android:inputType="numberDecimal"
                     android:paddingVertical="10dp"
                     android:paddingEnd="8dp"
+                    android:paddingStart="8dp"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorPrimary"
@@ -89,7 +90,7 @@
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:hint="Anz.">
+                android:hint="@string/hint_amount">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAmount"
                     android:layout_width="match_parent"
@@ -103,7 +104,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Preset wählen">
+                android:hint="@string/hint_choose_preset">
                 <AutoCompleteTextView
                     android:id="@+id/spinnerPresets"
                     android:layout_width="match_parent"
@@ -117,8 +118,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:paddingVertical="12dp"
             android:visibility="gone"
-            app:thumbRadius="10dp"
+            app:thumbRadius="12dp"
+            app:thumbElevation="4dp"
+            app:thumbColor="?attr/colorPrimary"
+            app:haloRadius="24dp"
+            app:tickVisible="false"
             app:trackHeight="4dp" />
 
     </LinearLayout>

@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
+import com.example.weightbalance2.R
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -217,38 +217,39 @@ class CalculationsAdapter(
 
         private fun createSmallInputView(swp: StationWithPresets): View {
             val context = itemView.context
-            val container = LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(16, 8, 16, 8)
-                // GridLayout Params korrigiert: Wir nutzen MATCH_PARENT für die Breite der Zelle
-                layoutParams = androidx.gridlayout.widget.GridLayout.LayoutParams().apply {
-                    columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f)
-                    width = 0
-                }
+            val inflater = LayoutInflater.from(context)
+            val view = inflater.inflate(R.layout.item_small_input_grid, binding.gridLayout, false)
+
+            // LayoutParams für das Grid (2 Spalten, gleichmäßig verteilt)
+            view.layoutParams = androidx.gridlayout.widget.GridLayout.LayoutParams().apply {
+                columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f)
+                width = 0
             }
 
-            val label = TextView(context).apply {
-                text = swp.station.name
-                textSize = 12f
-            }
+            val tvName = view.findViewById<TextView>(R.id.tvSmallStationName)
+            val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
+            val tvUnit = view.findViewById<TextView>(R.id.tvSmallUnitSuffix)
 
-            val input = EditText(context).apply {
-                inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-                setText(swp.station.defaultValue?.toString() ?: "0")
-                textSize = 14f
-                addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) {
-                        val weight = s.toString().toDoubleOrNull() ?: 0.0
+            tvName.text = swp.station.name
+            tvUnit.text = swp.station.unit ?: "kg"
+            
+            val formattedValue = swp.station.defaultValue?.let {
+                String.format(Locale.getDefault(), "%.1f", it)
+            } ?: "0.0"
+            etInput.setText(formattedValue)
+
+            etInput.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (etInput.hasFocus()) {
+                        val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
                         onWeightChanged(swp.station.stationId, weight, null, 1)
                     }
-                    override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
-                    override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
-                })
-            }
+                }
+                override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+                override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+            })
 
-            container.addView(label)
-            container.addView(input)
-            return container
+            return view
         }
     }
 

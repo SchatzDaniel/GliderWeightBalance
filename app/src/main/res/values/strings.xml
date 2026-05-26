@@ -89,4 +89,7 @@
     <string name="hint_preset_weight">Gewicht</string>
     <string name="hint_enter_weight">Gewicht eingeben</string>
     <string name="hint_select_preset">Preset wählen</string>
+    <string name="prompt_no_aircraft_selected">Bitte wähle zuerst ein Flugzeug aus.</string>
+    <string name="hint_amount">Anz.</string>
+    <string name="hint_choose_preset">Preset wählen</string>
 </resources>

@@ -30,7 +30,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     // 2. Die Massen, die der Benutzer eingibt. Die Liste wird jetzt dynamisch
     //    aus dem ausgewählten Profil generiert.
     private val _stationMasses = MutableLiveData<Map<Int, Double>>() // Map<stationId, mass>
-    val stationMasses: LiveData<Map<Int, Double>> = _stationMasses
 
     // --- BERECHNUNGSERGEBNISSE (BLEIBEN GLEICH) ---
     private val _totalMass = MutableLiveData<CalculationResult>()
@@ -42,6 +41,14 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     // NonLiftingMass wird vereinfacht, da es nicht mehr aus festen Feldern berechnet wird.
     private val _nonLiftingMass = MutableLiveData<CalculationResult>()
     val nonLiftingMass: LiveData<CalculationResult > = _nonLiftingMass
+
+    // Hält die aktuelle Höhe des Dashboards für das ScrollingFragment bereit
+    private val _headerHeight = MutableLiveData<Int>()
+    val headerHeight: LiveData<Int> = _headerHeight
+
+    fun setHeaderHeight(height: Int) {
+        _headerHeight.value = height
+    }
 
     init {
         // Lade das zuletzt ausgewählte Flugzeug beim Start der App
@@ -66,9 +73,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
                 // stationMasses initialisieren, damit recalc() beim App-Start Werte zum Rechnen hat
                 if (profile != null) {
-                    val initialMasses = profile.stations
+                    val initialMasses = profile.stations.asSequence()
                         .filter { it.station.defaultValue != null }
-                        .associate { it.station.stationId to (it.station.defaultValue ?: 0.0) }
+                        .associateBy({ it.station.stationId }, { it.station.defaultValue ?: 0.0 })
                     _stationMasses.value = initialMasses
                 }
                 // Entferne die Quelle, um Speicherlecks zu vermeiden.
@@ -88,9 +95,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
         if (profile != null) {
             // Erstelle eine Map aus allen Stationen, die einen Standardwert hinterlegt haben
-            val initialMasses = profile.stations
+            val initialMasses = profile.stations.asSequence()
                 .filter { it.station.defaultValue != null }
-                .associate { it.station.stationId to (it.station.defaultValue ?: 0.0) }
+                .associateBy({ it.station.stationId }, { it.station.defaultValue ?: 0.0 })
 
             _stationMasses.value = initialMasses
         } else {
