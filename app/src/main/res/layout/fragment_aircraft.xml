@@ -1,44 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".AircraftAdapter">
+    android:layout_height="match_parent">
 
-    <!-- RecyclerView zur Anzeige der Liste von Flugzeug-Karten -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewAircraft"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:clipToPadding="false"
-        tools:listitem="@layout/item_aircraft_card" />
-    <!-- tools:listitem verweist auf das Layout für eine einzelne Zeile (siehe Schritt 2) -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_max="@dimen/max_ui_width"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <!-- TextView, die angezeigt wird, wenn die Liste leer ist -->
-    <TextView
-        android:id="@+id/textViewEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_aircrafts"
-        android:textSize="18sp"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        tools:visibility="visible" />
+        <!-- RecyclerView zur Anzeige der Liste von Flugzeug-Karten -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewAircraft"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_aircraft_card" />
 
-    <!-- Dein FloatingActionButton, jetzt korrekt positioniert -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fabAddAircraft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:contentDescription="@string/add_aircraft_fab_desc"
-        app:icon="@drawable/ic_add"
-        app:iconTint="?attr/colorOnSecondary"
-        android:backgroundTint="?attr/colorSecondary"/>
+        <!-- TextView, die angezeigt wird, wenn die Liste leer ist -->
+        <TextView
+            android:id="@+id/textViewEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_aircrafts"
+            android:textSize="18sp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            tools:visibility="visible" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <!-- Dein FloatingActionButton, jetzt korrekt positioniert -->
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fabAddAircraft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="24dp"
+            android:contentDescription="@string/add_aircraft_fab_desc"
+            app:icon="@drawable/ic_add"
+            app:iconTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondary"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

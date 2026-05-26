@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -10,6 +11,7 @@
         android:id="@+id/nested_scroll_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintWidth_max="@dimen/max_ui_width"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,438 +24,399 @@
             android:padding="16dp"
             android:clipToPadding="false">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:divider="@android:color/transparent"
+                android:showDividers="middle"
+                android:dividerPadding="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aicraft_specs"
+                    android:textSize="24sp" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-
-                    android:divider="@android:color/transparent"
-                    android:showDividers="middle"
-                    android:dividerPadding="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aicraft_specs"
-                        android:textSize="24sp" />
-
-                    <!-- Ein kleiner Container für das Label und das Eingabefeld -->
-                    <!-- NEU: Horizontaler LinearLayout als Container für beide Felder -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false"
-                        android:paddingTop="4dp">
-
-                        <!-- 1. Container für das Kennzeichen-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="8dp"> <!-- Abstand zum rechten Feld -->
-
-                            <!-- Label für Kennzeichen -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/registration"
-                                android:labelFor="@+id/editTextRegistration"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Kennzeichen (ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/registrationLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:helperText="@string/input_mandatory">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextRegistration"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textCapCharacters"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-
-                        <!-- 2. Container für das Typ-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <!-- Label für Typ -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/aircraft_type"
-                                android:labelFor="@+id/editTextAircraftType"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Typ (umgebaut und ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/aircraftTypeLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:helperText="@string/input_mandatory">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextAircraftType"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textCapCharacters"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aircraft_masses"
-                        android:textSize="24sp"
-                        android:paddingTop="8dp"/>
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:paddingTop="4dp">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false"
-                        android:paddingTop="4dp"> <!-- Wichtig für korrekte vertikale Ausrichtung -->
-
-                        <!-- 1. Container für das Kennzeichen-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="8dp"> <!-- Abstand zum rechten Feld -->
-
-                            <!-- Label für Kennzeichen -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/Leermasse"
-                                android:labelFor="@+id/editTextEmptyMass"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Kennzeichen (ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/emptyMassLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/kg">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextEmptyMass"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberDecimal" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-
-                        <!-- 2. Container für das Typ-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <!-- Label für Typ -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/emptyMassArm"
-                                android:labelFor="@+id/editTextEmptyMassArm"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Typ (umgebaut und ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/emptyMassArmLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/mm">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextEmptyMassArm"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberSigned"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false"
-                        android:paddingTop="4dp"> <!-- Wichtig für korrekte vertikale Ausrichtung -->
-
-                        <!-- 1. Container für das Kennzeichen-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="8dp"> <!-- Abstand zum rechten Feld -->
-
-                            <!-- Label für Kennzeichen -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/fuselage_mass"
-                                android:labelFor="@+id/editTextFuselageMass"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Kennzeichen (ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/fuselageMassLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/kg">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextFuselageMass"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberDecimal"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-
-                        <!-- 2. Container für das Typ-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <!-- Label für Typ -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/stabilizer_mass"
-                                android:labelFor="@+id/editTextStabilizerMass"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Typ (umgebaut und ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/stabilizerMassLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/kg">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextStabilizerMass"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberDecimal"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aircraft_limits"
-                        android:textSize="24sp"
-                        android:paddingTop="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false"
-                        android:paddingTop="4dp"> <!-- Wichtig für korrekte vertikale Ausrichtung -->
-
-                        <!-- 1. Container für das Kennzeichen-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="8dp"> <!-- Abstand zum rechten Feld -->
-
-                            <!-- Label für Kennzeichen -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/max_total_mass"
-                                android:labelFor="@+id/editTextMaxTotalMass"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Kennzeichen (ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/maxTotalMassLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/kg">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextMaxTotalMass"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberDecimal"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-
-                        <!-- 2. Container für das Typ-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <!-- Label für Typ -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/max_non_lifting_mass"
-                                android:labelFor="@+id/editTextAircraftType"
-                                android:textAppearance="?attr/textAppearanceLabelLarge"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginBottom="4dp"/>
-
-                            <!-- Eingabefeld für Typ (umgebaut und ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/maxNonLiftingMassLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:suffixText="@string/kg">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextMaxNonLiftingMass"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberDecimal"/>
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/cg_limit"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginBottom="4dp"
-                        android:paddingTop="4dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:baselineAligned="false"> <!-- Wichtig für korrekte vertikale Ausrichtung -->
-
-                        <!-- 1. Container für das Kennzeichen-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginEnd="4dp"> <!-- Abstand zum rechten Feld -->
-
-                            <!-- Eingabefeld für Kennzeichen (ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/migCgLayout"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:prefixText="@string/min"
-                                app:suffixText="@string/mm">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextMinCg"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberSigned"
-                                    android:gravity="center" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="8dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/em_dash"
-                            android:textSize="42sp"
-                            android:layout_marginTop="4dp"/>
+                            android:text="@string/registration"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
 
-                        <!-- 2. Container für das Typ-Feld (nimmt 50% der Breite) -->
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/registrationLayout"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="4dp">
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:helperText="@string/input_mandatory">
 
-                            <!-- Eingabefeld für Typ (umgebaut und ohne Hint) -->
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/maxCgLayout"
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextRegistration"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                                app:prefixText="@string/max"
-                                app:suffixText="@string/mm">
+                                android:inputType="textCapCharacters"/>
 
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/editTextMaxCg"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="numberSigned"
-                                    android:gravity="center"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
 
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/aircraft_type"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/aircraftTypeLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:helperText="@string/input_mandatory">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextAircraftType"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapCharacters"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aircraft_masses"
+                    android:textSize="24sp"
+                    android:paddingTop="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:paddingTop="4dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/Leermasse"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/emptyMassLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/kg">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextEmptyMass"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/emptyMassArm"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/emptyMassArmLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/mm">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextEmptyMassArm"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberSigned"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Rest of the form remains similar... -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:paddingTop="4dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/fuselage_mass"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/fuselageMassLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/kg">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextFuselageMass"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/stabilizer_mass"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/stabilizerMassLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/kg">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextStabilizerMass"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aircraft_limits"
+                    android:textSize="24sp"
+                    android:paddingTop="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:paddingTop="4dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/max_total_mass"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/maxTotalMassLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/kg">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextMaxTotalMass"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/max_non_lifting_mass"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/maxNonLiftingMassLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:suffixText="@string/kg">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextMaxNonLiftingMass"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cg_limit"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:paddingTop="4dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginEnd="4dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/migCgLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:prefixText="@string/min"
+                            app:suffixText="@string/mm">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextMinCg"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberSigned"
+                                android:gravity="center" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/Hebelarme"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:layout_marginTop="16dp"/>
+                        android:text="@string/em_dash"
+                        android:textSize="42sp"
+                        android:layout_marginTop="4dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="4dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/maxCgLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:prefixText="@string/max"
+                            app:suffixText="@string/mm">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editTextMaxCg"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberSigned"
+                                android:gravity="center"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
                 </LinearLayout>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewStations"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                    tools:listitem="@layout/item_payload_station"
-                    android:paddingBottom="88dp"/>
+                    android:text="@string/Hebelarme"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:layout_marginTop="16dp"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewStations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_payload_station"
+                android:paddingBottom="88dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

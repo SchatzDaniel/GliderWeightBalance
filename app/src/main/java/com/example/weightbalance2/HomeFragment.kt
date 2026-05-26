@@ -43,9 +43,14 @@ class HomeFragment : Fragment() {
 
         updateHeaderColors()
 
-        // Messe die Höhe des Dashboards und teile sie dem ViewModel mit
+        // Messe die Höhe/Breite des Dashboards und teile sie dem ViewModel mit
         binding.headerContainer.doOnLayout {
-            sharedViewModel.setHeaderHeight(it.height)
+            val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            if (isLandscape) {
+                sharedViewModel.setHeaderHeight(0) // Im Querformat liegen sie nebeneinander
+            } else {
+                sharedViewModel.setHeaderHeight(it.height)
+            }
         }
 
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { aircraftProfile ->

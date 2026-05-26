@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
+
+    <!-- Guideline für die Trennung (z.B. 35%) -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <!-- Dashboard links (Seitenleiste) -->
+    <LinearLayout
+        android:id="@+id/headerContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/bg_dashboard_side"
+        android:elevation="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/dashboardLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:clipChildren="false">
+
+                <!-- Karte 1: Schwerpunkt -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardCg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:padding="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/labelCg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/Schwerpunktlage"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/twSchwerpunktlageErgebnis"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@id/labelCg"
+                            app:layout_constraintStart_toStartOf="parent"
+                            tools:text="125.4 mm" />
+
+                        <TextView
+                            android:id="@+id/twCgPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            app:layout_constraintBottom_toBottomOf="@id/twSchwerpunktlageErgebnis"
+                            app:layout_constraintStart_toEndOf="@id/twSchwerpunktlageErgebnis"
+                            app:layout_constraintTop_toTopOf="@id/twSchwerpunktlageErgebnis"
+                            tools:text="(25.4%)" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatusCg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="4dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="#4CAF50"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:id="@+id/statusCg"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingHorizontal="4dp"
+                                android:text="@string/status_ok"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:textColor="#4CAF50" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progressCg"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/twSchwerpunktlageErgebnis"
+                            app:trackThickness="6dp"
+                            app:trackCornerRadius="3dp"
+                            app:trackStopIndicatorSize="0dp"/>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Karte 2: Masse n.t.T (In Landcape vertikal untereinander oder gestapelt) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardNonLifting"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:padding="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/labelNonLifting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/MasseNTTeile"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/twMasseNTTeileErgebnis"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@id/labelNonLifting"
+                            app:layout_constraintStart_toStartOf="parent"
+                            tools:text="450.0 kg" />
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progressNonLifting"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/twMasseNTTeileErgebnis"
+                            app:trackThickness="4dp"
+                            app:trackCornerRadius="2dp"
+                            app:trackStopIndicatorSize="0dp"/>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatusNonLifting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="4dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="#4CAF50"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:id="@+id/statusNonLifting"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingHorizontal="4dp"
+                                android:text="@string/status_ok"
+                                android:textSize="11sp"
+                                android:textColor="#4CAF50" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Karte 3: Gesamtgewicht -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardTotalMass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:padding="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/labelTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/Gesamtgewicht"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/twGesamtgewichtOutput"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@id/labelTotal"
+                            app:layout_constraintStart_toStartOf="parent"
+                            tools:text="600.0 kg" />
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progressTotal"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/twGesamtgewichtOutput"
+                            app:trackThickness="4dp"
+                            app:trackCornerRadius="2dp"
+                            app:trackStopIndicatorSize="0dp"/>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatusTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="4dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="#4CAF50"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:id="@+id/statusTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingHorizontal="4dp"
+                                android:text="@string/status_ok"
+                                android:textSize="11sp"
+                                android:textColor="#4CAF50" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- Content rechts -->
+    <FrameLayout
+        android:id="@+id/bottom_fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
