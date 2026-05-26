@@ -14,10 +14,12 @@ data class PayloadStation(
     val unit: String? = null,
     val displayOrder: Int = 0,
     val isNonLifting: Boolean = false,
-    val defaultValue: Double? = null,
+    var defaultValue: Double? = null,
     val hasSlider: Boolean = false,
     val hasPresets: Boolean = false,
     val hasAmountInput: Boolean = false,
+    var selectedPresetLabel: String? = null,
+    var amount: Int = 1,
 
     @Ignore // Dieses Feld wird nicht in der Tabelle gespeichert, nur im Code genutzt
     var presets: List<Preset> = emptyList()
@@ -35,10 +37,12 @@ data class PayloadStation(
         defaultValue: Double?,
         hasSlider: Boolean,
         hasPresets: Boolean,
-        hasAmountInput: Boolean
+        hasAmountInput: Boolean,
+        selectedPresetLabel: String?,
+        amount: Int
     ) : this(
         stationId, aircraftOwnerId, name, arm, maxMass, unit,
         displayOrder, isNonLifting, defaultValue, hasSlider,
-        hasPresets, hasAmountInput, emptyList()
+        hasPresets, hasAmountInput, selectedPresetLabel, amount, emptyList()
     )
 }

@@ -19,7 +19,7 @@ import com.example.weightbalance2.databinding.ItemScrollingStationBinding
 import java.util.Locale
 
 class CalculationsAdapter(
-    private val onWeightChanged: (Int, Double) -> Unit
+    private val onWeightChanged: (Int, Double, String?, Int) -> Unit
 ) : ListAdapter<CalculationItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
     companion object {
@@ -75,9 +75,16 @@ class CalculationsAdapter(
     inner class SingleViewHolder(private val binding: ItemScrollingStationBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        private var manualWatcher: TextWatcher? = null
+        private var amountWatcher: TextWatcher? = null
+
         fun bind(swp: StationWithPresets) {
             val station = swp.station
             binding.tvStationName.text = station.name
+
+            // Alten Watcher entfernen
+            binding.etManualInput.removeTextChangedListener(manualWatcher)
+            binding.etAmount.removeTextChangedListener(amountWatcher)
 
             // Das kombinierte Eingabe-/Anzeigefeld oben rechts
             val etWeightDisplay = binding.etManualInput
@@ -102,7 +109,7 @@ class CalculationsAdapter(
             updateTextProgrammatically(station.defaultValue ?: 0.0)
 
             // Haupt-TextWatcher (Manuelle Eingabe oben rechts)
-            etWeightDisplay.addTextChangedListener(object : TextWatcher {
+            manualWatcher = object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     if (etWeightDisplay.hasFocus()) {
                         val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
@@ -113,22 +120,24 @@ class CalculationsAdapter(
                             val sliderVal = weight.toFloat().coerceIn(0f, station.maxMass.toFloat())
                             binding.weightSlider.value = sliderVal
                         }
-                        onWeightChanged(station.stationId, weight)
+                        onWeightChanged(station.stationId, weight, null, 1)
                     }
                 }
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
                 override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
-            })
+            }
+            etWeightDisplay.addTextChangedListener(manualWatcher)
 
             // --- LOGIK FÜR DIE ZUSATZ-CONTROLS (UNTERHALB) ---
             if (station.hasPresets && swp.presets.isNotEmpty()) {
                 binding.layoutPresetControls.visibility = View.VISIBLE
                 binding.weightSlider.visibility = View.GONE
+                binding.layoutManualInput.visibility = View.VISIBLE
 
                 // Mengen-Feld
                 if (station.hasAmountInput) {
                     binding.layoutAmount.visibility = View.VISIBLE
-                    if (binding.etAmount.text.isNullOrEmpty()) binding.etAmount.setText("1")
+                    binding.etAmount.setText(station.amount.toString())
                 } else {
                     binding.layoutAmount.visibility = View.GONE
                     binding.etAmount.setText("1")
@@ -139,6 +148,9 @@ class CalculationsAdapter(
                 val adapter = ArrayAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, presetLabels)
                 binding.spinnerPresets.setAdapter(adapter)
 
+                // Gespeicherten Zustand wiederherstellen
+                binding.spinnerPresets.setText(station.selectedPresetLabel ?: "Keine Auswahl", false)
+
                 val calculateFromPresets = {
                     val selectedText = binding.spinnerPresets.text.toString()
                     val selectedPreset = swp.presets.find { it.label == selectedText }
@@ -147,19 +159,25 @@ class CalculationsAdapter(
                         val amount = if (station.hasAmountInput) amountText.toDoubleOrNull() ?: 0.0 else 1.0
                         val total = selectedPreset.weight * amount
                         updateTextProgrammatically(total)
-                        onWeightChanged(station.stationId, total)
+                        onWeightChanged(station.stationId, total, selectedText, amount.toInt())
                     } else if (selectedText == "Keine Auswahl" && binding.spinnerPresets.hasFocus()) {
                         updateTextProgrammatically(0.0)
-                        onWeightChanged(station.stationId, 0.0)
+                        onWeightChanged(station.stationId, 0.0, null, 1)
                     }
                 }
 
                 binding.spinnerPresets.setOnItemClickListener { _, _, _, _ -> calculateFromPresets() }
-                binding.etAmount.addTextChangedListener(object : TextWatcher {
-                    override fun afterTextChanged(s: Editable?) { calculateFromPresets() }
+                
+                amountWatcher = object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) { 
+                        if (binding.etAmount.hasFocus()) {
+                            calculateFromPresets()
+                        }
+                    }
                     override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
                     override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
-                })
+                }
+                binding.etAmount.addTextChangedListener(amountWatcher)
 
             } else if (station.hasSlider && station.maxMass != null && station.maxMass > 0) {
                 binding.layoutPresetControls.visibility = View.GONE
@@ -176,7 +194,7 @@ class CalculationsAdapter(
                         slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                         val weight = value.toDouble()
                         updateTextProgrammatically(weight)
-                        onWeightChanged(station.stationId, weight)
+                        onWeightChanged(station.stationId, weight, null, 1)
                     }
                 }
             } else {
@@ -221,7 +239,7 @@ class CalculationsAdapter(
                 addTextChangedListener(object : TextWatcher {
                     override fun afterTextChanged(s: Editable?) {
                         val weight = s.toString().toDoubleOrNull() ?: 0.0
-                        onWeightChanged(swp.station.stationId, weight)
+                        onWeightChanged(swp.station.stationId, weight, null, 1)
                     }
                     override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
                     override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
@@ -236,7 +254,13 @@ class CalculationsAdapter(
 
     class DiffCallback : DiffUtil.ItemCallback<CalculationItem>() {
         override fun areItemsTheSame(oldItem: CalculationItem, newItem: CalculationItem): Boolean {
-            return oldItem == newItem
+            return when {
+                oldItem is CalculationItem.SingleStation && newItem is CalculationItem.SingleStation ->
+                    oldItem.swp.station.stationId == newItem.swp.station.stationId
+                oldItem is CalculationItem.StationGroup && newItem is CalculationItem.StationGroup ->
+                    oldItem.stations.map { it.station.stationId } == newItem.stations.map { it.station.stationId }
+                else -> false
+            }
         }
         override fun areContentsTheSame(oldItem: CalculationItem, newItem: CalculationItem): Boolean {
             return oldItem == newItem

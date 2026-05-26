@@ -99,21 +99,29 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Wird vom ScrollingFragment aufgerufen, wenn der Benutzer eine Masse ändert.
+     * Speichert den exakten Zustand einer Station in der Datenbank.
      */
-    /**
-     * Wird vom ScrollingFragment aufgerufen, wenn der Benutzer eine Masse ändert.
-     */
-    fun updateStationMass(stationId: Int, mass: Double) {
-        val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
+    fun updateStationState(stationId: Int, mass: Double, presetLabel: String?, amount: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. In der Datenbank aktualisieren
+            payloadStationDao.updateStationState(stationId, mass, presetLabel, amount)
 
-        // Nur aktualisieren, wenn sich der Wert wirklich geändert hat (spart Rechenleistung)
-        if (currentMasses[stationId] != mass) {
-            currentMasses[stationId] = mass
+            // 2. Den lokalen State im UI-Thread aktualisieren (für die Live-Berechnung)
+            launch(Dispatchers.Main) {
+                val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
+                currentMasses[stationId] = mass
+                _stationMasses.value = currentMasses
 
-            // WICHTIG: Wir müssen den Wert der LiveData neu setzen,
-            // damit observeForever { recalc() } im init-Block ausgelöst wird.
-            _stationMasses.value = currentMasses
+                // Wir müssen auch das Profil aktualisieren, damit der Adapter beim Scrollen
+                // die neuen Werte aus den Stations-Objekten liest.
+                _selectedProfile.value?.let { profile ->
+                    profile.stations.find { it.station.stationId == stationId }?.let {
+                        it.station.defaultValue = mass
+                        it.station.selectedPresetLabel = presetLabel
+                        it.station.amount = amount
+                    }
+                }
+            }
         }
     }
 

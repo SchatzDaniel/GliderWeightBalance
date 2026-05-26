@@ -24,4 +24,7 @@ interface PayloadStationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(station: PayloadStation): Long
+
+    @Query("UPDATE payload_stations SET defaultValue = :mass, selectedPresetLabel = :label, amount = :amount WHERE stationId = :id")
+    suspend fun updateStationState(id: Int, mass: Double, label: String?, amount: Int)
 }

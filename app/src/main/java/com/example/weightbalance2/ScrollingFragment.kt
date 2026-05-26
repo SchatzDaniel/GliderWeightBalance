@@ -37,10 +37,10 @@ class ScrollingFragment : Fragment() {
 
     private fun setupRecyclerView() {
         // Initialisierung des neuen Adapters
-        calculationsAdapter = CalculationsAdapter { stationId, newWeight ->
+        calculationsAdapter = CalculationsAdapter { stationId, newWeight, selectedPreset, amount ->
             // Wenn sich ein Gewicht im Adapter ändert (Preset-Wahl, Slider, etc.),
             // informieren wir das SharedViewModel für die Gesamtberechnung.
-            sharedViewModel.updateStationMass(stationId, newWeight)
+            sharedViewModel.updateStationState(stationId, newWeight, selectedPreset, amount)
         }
 
         binding.recyclerViewMassInputs.apply {

@@ -52,12 +52,19 @@ class MassInputAdapter(
             // b) defaultValue aus der Datenbank (falls vorhanden und ungleich 0.0)
             // c) Leerer String (damit keine 0.0 erscheint)
 
-            val dbValueFormatted = if (station.defaultValue == null || station.defaultValue == 0.0) {
+            // 3. Den anzuzeigenden Text bestimmen
+            val currentVal = station.defaultValue // Lokale Kopie für Thread-Sicherheit
+
+            val dbValueFormatted = if (currentVal == null || currentVal == 0.0) {
                 ""
             } else {
                 // Verhindert .0 bei ganzen Zahlen für schönere Optik
-                if (station.defaultValue % 1.0 == 0.0) station.defaultValue.toInt().toString()
-                else station.defaultValue.toString()
+                // Hier nutzen wir die lokale Variable 'currentVal', die sicher nicht null ist
+                if (currentVal % 1.0 == 0.0) {
+                    currentVal.toInt().toString()
+                } else {
+                    currentVal.toString()
+                }
             }
 
             val textToSet = currentMasses[station.stationId] ?: dbValueFormatted
@@ -114,11 +121,6 @@ class MassInputAdapter(
                 )
             }
         }
-    }
-
-    // Setzt die internen Massen zurück (wichtig bei Flugzeugwechsel)
-    fun resetMasses() {
-        currentMasses.clear()
     }
 
     companion object {

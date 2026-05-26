@@ -16,7 +16,7 @@ import com.example.weightbalance2.data.model.Preset
 
 @Database(
     entities = [Aircraft::class, PayloadStation::class, Preset::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,7 +36,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "aircraft_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
+                        MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                 INSTANCE = instance
                 instance
@@ -101,6 +102,16 @@ abstract class AppDatabase : RoomDatabase() {
 
                 // Index für Performance und Fremdschlüssel-Effizienz
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_station_presets_parentStationId ON station_presets (parentStationId)")
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Fügt die Spalte für das gewählte Preset-Label hinzu (Nullable TEXT)
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN selectedPresetLabel TEXT")
+
+                // Fügt die Spalte für die Anzahl hinzu (INTEGER mit Default 1)
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN amount INTEGER NOT NULL DEFAULT 1")
             }
         }
     }
