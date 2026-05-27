@@ -1,39 +1,76 @@
 <resources>
 
+    <!-- 4. DER MASTER-UMSCHALTER (Nur hier änderst du das parent!) -->
+    <style name="Base.Theme.WeightBalance2.noActionBar" parent="AppTheme" />
+
+    <!-- 1. ALLES GEMEINSAME (Keine Farben hier!) -->
     <style name="Base.Theme.WeightBalance2" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- AppBar / Primary -->
+        <!-- Hier kommen alle deine speziellen Logiken rein -->
+        <item name="errorTextAppearance">@style/TextAppearance.App.ErrorBold</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Verweis auf das Toolbar-Overlay -->
+        <item name="toolbarStyle">@style/Widget.Material3.Toolbar</item>
+        <item name="dashboard_header_background">?attr/colorPrimaryContainer</item>
+        <item name="iconColor">?attr/colorOnSurface</item>
+        <item name="colorControlNormal">?attr/colorOnSurface</item>
+    </style>
+
+    <!-- 2. DIE LILA PALETTE -->
+    <style name="Base.Theme.WeightBalance2.Purple" parent="Base.Theme.WeightBalance2">
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorOnPrimary">@color/black</item>
-
-        <!-- Secondary -->
         <item name="colorSecondary">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
-
-        <!-- StatusBar -->
         <item name="android:statusBarColor">@color/purple_500</item>
-        <item name="android:windowLightStatusBar">true</item>
-
-        <!-- Icons -->
-        <item name="iconColor">@android:color/black</item>
+        <item name="dashboard_header_background">#F3EDF7</item>
+        <item name="colorPositive">@color/green</item>
     </style>
 
-    <style name="Theme.WeightBalance2.noActionBar" parent="Base.Theme.WeightBalance2" />
-
-    <style name="ThemeOverlay.App.Toolbar" parent="ThemeOverlay.Material3.Toolbar.Surface">
-        <!--
-          Setzt die Farbe für alle "Vordergrund"-Elemente.
-          Dies betrifft den Titel, das "Zurück"-Icon UND die Menü-Icons.
-          Wir verweisen auf die Farbe, die wir in unserem Haupt-Theme definiert haben.
-        -->
-        <item name="colorOnSurface">?attr/colorOnPrimary</item>
+    <!-- 3. DIE PRUSSIAN BLUE PALETTE -->
+    <style name="Base.Theme.WeightBalance2.PrussianBlue" parent="Base.Theme.WeightBalance2">
+        <item name="colorPrimary">@color/prussian_blue</item>
+        <item name="colorOnPrimary">@color/papaya_whip</item>
+        <item name="colorSecondary">@color/charcoal_blue</item>
+        <item name="colorTertiary">@color/peach_glow</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/pale_slate</item>
+        <item name="android:colorBackground">@color/papaya_whip</item>
+        <item name="colorOutline">@color/pale_slate</item>
+        <item name="colorPositive">@color/green</item>
     </style>
 
-    <!-- Custom Style für dicke rote Umrandung im Fehlerfall -->
+    <style name="AppTheme" parent="Base.Theme.WeightBalance2">
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_error</item>
+        <item name="colorOnError">@color/md_theme_onError</item>
+        <item name="colorErrorContainer">@color/md_theme_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/md_theme_onErrorContainer</item>
+        <item name="android:colorBackground">@color/md_theme_background</item>
+        <item name="colorOnBackground">@color/md_theme_onBackground</item>
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_outline</item>
+        <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
+        <item name="iconColor">?attr/colorOnSurface</item>
+        <item name="colorControlNormal">?attr/colorOnSurface</item>
+        <item name="colorPositive">@color/green</item>
+    </style>
+
+    <!-- HIER DIE SEPARATEN STYLES (Müssen außerhalb vom Theme stehen) -->
     <style name="Widget.App.TextInputLayout.ErrorThick" parent="Widget.Material3.TextInputLayout.OutlinedBox.Dense">
-        <!-- Wir nutzen boxStrokeWidthFocused, da Material3 die Fehlerranddicke oft intern steuert,
-             aber wir erzwingen die generelle Randdicke für Fehler über die Error-Color.
-             Eigentlich gibt es kein direktes 'boxStrokeErrorWidth' Attribut in XML ohne Custom View.
-             Wir lassen es bei der Standarddicke und setzen die Text-Styles. -->
         <item name="errorTextAppearance">@style/TextAppearance.App.ErrorBold</item>
     </style>
 
@@ -47,4 +84,10 @@
         <item name="android:textColor">?attr/colorPrimary</item>
         <item name="android:textSize">16sp</item>
     </style>
+
+    <style name="ThemeOverlay.App.Toolbar" parent="ThemeOverlay.Material3.Toolbar.Surface">
+        <item name="colorOnSurface">?attr/colorOnPrimary</item>
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+    </style>
+
 </resources>
