@@ -4,20 +4,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:layout_height="match_parent">
 
     <!-- Der Fragment-Container füllt nun den ganzen Bildschirm aus (Z-Index unten) -->
+
+    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
+
     <FrameLayout
         android:id="@+id/bottom_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
     <LinearLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
@@ -91,10 +94,10 @@
                         android:layout_height="wrap_content"
                         app:cardCornerRadius="4dp"
                         app:cardElevation="0dp"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#4CAF50"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#4CAF50">
                         <TextView
                             android:id="@+id/statusCg"
                             android:layout_width="wrap_content"
@@ -102,7 +105,7 @@
                             android:paddingHorizontal="8dp"
                             android:paddingVertical="2dp"
                             android:text="@string/status_ok"
-                            android:textSize="12sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="#4CAF50" />
                     </com.google.android.material.card.MaterialCardView>
@@ -181,7 +184,8 @@
                                 android:layout_height="wrap_content"
                                 android:paddingHorizontal="4dp"
                                 android:text="@string/status_ok"
-                                android:textSize="11sp"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
                                 android:textColor="#4CAF50" />
                         </com.google.android.material.card.MaterialCardView>
 
@@ -252,7 +256,8 @@
                                 android:layout_height="wrap_content"
                                 android:paddingHorizontal="4dp"
                                 android:text="@string/status_ok"
-                                android:textSize="11sp"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
                                 android:textColor="#4CAF50" />
                         </com.google.android.material.card.MaterialCardView>
 

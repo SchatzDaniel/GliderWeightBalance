@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.doOnLayout
@@ -15,7 +14,6 @@ import androidx.navigation.findNavController
 import com.example.weightbalance2.data.model.AircraftProfile
 import com.example.weightbalance2.databinding.FragmentHomeBinding
 import java.util.Locale
-import androidx.core.graphics.toColorInt
 
 class HomeFragment : Fragment() {
 
@@ -224,8 +222,6 @@ class HomeFragment : Fragment() {
         isError: Boolean,
         limitExists: Boolean
     ) {
-        val context = requireContext()
-
         // 1. Logik für Sichtbarkeit und Fortschritt der ProgressBar
         when {
             isError || !limitExists ||progressValue == null -> {
@@ -240,8 +236,8 @@ class HomeFragment : Fragment() {
         // 2. Styling basierend auf dem Zustand (Priorität: Error > OutsideLimits > OK)
         if (isError || isOutsideLimits || !limitExists) {
             // FEHLER-STYLING (ROT)
-            val colorRed = ContextCompat.getColor(context, R.color.error_text_color2)
-            val bgRed = ContextCompat.getColor(context, R.color.error_background_light)
+            val colorRed = getThemeColor(com.google.android.material.R.attr.colorOnErrorContainer)
+            val bgRed = getThemeColor(com.google.android.material.R.attr.colorErrorContainer)
 
             // Karte Rot färben
             card.setCardBackgroundColor(ColorStateList.valueOf(bgRed))
@@ -257,27 +253,30 @@ class HomeFragment : Fragment() {
                 else -> getString(R.string.status_out_of_limits)
             }
 
-            statusLabel.setTextColor(colorRed)
-            statusCard.setStrokeColor(ColorStateList.valueOf(colorRed))
+            statusLabel.setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnError))
+            statusCard.setCardBackgroundColor(getThemeColor(androidx.appcompat.R.attr.colorError))
+            statusCard.strokeWidth = 0
 
         } else {
-            // OK-STYLING (GRÜN / STANDARD)
-            val colorGreen = "#4CAF50".toColorInt()
-            val colorPrimary = ContextCompat.getColor(context, R.color.purple_700)
-            val colorPrimaryBackground = ContextCompat.getColor(context, R.color.purple_200)
-            val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
-
             // Karte zurücksetzen
+            val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
             card.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
             card.strokeWidth = 0
             card.cardElevation = 4 * resources.displayMetrics.density
 
             // Progress & Status auf OK
-            progressIndicator.setIndicatorColor(colorPrimary)
-            progressIndicator.trackColor = colorPrimaryBackground
+            val colorIndicator = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
+            val colorTrack = getThemeColor(com.google.android.material.R.attr.colorSurfaceVariant)
+            
+            progressIndicator.setIndicatorColor(colorIndicator)
+            progressIndicator.trackColor = colorTrack
+
+            // Statuslabel setzen
             statusLabel.text = getString(R.string.status_ok)
-            statusLabel.setTextColor(colorGreen)
-            statusCard.setStrokeColor(ColorStateList.valueOf(colorGreen))
+            statusLabel.setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer))
+            statusCard.setCardBackgroundColor(getThemeColor(com.google.android.material.R.attr.colorPrimaryContainer))
+            statusCard.strokeWidth = 2
+            statusCard.strokeColor = getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer)
         }
     }
 
@@ -288,8 +287,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateHeaderColors() {
-        val context = requireContext()
-        val headerColor = ContextCompat.getColor(context, R.color.dashboard_header_background)
+        val headerColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
         
         // Prüfen, ob wir im Dark Mode sind
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == 

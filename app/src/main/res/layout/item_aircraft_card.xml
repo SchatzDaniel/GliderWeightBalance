@@ -39,6 +39,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/export_aircraft"
             android:src="@drawable/ic_export"
+            app:tint="?attr/colorOnSurface"
             app:layout_constraintEnd_toStartOf="@id/btnEdit"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,6 +50,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/edit_aircraft"
             android:src="@drawable/ic_edit_aircraft"
+            app:tint="?attr/colorOnSurface"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
