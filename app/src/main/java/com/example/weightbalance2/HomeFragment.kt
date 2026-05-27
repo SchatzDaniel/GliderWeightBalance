@@ -266,7 +266,7 @@ class HomeFragment : Fragment() {
 
             // Progress & Status auf OK
             val colorIndicator = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-            val colorTrack = getThemeColor(com.google.android.material.R.attr.colorSurfaceVariant)
+            val colorTrack = getThemeColor(com.google.android.material.R.attr.colorPrimaryInverse)
             
             progressIndicator.setIndicatorColor(colorIndicator)
             progressIndicator.trackColor = colorTrack

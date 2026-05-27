@@ -121,7 +121,8 @@
                         app:layout_constraintTop_toBottomOf="@id/twSchwerpunktlageErgebnis"
                         app:trackThickness="8dp"
                         app:trackCornerRadius="4dp"
-                        app:trackStopIndicatorSize="0dp"/>
+                        app:trackStopIndicatorSize="0dp"
+                        app:trackColor="?attr/colorPrimaryInverse"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -200,7 +201,8 @@
                             app:layout_constraintTop_toBottomOf="@id/twMasseNTTeileErgebnis"
                             app:trackThickness="6dp"
                             app:trackCornerRadius="3dp"
-                            app:trackStopIndicatorSize="0dp"/>
+                            app:trackStopIndicatorSize="0dp"
+                            app:trackColor="?attr/colorPrimaryInverse"/>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -272,7 +274,8 @@
                             app:layout_constraintTop_toBottomOf="@id/twGesamtgewichtOutput"
                             app:trackThickness="6dp"
                             app:trackCornerRadius="3dp"
-                            app:trackStopIndicatorSize="0dp"/>
+                            app:trackStopIndicatorSize="0dp"
+                            app:trackColor="?attr/colorPrimaryInverse"/>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
