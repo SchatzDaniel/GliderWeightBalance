@@ -54,5 +54,5 @@ Dieses Projekt wurde mit einem Fokus auf eine saubere, skalierbare und wartbare 
 
 ## 📄 Lizenz
 
-Dieses Projekt steht unter der [MIT-Lizenz](https://github.com/SchatzDaniel/GliderWeightBalance/blob/main/LICENSE).
+Dieses Projekt steht unter der [GNU General Public License v3.0](https://github.com/SchatzDaniel/GliderWeightBalance/blob/master/LICENSE).
 
