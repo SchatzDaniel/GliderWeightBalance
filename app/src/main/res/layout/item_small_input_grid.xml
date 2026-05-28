@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:textAppearance="@style/TextAppearance.App.SuffixBold"
-            android:gravity="end"
+            android:gravity="center_horizontal"
             android:inputType="numberDecimal"
             android:paddingVertical="12dp"
             android:paddingHorizontal="12dp"
