@@ -1,6 +1,7 @@
 package com.example.weightbalance2
 
-import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -14,6 +15,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.example.weightbalance2.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -89,7 +91,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAndShowDisclaimer() {
-        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val hasAccepted = prefs.getBoolean(KEY_DISCLAIMER_ACCEPTED, false)
 
         // Nur beim ersten Start anzeigen (wenn noch nicht akzeptiert)
@@ -112,8 +114,8 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.disclaimer_accept_button) { dialog, _ ->
                 // Wenn der Haken gesetzt ist, die Entscheidung in SharedPreferences speichern
                 if (checkbox.isChecked) {
-                    val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                    prefs.edit().putBoolean(KEY_DISCLAIMER_ACCEPTED, true).apply()
+                    val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    prefs.edit { putBoolean(KEY_DISCLAIMER_ACCEPTED, true) }
                 }
                 dialog.dismiss()
             }
@@ -144,18 +146,45 @@ class MainActivity : AppCompatActivity() {
         menu.findItem(R.id.aircraftFragment)?.isVisible = showMenu
         menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
         menu.findItem(R.id.show_disclaimer)?.isVisible = showMenu
+        menu.findItem(R.id.show_about)?.isVisible = showMenu
 
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.show_disclaimer) {
-            showDisclaimerDialog()
-            return true
+        when (item.itemId) {
+            R.id.show_disclaimer -> {
+                showDisclaimerDialog()
+                return true
+            }
+            R.id.show_about -> {
+                showAboutDialog()
+                return true
+            }
         }
 
         return NavigationUI.onNavDestinationSelected(item, navController)
                 || super.onOptionsItemSelected(item)
+    }
+
+    private fun showAboutDialog() {
+        val versionName = try {
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, 0)
+            }
+            packageInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            "N/A"
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.about_title)
+            .setMessage(getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     override fun onSupportNavigateUp(): Boolean {

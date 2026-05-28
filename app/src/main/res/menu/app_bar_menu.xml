@@ -15,4 +15,8 @@
         android:id="@+id/show_disclaimer"
         android:title="@string/menu_item_disclaimer"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/show_about"
+        android:title="@string/menu_item_about"
+        app:showAsAction="never" />
 </menu>
