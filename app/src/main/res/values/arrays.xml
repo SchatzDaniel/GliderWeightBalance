@@ -1,17 +1,11 @@
 <resources>
-    <!-- Reply Preference -->
-    <string-array name="recalculation_preference_keys">
-        <item>Leermasse</item>
-        <item>Rumpf</item>
-        <item>Höhenleitwerk</item>
-        <item>LeermasseHebel</item>
-        <item>PilotHebel</item>
-        <item>GepäckraumUntenHebel</item>
-        <item>GepäckraumObenHebel</item>
-        <item>TrimmplattenHebel</item>
-        <item>WasserballastHebel</item>
-        <item>BallastSeitenflosseHebel</item>
-        <item>SauerstoffflascheHebel</item>
-        <item>InstrumenteHebel</item>
+    <string-array name="update_channel_entries">
+        <item>Stabil</item>
+        <item>Beta</item>
+    </string-array>
+
+    <string-array name="update_channel_values">
+        <item>stable</item>
+        <item>beta</item>
     </string-array>
 </resources>

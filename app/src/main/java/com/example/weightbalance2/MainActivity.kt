@@ -1,5 +1,6 @@
 package com.example.weightbalance2
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -7,15 +8,19 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.example.weightbalance2.databinding.ActivityMainBinding
+import com.example.weightbalance2.updater.UpdateManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,6 +58,10 @@ class MainActivity : AppCompatActivity() {
             navController,
             appBarConfiguration
         )
+
+        // Updater initialisieren
+        UpdateManager.scheduleUpdateCheck(this)
+        requestNotificationPermission()
 
         // Listener für Fragment-Wechsel
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -180,10 +189,19 @@ class MainActivity : AppCompatActivity() {
             "N/A"
         }
 
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val latestVersion = prefs.getString("latest_available_version", null)
+        val updateInfo = if (latestVersion != null) {
+            "\n\n--- UPDATE VERFÜGBAR ---\nVersion: $latestVersion"
+        } else ""
+
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.about_title)
-            .setMessage(getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info))
+            .setMessage(getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info) + updateInfo)
             .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.update_button) { _, _ ->
+                UpdateManager.runUpdateCheckNow(this)
+            }
             .show()
     }
 
@@ -194,8 +212,18 @@ class MainActivity : AppCompatActivity() {
     /**
      * Ermöglicht es den Fragmenten (und der MainActivity), den Titel konsistent zu setzen.
      */
-    fun setToolbarTitle(title: String) {
+    private fun setToolbarTitle(title: String) {
         binding.toolbar.title = title
         supportActionBar?.title = title
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                registerForActivityResult(ActivityResultContracts.RequestPermission()) {}.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
     }
 }
