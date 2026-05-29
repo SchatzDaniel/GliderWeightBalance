@@ -76,11 +76,21 @@ class HomeFragment : Fragment() {
             val aircraft = sharedViewModel.selectedProfile.value?.aircraft
             val maxMass = aircraft?.maxTotalMass ?: 0.0
             val hasLimit = aircraft?.maxTotalMass != null
+            val wingArea = aircraft?.wingArea ?: 0.0
 
             when (result) {
                 is CalculationResult.Success -> {
                     val value = result.value
                     binding.twGesamtgewichtOutput.text = String.format(Locale.getDefault(), "%.1f kg", value)
+
+                    // Flächenbelastung berechnen und anzeigen
+                    if (wingArea > 0) {
+                        val loading = value / wingArea
+                        binding.twWingLoading.text = getString(R.string.wing_loading_format, loading)
+                        binding.twWingLoading.visibility = View.VISIBLE
+                    } else {
+                        binding.twWingLoading.visibility = View.GONE
+                    }
 
                     // Progress & Validierung
                     val isOutsideLimits = maxMass > 0.0 && value > maxMass
@@ -99,6 +109,7 @@ class HomeFragment : Fragment() {
                 }
                 is CalculationResult.Error -> {
                     binding.twGesamtgewichtOutput.text = "---"
+                    binding.twWingLoading.visibility = View.GONE
                     binding.statusTotal.text = getString(R.string.status_error)
 
                     updateCardVisuals(

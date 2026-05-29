@@ -16,7 +16,7 @@ import com.example.weightbalance2.data.model.Preset
 
 @Database(
     entities = [Aircraft::class, PayloadStation::class, Preset::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -37,7 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "aircraft_database"
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
-                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                     .build()
                 INSTANCE = instance
                 instance
@@ -118,6 +118,12 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE payload_stations ADD COLUMN fluidType TEXT")
+            }
+        }
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE aircraft_table ADD COLUMN wingArea REAL")
             }
         }
     }

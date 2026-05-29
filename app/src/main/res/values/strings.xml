@@ -103,6 +103,9 @@
     <string name="feature_presets_count">Presets: %1$d</string>
     <string name="label_unit_info">Einheit: %1$s</string>
     <string name="label_unit_fluid_info">Einheit: %1$s (%2$s)</string>
+    <string name="wing_area">Flügelfläche</string>
+    <string name="wing_loading_format">%1$.1f kg/m²</string>
+    <string name="unit_m2">m²</string>
     <string name="unit_kg">kg</string>
     <string name="unit_liter">Liter</string>
     <string name="fluid_none">Keine Flüssigkeit</string>

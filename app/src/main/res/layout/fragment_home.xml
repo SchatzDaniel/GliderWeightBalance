@@ -137,7 +137,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardNonLifting"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
                     app:cardCornerRadius="12dp"
@@ -146,7 +146,7 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:padding="12dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="match_parent">
 
                         <TextView
                             android:id="@+id/labelNonLifting"
@@ -199,6 +199,7 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/twMasseNTTeileErgebnis"
+                            app:layout_constraintVertical_bias="1.0"
                             app:trackThickness="6dp"
                             app:trackCornerRadius="3dp"
                             app:trackStopIndicatorSize="0dp"
@@ -210,7 +211,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardTotalMass"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     app:cardCornerRadius="12dp"
@@ -219,7 +220,7 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:padding="12dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="match_parent">
 
                         <TextView
                             android:id="@+id/labelTotal"
@@ -241,6 +242,18 @@
                             app:layout_constraintTop_toBottomOf="@id/labelTotal"
                             app:layout_constraintStart_toStartOf="parent"
                             tools:text="600.0 kg" />
+
+                        <TextView
+                            android:id="@+id/twWingLoading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceLabelSmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            app:layout_constraintTop_toBottomOf="@id/twGesamtgewichtOutput"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:visibility="gone"
+                            tools:visibility="visible"
+                            tools:text="Flächenbel.: 35.5 kg/m²" />
 
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardStatusTotal"
@@ -271,7 +284,8 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/twGesamtgewichtOutput"
+                            app:layout_constraintTop_toBottomOf="@id/twWingLoading"
+                            app:layout_constraintVertical_bias="1.0"
                             app:trackThickness="6dp"
                             app:trackCornerRadius="3dp"
                             app:trackStopIndicatorSize="0dp"

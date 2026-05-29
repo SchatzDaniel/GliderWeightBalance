@@ -122,11 +122,6 @@ class AddAircraftFragment : Fragment() {
 
         // Fülle die Stammdaten
         binding.editTextRegistration.setText(profile.aircraft.registration)
-        // ... (restliche Stammdaten bleiben gleich)
-        binding.editTextEmptyMassArm.setText(profile.aircraft.emptyWeightArm?.toString() ?: "")
-
-        // Fülle die Stammdaten
-        binding.editTextRegistration.setText(profile.aircraft.registration)
         binding.editTextAircraftType.setText(profile.aircraft.aircraftType)
         binding.editTextMaxTotalMass.setText(profile.aircraft.maxTotalMass?.toString() ?: "")
         binding.editTextMaxNonLiftingMass.setText(profile.aircraft.maxNonLiftingMass?.toString() ?: "")
@@ -136,6 +131,7 @@ class AddAircraftFragment : Fragment() {
         binding.editTextFuselageMass.setText(profile.aircraft.fuselageMass?.toString() ?: "")
         binding.editTextStabilizerMass.setText(profile.aircraft.stabilizerMass?.toString() ?: "")
         binding.editTextEmptyMassArm.setText(profile.aircraft.emptyWeightArm?.toString() ?: "")
+        binding.editTextWingArea.setText(profile.aircraft.wingArea?.toString() ?: "")
 
         // Übergib die gemappte Liste an den Adapter
         stationsAdapter.submitList(uiStations)
@@ -179,7 +175,8 @@ class AddAircraftFragment : Fragment() {
             emptyWeight = binding.editTextEmptyMass.text.toString().toDoubleOrNull(),
             fuselageMass = binding.editTextFuselageMass.text.toString().toDoubleOrNull(),
             stabilizerMass = binding.editTextStabilizerMass.text.toString().toDoubleOrNull(),
-            emptyWeightArm = binding.editTextEmptyMassArm.text.toString().toDoubleOrNull()
+            emptyWeightArm = binding.editTextEmptyMassArm.text.toString().toDoubleOrNull(),
+            wingArea = binding.editTextWingArea.text.toString().toDoubleOrNull()
         )
 
         // Bündle das Flugzeug und seine Stationen (inkl. deren Presets) in einem Profil

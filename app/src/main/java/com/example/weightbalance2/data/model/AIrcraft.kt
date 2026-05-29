@@ -19,6 +19,7 @@ data class Aircraft(
     val fuselageMass: Double?,
     val stabilizerMass: Double?,
 
-    val emptyWeightArm: Double?
+    val emptyWeightArm: Double?,
+    val wingArea: Double?
 )
 
