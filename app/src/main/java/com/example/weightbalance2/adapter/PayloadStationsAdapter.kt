@@ -2,6 +2,8 @@ package com.example.weightbalance2.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -89,11 +91,17 @@ class PayloadStationsAdapter(
 
             // Logik: Slider nur erlauben, wenn MaxMass gesetzt ist
             dialogBinding.cbHasSlider.isEnabled = station.maxMass != null && station.maxMass > 0
-            dialogBinding.dialogEditTextStationMaxInput.setOnFocusChangeListener { _, _ ->
-                val maxVal = dialogBinding.dialogEditTextStationMaxInput.text.toString().toDoubleOrNull()
-                dialogBinding.cbHasSlider.isEnabled = maxVal != null && maxVal > 0
-                if (!dialogBinding.cbHasSlider.isEnabled) dialogBinding.cbHasSlider.isChecked = false
-            }
+            
+            dialogBinding.dialogEditTextStationMaxInput.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    val maxVal = s.toString().toDoubleOrNull()
+                    val isValid = maxVal != null && maxVal > 0
+                    dialogBinding.cbHasSlider.isEnabled = isValid
+                    if (!isValid) dialogBinding.cbHasSlider.isChecked = false
+                }
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
 
             dialogBinding.btnEditPresets.setOnClickListener {
                 showPresetsListDialog(context, station) { updatedPresets ->

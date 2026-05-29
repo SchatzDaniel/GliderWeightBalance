@@ -94,4 +94,6 @@
     <string name="about_update_available">\n\n--- UPDATE VERFÜGBAR ---\nVersion: %1$s</string>
     <string name="preset_info_format">%1$s (%2$s kg)</string>
     <string name="presets_count_toast">%1$s Presets vorgemerkt</string>
+    <string name="label_slider_min">%1$s %2$s</string>
+    <string name="label_slider_max">%1$s %2$s</string>
 </resources>

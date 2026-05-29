@@ -133,6 +133,7 @@ class CalculationsAdapter(
             if (station.hasPresets && swp.presets.isNotEmpty()) {
                 binding.layoutPresetControls.visibility = View.VISIBLE
                 binding.weightSlider.visibility = View.GONE
+                binding.layoutSliderLabels.visibility = View.GONE
                 binding.layoutManualInput.visibility = View.VISIBLE
 
                 // Mengen-Feld
@@ -183,6 +184,10 @@ class CalculationsAdapter(
             } else if (station.hasSlider && station.maxMass != null && station.maxMass > 0) {
                 binding.layoutPresetControls.visibility = View.GONE
                 binding.weightSlider.visibility = View.VISIBLE
+                binding.layoutSliderLabels.visibility = View.VISIBLE
+
+                binding.tvSliderMin.text = itemView.context.getString(R.string.label_slider_min, "0", station.unit ?: "")
+                binding.tvSliderMax.text = itemView.context.getString(R.string.label_slider_max, station.maxMass.toString(), station.unit ?: "")
 
                 binding.weightSlider.valueFrom = 0f
                 binding.weightSlider.valueTo = station.maxMass.toFloat()
@@ -208,6 +213,7 @@ class CalculationsAdapter(
                 // Fall: nur manuelle Eingabe oben rechts
                 binding.layoutPresetControls.visibility = View.GONE
                 binding.weightSlider.visibility = View.GONE
+                binding.layoutSliderLabels.visibility = View.GONE
             }
         }
     }
