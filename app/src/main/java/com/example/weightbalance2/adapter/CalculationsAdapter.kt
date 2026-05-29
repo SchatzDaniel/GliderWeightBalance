@@ -236,6 +236,7 @@ class CalculationsAdapter(
             // LayoutParams für das Grid (2 Spalten, gleichmäßig verteilt)
             view.layoutParams = androidx.gridlayout.widget.GridLayout.LayoutParams().apply {
                 columnSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, 1f)
+                rowSpec = androidx.gridlayout.widget.GridLayout.spec(androidx.gridlayout.widget.GridLayout.UNDEFINED, androidx.gridlayout.widget.GridLayout.FILL)
                 width = 0
             }
 
@@ -250,7 +251,14 @@ class CalculationsAdapter(
 
             val maxMass = swp.station.maxMass ?: 0.0
             val hintText = if (maxMass > 0) context.getString(R.string.max_weight_hint, String.format(Locale.getDefault(), "%.0f", maxMass), unit) else ""
-            tilInput.helperText = hintText
+            
+            // Helper Text nur anzeigen, wenn ein Limit existiert
+            if (maxMass > 0) {
+                tilInput.isHelperTextEnabled = true
+                tilInput.helperText = hintText
+            } else {
+                tilInput.isHelperTextEnabled = false
+            }
 
             val formatValue = { value: Double ->
                 if (value % 1.0 == 0.0) {
@@ -271,10 +279,11 @@ class CalculationsAdapter(
                         
                         // Validierung
                         if (maxMass > 0 && weight > maxMass) {
+                            tilInput.isErrorEnabled = true
                             tilInput.error = hintText
                         } else {
                             tilInput.error = null
-                            tilInput.helperText = hintText
+                            tilInput.isErrorEnabled = false
                         }
 
                         onWeightChanged(swp.station.stationId, weight, null, 1)
