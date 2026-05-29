@@ -73,6 +73,11 @@ class AircraftFragment : Fragment() {
             }
         }
 
+        // Beobachte das aktuell ausgewählte Profil, um die Markierung in der Liste zu aktualisieren
+        sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
+            aircraftAdapter.setSelectedAircraftId(profile?.aircraft?.id)
+        }
+
         // Schritt 3: Click Listener für den "Hinzufügen"-Button
         binding.fabAddAircraft.setOnClickListener {
             val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()

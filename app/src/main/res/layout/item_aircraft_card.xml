@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
+<com.google.android.material.card.MaterialCardView
+    android:id="@+id/aircraft_card"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,6 +9,8 @@
     app:cardElevation="4dp"
     app:cardCornerRadius="12dp"
     app:cardUseCompatPadding="true"
+    app:strokeColor="?attr/colorPrimary"
+    app:strokeWidth="0dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.constraintlayout.widget.ConstraintLayout

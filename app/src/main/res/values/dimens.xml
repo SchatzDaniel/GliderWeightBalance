@@ -1,3 +1,4 @@
 <resources>
     <dimen name="max_ui_width">640dp</dimen>
+    <dimen name="selected_card_stroke_width">3dp</dimen>
 </resources>

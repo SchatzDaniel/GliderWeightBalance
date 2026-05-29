@@ -47,17 +47,42 @@ class PayloadStationsAdapter(
 
         @SuppressLint("ClickableViewAccessibility")
         fun bind(station: PayloadStation) {
+            val context = itemView.context
             binding.textViewStationName.text = station.name
-            binding.textViewStationArm.text = itemView.context.getString(R.string.label_arm, station.arm.toString())
+            binding.textViewStationArm.text = context.getString(R.string.label_arm, station.arm.toString())
 
-            // Anzeige der konfigurierten Features als kleine Icons oder Text-Labels
+            // Einheit & Flüssigkeits-Info
+            if (station.unit == context.getString(R.string.unit_liter) && station.fluidType != null) {
+                val fluidName = when (station.fluidType) {
+                    "WATER" -> context.getString(R.string.fluid_water)
+                    "GASOLINE" -> context.getString(R.string.fluid_gasoline)
+                    "KEROSENE" -> context.getString(R.string.fluid_kerosene)
+                    else -> station.fluidType
+                }
+                binding.textViewStationUnitInfo.text = context.getString(R.string.label_unit_fluid_info, station.unit, fluidName)
+            } else {
+                binding.textViewStationUnitInfo.text = context.getString(R.string.label_unit_info, station.unit ?: context.getString(R.string.unit_kg))
+            }
+
+            // Anzeige der konfigurierten Features
             val features = mutableListOf<String>()
-            if (station.hasSlider) features.add("Slider")
-            if (station.hasPresets) features.add("Presets")
-            if (station.hasAmountInput) features.add("Menge")
+            if (station.hasSlider) features.add(context.getString(R.string.feature_slider))
+            if (station.hasPresets) {
+                val count = station.presets.size
+                features.add(context.getString(R.string.feature_presets_count, count))
+            }
+            if (station.hasAmountInput) features.add(context.getString(R.string.feature_amount))
+            if (station.isNonLifting) features.add(context.getString(R.string.feature_non_lifting))
+
+            if (features.isNotEmpty()) {
+                binding.textViewStationFeatures.text = features.joinToString(" | ")
+                binding.textViewStationFeatures.visibility = View.VISIBLE
+            } else {
+                binding.textViewStationFeatures.visibility = View.GONE
+            }
 
             if (station.maxMass != null && station.maxMass > 0) {
-                binding.textViewStationMaxMass.text = itemView.context.getString(R.string.label_max_mass, station.maxMass.toString(), station.unit)
+                binding.textViewStationMaxMass.text = context.getString(R.string.label_max_mass, station.maxMass.toString(), station.unit)
                 binding.textViewStationMaxMass.visibility = View.VISIBLE
             } else {
                 binding.textViewStationMaxMass.visibility = View.GONE

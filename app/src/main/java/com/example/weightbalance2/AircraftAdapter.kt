@@ -18,8 +18,14 @@ class AircraftAdapter(
     private val onItemClicked: (AircraftProfile) -> Unit,
     private val onEditClicked: (AircraftProfile) -> Unit,
     private val onItemLongClicked: (AircraftProfile) -> Unit,
-    private val onExportClicked: (AircraftProfile) -> Unit
+    private val onExportClicked: (AircraftProfile) -> Unit,
+    private var selectedAircraftId: Int? = null
 ) : ListAdapter<AircraftProfile, AircraftAdapter.AircraftViewHolder>(DiffCallback) { // ViewHolder-Klasse richtig referenziert
+
+    fun setSelectedAircraftId(id: Int?) {
+        selectedAircraftId = id
+        notifyDataSetChanged()
+    }
 
     /**
      * Erstellt einen neuen ViewHolder für das Item-Layout.
@@ -66,6 +72,13 @@ class AircraftAdapter(
         // Die bind-Methode erwartet jetzt ein AircraftProfile
         fun bind(profile: AircraftProfile) {
             val aircraft = profile.aircraft // Extrahiere das reine Flugzeug-Objekt für die Stammdaten
+
+            // Hervorhebung wenn ausgewählt
+            binding.aircraftCard.strokeWidth = if (aircraft.id == selectedAircraftId) {
+                itemView.context.resources.getDimensionPixelSize(R.dimen.selected_card_stroke_width)
+            } else {
+                0
+            }
 
             binding.tvAircraftName.text = buildString {
                 append(aircraft.registration)

@@ -96,6 +96,13 @@
     <string name="presets_count_toast">%1$s Presets vorgemerkt</string>
     <string name="label_slider_min">%1$s %2$s</string>
     <string name="label_slider_max">%1$s %2$s</string>
+    <string name="feature_slider">Schieberegler</string>
+    <string name="feature_presets">Presets</string>
+    <string name="feature_non_lifting">Nicht-tragend</string>
+    <string name="feature_amount">Anzahl</string>
+    <string name="feature_presets_count">Presets: %1$d</string>
+    <string name="label_unit_info">Einheit: %1$s</string>
+    <string name="label_unit_fluid_info">Einheit: %1$s (%2$s)</string>
     <string name="unit_kg">kg</string>
     <string name="unit_liter">Liter</string>
     <string name="fluid_none">Keine Flüssigkeit</string>

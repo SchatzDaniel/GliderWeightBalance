@@ -64,6 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textViewStationName"
                 tools:text="Hebelarm: 1200 mm"/>
@@ -75,11 +76,36 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textViewStationArm"
                 tools:text="Max. Masse: 110 kg"
                 android:visibility="gone"
                 tools:visibility="visible"/>
+
+            <!-- Details: Einheit & Typ -->
+            <TextView
+                android:id="@+id/textViewStationUnitInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewStationMaxMass"
+                tools:text="Einheit: Liter (Wasser)" />
+
+            <!-- Neue Details: Konfigurierte Features -->
+            <TextView
+                android:id="@+id/textViewStationFeatures"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textViewStationUnitInfo"
+                tools:text="Slider | Presets: 2 | Non-Lifting" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
