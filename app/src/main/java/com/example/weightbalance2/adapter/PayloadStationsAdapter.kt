@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -89,6 +90,50 @@ class PayloadStationsAdapter(
             dialogBinding.cbHasPresets.isChecked = station.hasPresets
             dialogBinding.cbHasAmountInput.isChecked = station.hasAmountInput
 
+            // NEU: Einheit- und Flüssigkeitstyp-Dropdowns
+            val units = listOf(context.getString(R.string.unit_kg), context.getString(R.string.unit_liter))
+            val unitAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, units)
+            dialogBinding.dialogEditTextStationUnit.setAdapter(unitAdapter)
+            
+            val fluids = mapOf(
+                context.getString(R.string.fluid_water) to "WATER",
+                context.getString(R.string.fluid_gasoline) to "GASOLINE",
+                context.getString(R.string.fluid_kerosene) to "KEROSENE"
+            )
+            val fluidLabels = fluids.keys.toList()
+            val fluidAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, fluidLabels)
+            dialogBinding.dialogEditTextStationFluidType.setAdapter(fluidAdapter)
+
+            // Initialwerte setzen
+            val initialUnit = station.unit ?: context.getString(R.string.unit_kg)
+            dialogBinding.dialogEditTextStationUnit.setText(initialUnit, false)
+            
+            if (initialUnit == context.getString(R.string.unit_liter)) {
+                dialogBinding.dialogStationFluidTypeLayout.visibility = View.VISIBLE
+                val currentFluidLabel = fluids.entries.find { it.value == station.fluidType }?.key ?: fluidLabels[0]
+                dialogBinding.dialogEditTextStationFluidType.setText(currentFluidLabel, false)
+            }
+
+            dialogBinding.dialogEditTextStationUnit.setOnItemClickListener { _, _, position, _ ->
+                val selectedUnit = units[position]
+                if (selectedUnit == context.getString(R.string.unit_liter)) {
+                    dialogBinding.dialogStationFluidTypeLayout.visibility = View.VISIBLE
+                    if (dialogBinding.dialogEditTextStationFluidType.text.isNullOrEmpty()) {
+                        dialogBinding.dialogEditTextStationFluidType.setText(fluidLabels[0], false)
+                    }
+                } else {
+                    dialogBinding.dialogStationFluidTypeLayout.visibility = View.GONE
+                }
+            }
+
+            dialogBinding.btnFluidInfo.setOnClickListener {
+                MaterialAlertDialogBuilder(context)
+                    .setTitle(R.string.fluid_info_title)
+                    .setMessage(R.string.fluid_info_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+
             // Logik: Slider nur erlauben, wenn MaxMass gesetzt ist
             dialogBinding.cbHasSlider.isEnabled = station.maxMass != null && station.maxMass > 0
             
@@ -135,6 +180,11 @@ class PayloadStationsAdapter(
                     val newArm = dialogBinding.dialogEditTextStationArm.text.toString().toDoubleOrNull() ?: station.arm
                     val newUnit = dialogBinding.dialogEditTextStationUnit.text.toString().trim()
                     val newMaxMass = dialogBinding.dialogEditTextStationMaxInput.text.toString().toDoubleOrNull()
+                    
+                    val selectedFluidLabel = dialogBinding.dialogEditTextStationFluidType.text.toString()
+                    val newFluidType = if (newUnit == context.getString(R.string.unit_liter)) {
+                        fluids[selectedFluidLabel]
+                    } else null
 
                     if (newName.isNotBlank() && newUnit.isNotBlank()) {
                         val updatedStation = station.copy(
@@ -145,7 +195,8 @@ class PayloadStationsAdapter(
                             isNonLifting = dialogBinding.cbIsNonLifting.isChecked,
                             hasSlider = dialogBinding.cbHasSlider.isChecked,
                             hasPresets = dialogBinding.cbHasPresets.isChecked,
-                            hasAmountInput = dialogBinding.cbHasAmountInput.isChecked
+                            hasAmountInput = dialogBinding.cbHasAmountInput.isChecked,
+                            fluidType = newFluidType
                         ).apply() {
                             this.presets = station.presets
                         }

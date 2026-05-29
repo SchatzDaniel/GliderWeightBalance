@@ -96,4 +96,13 @@
     <string name="presets_count_toast">%1$s Presets vorgemerkt</string>
     <string name="label_slider_min">%1$s %2$s</string>
     <string name="label_slider_max">%1$s %2$s</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_liter">Liter</string>
+    <string name="fluid_none">Keine Flüssigkeit</string>
+    <string name="fluid_water">Wasser</string>
+    <string name="fluid_gasoline">Benzin</string>
+    <string name="fluid_kerosene">Kerosin</string>
+    <string name="label_fluid_type">Flüssigkeitstyp</string>
+    <string name="fluid_info_title">Dichtewerte</string>
+    <string name="fluid_info_message">Für die Umrechnung von Litern in Kilogramm werden folgende Dichtewerte verwendet:\n\n• Wasser: 1,00 kg/L\n• Benzin (AVGAS): 0,72 kg/L\n• Kerosin (Jet A-1): 0,80 kg/L\n\nBitte beachte, dass die tatsächliche Dichte je nach Temperatur leicht variieren kann.</string>
 </resources>

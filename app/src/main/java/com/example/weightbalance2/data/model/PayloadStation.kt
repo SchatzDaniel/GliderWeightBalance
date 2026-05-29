@@ -20,6 +20,7 @@ data class PayloadStation(
     val hasAmountInput: Boolean = false,
     var selectedPresetLabel: String? = null,
     var amount: Int = 1,
+    val fluidType: String? = null,
 
     @Ignore // Dieses Feld wird nicht in der Tabelle gespeichert, nur im Code genutzt
     var presets: List<Preset> = emptyList()
@@ -39,10 +40,11 @@ data class PayloadStation(
         hasPresets: Boolean,
         hasAmountInput: Boolean,
         selectedPresetLabel: String?,
-        amount: Int
+        amount: Int,
+        fluidType: String?
     ) : this(
         stationId, aircraftOwnerId, name, arm, maxMass, unit,
         displayOrder, isNonLifting, defaultValue, hasSlider,
-        hasPresets, hasAmountInput, selectedPresetLabel, amount, emptyList()
+        hasPresets, hasAmountInput, selectedPresetLabel, amount, fluidType, emptyList()
     )
 }

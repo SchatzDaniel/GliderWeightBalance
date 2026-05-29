@@ -148,7 +148,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         // --- 1. TotalMass berechnen ---
-        val totalPayloadMass = masses.values.sum()
+        // Wir müssen hier die Dichte berücksichtigen, falls eine Station in Litern angegeben ist.
+        val totalPayloadMass = profile.stations.sumOf { swp ->
+            val rawValue = masses[swp.station.stationId] ?: 0.0
+            val density = getDensity(swp.station.fluidType)
+            rawValue * density
+        }
+
         val mGes = profile.aircraft.emptyWeight + totalPayloadMass
         _totalMass.value = CalculationResult.Success(mGes)
 
@@ -158,7 +164,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         } else {
             // Berechne das Moment der Zuladung
             val payloadMoment = profile.sortedStations.sumOf { station ->
-                val mass = masses[station.stationId] ?: 0.0
+                val rawValue = masses[station.stationId] ?: 0.0
+                val density = getDensity(station.fluidType)
+                val mass = rawValue * density
                 mass * station.arm
             }
 
@@ -180,7 +188,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         // Berechne die Summe der Massen aller Stationen, die als "Non-Lifting" markiert sind
         val payloadNonLiftingMass = profile.stations.sumOf { swp ->
             if (swp.station.isNonLifting) {
-                masses[swp.station.stationId] ?: 0.0
+                val rawValue = masses[swp.station.stationId] ?: 0.0
+                val density = getDensity(swp.station.fluidType)
+                rawValue * density
             } else {
                 0.0
             }
@@ -192,6 +202,15 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             _nonLiftingMass.value = CalculationResult.Success(totalNonLiftingMass)
         } else {
             _nonLiftingMass.value = CalculationResult.Error
+        }
+    }
+
+    private fun getDensity(fluidType: String?): Double {
+        return when (fluidType) {
+            "WATER" -> 1.0
+            "GASOLINE" -> 0.72
+            "KEROSENE" -> 0.80
+            else -> 1.0
         }
     }
 }
