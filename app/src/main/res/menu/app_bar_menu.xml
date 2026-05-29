@@ -9,7 +9,7 @@
     <item
         android:title="@string/Settings"
         android:id="@+id/settingsFragment"
-        app:icon="@drawable/ic_action_name"
+        app:icon="@drawable/ic_settings"
         app:showAsAction="never"/>
     <item
         android:id="@+id/show_disclaimer"

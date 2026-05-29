@@ -99,7 +99,7 @@
         android:layout_marginBottom="8dp"
         android:text="@string/label_button_edit_preset"
         android:visibility="visible"
-        app:icon="@drawable/ic_edit_aircraft"
+        app:icon="@drawable/ic_edit"
         app:iconSize="18dp" />
 
     <com.google.android.material.checkbox.MaterialCheckBox

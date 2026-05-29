@@ -192,12 +192,14 @@ class MainActivity : AppCompatActivity() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val latestVersion = prefs.getString("latest_available_version", null)
         val updateInfo = if (latestVersion != null) {
-            "\n\n--- UPDATE VERFÜGBAR ---\nVersion: $latestVersion"
+            getString(R.string.about_update_available, latestVersion)
         } else ""
+
+        val aboutMessage = getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info) + updateInfo
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.about_title)
-            .setMessage(getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info) + updateInfo)
+            .setMessage(aboutMessage)
             .setPositiveButton(android.R.string.ok, null)
             .setNeutralButton(R.string.update_button) { _, _ ->
                 UpdateManager.runUpdateCheckNow(this)

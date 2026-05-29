@@ -15,30 +15,6 @@
         <item name="colorControlNormal">?attr/colorOnSurface</item>
     </style>
 
-    <!-- 2. DIE LILA PALETTE -->
-    <style name="Base.Theme.WeightBalance2.Purple" parent="Base.Theme.WeightBalance2">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <item name="android:statusBarColor">@color/purple_500</item>
-        <item name="dashboard_header_background">#F3EDF7</item>
-        <item name="colorPositive">@color/green</item>
-    </style>
-
-    <!-- 3. DIE PRUSSIAN BLUE PALETTE -->
-    <style name="Base.Theme.WeightBalance2.PrussianBlue" parent="Base.Theme.WeightBalance2">
-        <item name="colorPrimary">@color/prussian_blue</item>
-        <item name="colorOnPrimary">@color/papaya_whip</item>
-        <item name="colorSecondary">@color/charcoal_blue</item>
-        <item name="colorTertiary">@color/peach_glow</item>
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/pale_slate</item>
-        <item name="android:colorBackground">@color/papaya_whip</item>
-        <item name="colorOutline">@color/pale_slate</item>
-        <item name="colorPositive">@color/green</item>
-    </style>
-
     <style name="AppTheme" parent="Base.Theme.WeightBalance2">
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>

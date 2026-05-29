@@ -17,6 +17,7 @@ import com.example.weightbalance2.data.model.StationWithPresets
 import com.example.weightbalance2.databinding.ItemScrollingGroupBinding
 import com.example.weightbalance2.databinding.ItemScrollingStationBinding
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class CalculationsAdapter(
     private val onWeightChanged: (Int, Double, String?, Int) -> Unit
@@ -114,7 +115,7 @@ class CalculationsAdapter(
                     if (etWeightDisplay.hasFocus()) {
                         val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
                         if (station.hasPresets) {
-                            binding.spinnerPresets.setText("Keine Auswahl", false)
+                            binding.spinnerPresets.setText(R.string.option_no_selection)
                         }
                         if (station.hasSlider && station.maxMass != null) {
                             val sliderVal = weight.toFloat().coerceIn(0f, station.maxMass.toFloat())
@@ -192,7 +193,7 @@ class CalculationsAdapter(
                 
                 val currentVal = station.defaultValue?.toFloat() ?: 0f
                 // Sicherstellen, dass der Wert ein Vielfaches der stepSize ist, um Crash zu vermeiden
-                val snappedVal = if (step > 0) Math.round(currentVal / step) * step else currentVal
+                val snappedVal = (currentVal / step).roundToInt() * step
                 binding.weightSlider.value = snappedVal.coerceIn(0f, station.maxMass.toFloat())
 
                 binding.weightSlider.addOnChangeListener { slider, value, fromUser ->
@@ -204,7 +205,7 @@ class CalculationsAdapter(
                     }
                 }
             } else {
-                // Fall: Nur manuelle Eingabe oben rechts
+                // Fall: nur manuelle Eingabe oben rechts
                 binding.layoutPresetControls.visibility = View.GONE
                 binding.weightSlider.visibility = View.GONE
             }

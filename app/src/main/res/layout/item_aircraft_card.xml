@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/edit_aircraft"
-            android:src="@drawable/ic_edit_aircraft"
+            android:src="@drawable/ic_edit"
             app:tint="?attr/colorOnSurface"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

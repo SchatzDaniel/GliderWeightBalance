@@ -4,24 +4,10 @@
     <string name="Schwerpunktlage">Schwerpunktlage</string>
     <string name="MasseNTTeile">Masse n.t. Teile</string>
     <string name="Gesamtgewicht">Gesamtgewicht</string>
-    <string name="mmHinterBE">mm hinter B.E.</string>
     <string name="kg">kg</string>
-    <string name="Gewichte">Gewichte</string>
-    <string name="Pilot">Pilot</string>
-    <string name="ZuladungCockpit">Zuladung Cockpit</string>
-    <string name="Trimmplatten">Trimmplatten</string>
-    <string name="Bleikissen">Bleikissen</string>
-    <string name="Fallschirm">Fallschirm</string>
-    <string name="GepäckraumUnten">Gepäckraum unten</string>
-    <string name="GepäckraumOben">Gepäckraum oben</string>
-    <string name="Wasserballast">Wasserballast</string>
-    <string name="BallastSeitenflosse">Ballast Seitenflosse</string>
-    <string name="Sauerstoffflasche">Sauerstoffflasche</string>
-    <string name="extraInstrumente">extra Instrumente</string>
     <string name="title_activity_settings">Einstellungen</string>
     <string name="title_activity_aircraft">Flugzeuge</string>
     <string name="title_activity_add_aircraft">Neues Flugzeug</string>
-    <string name="Flugzeug">Flugzeug</string>
     <string name="Leermasse">Leermasse</string>
     <string name="emptyMassArm">Leermassen-SP</string>
     <string name="fuselage_mass">Rumpfmasse</string>
@@ -29,14 +15,10 @@
     <string name="Hebelarme">Hebelarme</string>
     <string name="mm">mm</string>
     <string name="Settings">Einstellungen</string>
-    <string name="Grenzwerte">Grenzwerte</string>
     <string name="max_total_mass">Maximal Abflugmasse</string>
     <string name="max_non_lifting_mass">Max. nicht tragend</string>
-    <string name="min_cg">Minimal zulässige Schwerpunktlage in mm hinter B.E.</string>
-    <string name="max_cg">Maximal zulässige Schwerpunktlage in mm hinter B.E:</string>
     <string name="cg_limit">Zulässiger Schwerpunktbereich</string>
     <string name="status_error">Error</string>
-    <string name="percent">in Prozent</string>
     <string name="edit_aircraft">Flugzeug bearbeiten</string>
     <string name="no_aircrafts">Keine Flugzeuge vorhanden.</string>
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
@@ -47,7 +29,6 @@
     <string name="aircraft_type">Typ</string>
     <string name="aircraft_limits">Grenzwerte</string>
     <string name="aircraft_masses">Basisdaten</string>
-    <string name="save_button_text">Speichern</string>
     <string name="delete_aircraft_title">%1$s löschen?</string>
     <string name="delete_aircraft_confirmation_message">Bist du sicher, dass du das Flugzeug löschen möchtest?</string>
     <string name="delete">Löschen</string>
@@ -63,10 +44,7 @@
     <string name="menu_item_disclaimer">Haftungsausschluss</string>
     <string name="add_station">Neuen Hebelarm hinzufügen</string>
     <string name="station_name">Name der Station</string>
-    <string name="delete_station">Station löschen</string>
     <string name="em_dash">—</string>
-    <string name="liter">Liter</string>
-    <string name="max_payload">Maximale Beladung</string>
     <string name="edit_station">Massenstation bearbeiten</string>
     <string name="arm">Hebelarm</string>
     <string name="max_input">Maximale Zuladung</string>
@@ -87,8 +65,6 @@
     <string name="label_button_add_preset">Neues Preset hinzufügen</string>
     <string name="hint_preset_name">Bezeichnung (z.B. Fallschirm XY)</string>
     <string name="hint_preset_weight">Gewicht</string>
-    <string name="hint_enter_weight">Gewicht eingeben</string>
-    <string name="hint_select_preset">Preset wählen</string>
     <string name="prompt_no_aircraft_selected">Bitte wähle zuerst ein Flugzeug aus.</string>
     <string name="hint_amount">Anz.</string>
     <string name="hint_choose_preset">Preset wählen</string>
@@ -114,4 +90,8 @@
     <string name="update_checking">Prüfe auf Updates&#8230;</string>
     <string name="update_latest">App ist auf dem neuesten Stand.</string>
     <string name="update_error">Fehler beim Prüfen auf Updates.</string>
+    <string name="option_no_selection">Keine Auswahl</string>
+    <string name="about_update_available">\n\n--- UPDATE VERFÜGBAR ---\nVersion: %1$s</string>
+    <string name="preset_info_format">%1$s (%2$s kg)</string>
+    <string name="presets_count_toast">%1$s Presets vorgemerkt</string>
 </resources>

@@ -63,8 +63,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
      * Lädt das Profil, das beim letzten Mal ausgewählt war.
      */
     private fun loadInitialAircraft() {
-        val lastId = prefs.getInt("last_selected_aircraft_id", -1)
-        if (lastId != -1) {
+        val lastId = prefs.getInt("last_selected_aircraft_id", R.integer.default_aircraft_id)
+        if (lastId != R.integer.default_aircraft_id) {
             // Lade das Profil aus der DB.
             val source = aircraftProfileDao.getProfileById(lastId).asLiveData()
             _selectedProfile.addSource(source) { profile ->

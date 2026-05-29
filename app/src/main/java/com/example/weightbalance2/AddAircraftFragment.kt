@@ -50,7 +50,7 @@ class AddAircraftFragment : Fragment() {
         val aircraftProfileId = navArgs.aircraftId
 
         // Appbar-Titel anpassen
-        if (aircraftProfileId != (-1)) {
+        if (aircraftProfileId != R.integer.default_aircraft_id) {
             activity?.title = getString(R.string.edit_aircraft)
             aircraftViewModel.loadAircraftProfileById(aircraftProfileId).observe(viewLifecycleOwner) { aircraftProfile ->
                 aircraftProfile?.let {

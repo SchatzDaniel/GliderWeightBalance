@@ -53,9 +53,6 @@ class PayloadStationsAdapter(
             if (station.hasPresets) features.add("Presets")
             if (station.hasAmountInput) features.add("Menge")
 
-            // Du könntest ein TextView für "Aktive Features" in item_payload_station.xml hinzufügen
-            // binding.textViewFeatures.text = features.joinToString(", ")
-
             if (station.maxMass != null && station.maxMass > 0) {
                 binding.textViewStationMaxMass.text = itemView.context.getString(R.string.label_max_mass, station.maxMass.toString(), station.unit)
                 binding.textViewStationMaxMass.visibility = View.VISIBLE
@@ -100,30 +97,22 @@ class PayloadStationsAdapter(
 
             dialogBinding.btnEditPresets.setOnClickListener {
                 showPresetsListDialog(context, station) { updatedPresets ->
-                    // Wir speichern die neuen Presets temporär im Station-Objekt ab
-                    // Diese werden beim Klick auf "Speichern" im Hauptdialog übernommen
                     station.presets = updatedPresets
-                    Toast.makeText(context, "${updatedPresets.size} Presets vorgemerkt", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.presets_count_toast, updatedPresets.size.toString()), Toast.LENGTH_SHORT).show()
                 }
             }
 
             dialogBinding.cbHasPresets.setOnCheckedChangeListener { _, isChecked ->
-                // 1. Sichtbarkeit des "Verwalten"-Buttons steuern
                 dialogBinding.btnEditPresets.visibility = if (isChecked) View.VISIBLE else View.GONE
-
-                // 2. Mengen-Eingabe nur erlauben, wenn Presets aktiv sind
                 dialogBinding.cbHasAmountInput.isEnabled = isChecked
                 if (!isChecked) {
                     dialogBinding.cbHasAmountInput.isChecked = false
                 }
-
-                // 3. Initialisierung der Liste falls nötig
                 if (isChecked && station.presets == null) {
                     station.presets = emptyList()
                 }
             }
 
-            // --- NEU: Initial-Zustand beim Öffnen des Dialogs setzen ---
             dialogBinding.cbHasAmountInput.isEnabled = station.hasPresets
 
             MaterialAlertDialogBuilder(context)
@@ -164,7 +153,7 @@ class PayloadStationsAdapter(
     inner class AddButtonViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         init {
             itemView.setOnClickListener {
-                onAddItem() // Ruft den korrekten Callback auf
+                onAddItem()
             }
         }
     }
@@ -198,10 +187,12 @@ class PayloadStationsAdapter(
     }
 
     // --- Öffentliche Methoden zur Interaktion ---
+    
+    @SuppressLint("NotifyDataSetChanged")
     fun submitList(newStations: List<PayloadStation>) {
         stations.clear()
         stations.addAll(newStations)
-        notifyDataSetChanged() // Für die komplette Neuerstellung der Liste ist das in Ordnung.
+        notifyDataSetChanged()
     }
 
     fun addStation(station: PayloadStation) {
@@ -219,8 +210,6 @@ class PayloadStationsAdapter(
     }
 
     fun updateStation(updatedStation: PayloadStation) {
-        // Finde die Position der Station anhand einer eindeutigen ID.
-        // Wenn die stationId noch 0 ist (neue, ungespeicherte Station), nutze Objekt-Referenz.
         val position = if (updatedStation.stationId != 0) {
             stations.indexOfFirst { it.stationId == updatedStation.stationId }
         } else {
@@ -234,22 +223,18 @@ class PayloadStationsAdapter(
     }
 
     fun getCurrentStations(): List<PayloadStation> {
-        return stations.toList() // Gib eine unveränderliche Kopie zurück
+        return stations.toList()
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {
         if (fromPosition < stations.size && toPosition < stations.size) {
-            // 1. Verschiebe das Element in der Liste
             val fromItem = stations.removeAt(fromPosition)
             stations.add(toPosition, fromItem)
 
-            // 2. WICHTIG: Aktualisiere die displayOrder für ALLE Elemente in der Liste
-            // damit die neue Reihenfolge permanent im Objekt gespeichert wird
             stations.forEachIndexed { index, station ->
                 stations[index] = station.copy(displayOrder = index)
             }
 
-            // 3. Benachrichtige die UI
             notifyItemMoved(fromPosition, toPosition)
         }
     }
@@ -264,7 +249,6 @@ class PayloadStationsAdapter(
         val listContainer = dialogView.findViewById<LinearLayout>(R.id.presetListContainer)
         val btnAdd = dialogView.findViewById<View>(R.id.btnAddPreset)
 
-        // Funktion zum Neuzeichnen der Liste im Dialog
         fun refreshList() {
             listContainer.removeAllViews()
             currentPresets.forEach { preset ->
@@ -272,7 +256,7 @@ class PayloadStationsAdapter(
                 val tvInfo = itemView.findViewById<android.widget.TextView>(R.id.tvPresetInfo)
                 val btnDel = itemView.findViewById<View>(R.id.btnDeletePreset)
 
-                tvInfo.text = "${preset.label} (${preset.weight} kg)"
+                tvInfo.text = context.getString(R.string.preset_info_format, preset.label, preset.weight.toString())
                 btnDel.setOnClickListener {
                     currentPresets.remove(preset)
                     refreshList()
@@ -281,7 +265,6 @@ class PayloadStationsAdapter(
             }
         }
 
-        // Button für neues Preset (öffnet einen weiteren kleinen Alert)
         btnAdd.setOnClickListener {
             val addBinding = com.example.weightbalance2.databinding.DialogAddPresetQuickBinding.inflate(LayoutInflater.from(context))
             MaterialAlertDialogBuilder(context)
