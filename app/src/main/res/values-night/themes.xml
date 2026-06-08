@@ -1,5 +1,5 @@
 <resources>
-    <style name="Base.Theme.WeightBalance2.noActionBar" parent="AppTheme"/>
+    <style name="Base.Theme.GliderWeightBalance.noActionBar" parent="AppTheme"/>
 
     <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/md_theme_primary</item>
