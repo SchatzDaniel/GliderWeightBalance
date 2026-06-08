@@ -2,16 +2,20 @@ package com.example.weightbalance2
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -36,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -43,6 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         // Toolbar als ActionBar setzen
         setSupportActionBar(binding.toolbar)
+
+        updateHeaderColors()
 
         // NavController holen
         val navHostFragment = supportFragmentManager
@@ -227,5 +234,29 @@ class MainActivity : AppCompatActivity() {
                 registerForActivityResult(ActivityResultContracts.RequestPermission()) {}.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
+
+    private fun updateHeaderColors() {
+        val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
+
+        // StatusBar auf transparent setzen, damit die AppBar (mit fitsSystemWindows) dahinter zeichnet
+        window.statusBarColor = Color.TRANSPARENT
+
+        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        // WICHTIG: Da wir colorPrimary als Hintergrund nutzen, müssen wir die Icon-Helligkeit anpassen.
+        // In deinem Theme ist Primary im Light-Mode DUNKEL (weiße Icons nötig) 
+        // und im Dark-Mode HELL (dunkle Icons nötig).
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isDarkMode
+
+        // AppBar Hintergrund fest auf primaryColor setzen, um Farbwechsel beim Scrollen zu verhindern
+        binding.appBarLayout.setBackgroundColor(primaryColor)
+    }
+
+    private fun getThemeColor(attr: Int): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
     }
 }

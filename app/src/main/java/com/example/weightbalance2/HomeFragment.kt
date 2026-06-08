@@ -3,9 +3,6 @@ package com.example.weightbalance2
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.toDrawable
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -38,8 +35,6 @@ class HomeFragment : Fragment() {
 
         // Wir nehmen die Farbe eines Standard-Labels als Referenz
         defaultTextColor = binding.labelTotal.textColors
-
-        updateHeaderColors()
 
         // Messe die Höhe/Breite des Dashboards und teile sie dem ViewModel mit
         binding.headerContainer.doOnLayout {
@@ -295,27 +290,6 @@ class HomeFragment : Fragment() {
         val typedValue = android.util.TypedValue()
         requireContext().theme.resolveAttribute(attr, typedValue, true)
         return typedValue.data
-    }
-
-    private fun updateHeaderColors() {
-        val headerColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-        
-        // Prüfen, ob wir im Dark Mode sind
-        val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == 
-                android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-        // StatusBar Farbe anpassen
-        activity?.window?.let { window ->
-            @Suppress("DEPRECATION")
-            window.statusBarColor = headerColor
-            // Icons dunkel im Light Mode, hell im Dark Mode
-            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = !isDarkMode
-        }
-
-        // ActionBar/Toolbar Farbe anpassen
-        (activity as? AppCompatActivity)?.supportActionBar?.apply {
-            setBackgroundDrawable(headerColor.toDrawable())
-        }
     }
 
     override fun onDestroyView() {
