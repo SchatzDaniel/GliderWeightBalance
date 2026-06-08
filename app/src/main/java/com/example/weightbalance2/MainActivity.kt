@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
@@ -202,7 +203,12 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.about_update_available, latestVersion)
         } else ""
 
-        val aboutMessage = getString(R.string.about_version, versionName) + "\n\n" + getString(R.string.about_info) + updateInfo
+        val aboutMessage = TextUtils.concat(
+            getString(R.string.about_version, versionName),
+            "\n\n",
+            getText(R.string.about_info),
+            updateInfo
+        )
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.about_title)
