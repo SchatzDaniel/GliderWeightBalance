@@ -16,7 +16,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -46,6 +49,13 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Manuelle Inset-Handhabung für die AppBar, um "Jumps" beim Fragment-Wechsel zu vermeiden
+        ViewCompat.setOnApplyWindowInsetsListener(binding.appBarLayout) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(top = insets.top)
+            windowInsets
+        }
 
         // Toolbar als ActionBar setzen
         setSupportActionBar(binding.toolbar)
@@ -78,15 +88,6 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.homeFragment -> { // Prüfe die ID in deinem NavGraph!
                     updateAppBarTitleWithSelectedProfile()
-                }
-                R.id.aircraftFragment -> {
-                    // Hier erlauben wir der Navigation das Standard-Label zu setzen
-                    // ODER wir setzen es manuell:
-                    setToolbarTitle(getString(R.string.title_activity_aircraft))
-                }
-                R.id.addAircraftFragment -> {
-                    // Hier nichts tun, da das Fragment den Titel
-                    // selbst in onViewCreated setzt ("Bearbeiten" vs "Neu")
                 }
             }
         }
@@ -141,14 +142,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateAppBarTitleWithSelectedProfile() {
         val profile = sharedViewModel.selectedProfile.value
-        if (profile != null) {
-            val title = "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
-            // Setze den Titel sowohl in der Actionbar als auch in der Toolbar
-            supportActionBar?.title = title
-            binding.toolbar.title = title
+        val title = if (profile != null) {
+            "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
         } else {
-            supportActionBar?.title = getString(R.string.no_aircraft_selected_title)
+            getString(R.string.no_aircraft_selected_title)
         }
+        binding.toolbar.title = title
     }
 
     override fun onCreateOptionsMenu(menu: Menu):Boolean {

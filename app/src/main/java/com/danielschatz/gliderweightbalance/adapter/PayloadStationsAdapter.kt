@@ -132,6 +132,7 @@ class PayloadStationsAdapter(
             // Initialwerte setzen
             val initialUnit = station.unit ?: context.getString(R.string.unit_kg)
             dialogBinding.dialogEditTextStationUnit.setText(initialUnit, false)
+            dialogBinding.dialogStationMaxInputLayout.suffixText = initialUnit
             
             if (initialUnit == context.getString(R.string.unit_liter)) {
                 dialogBinding.dialogStationFluidTypeLayout.visibility = View.VISIBLE
@@ -141,6 +142,7 @@ class PayloadStationsAdapter(
 
             dialogBinding.dialogEditTextStationUnit.setOnItemClickListener { _, _, position, _ ->
                 val selectedUnit = units[position]
+                dialogBinding.dialogStationMaxInputLayout.suffixText = selectedUnit
                 if (selectedUnit == context.getString(R.string.unit_liter)) {
                     dialogBinding.dialogStationFluidTypeLayout.visibility = View.VISIBLE
                     if (dialogBinding.dialogEditTextStationFluidType.text.isNullOrEmpty()) {
