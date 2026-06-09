@@ -94,6 +94,25 @@
     <string name="about_update_available">\n\n--- UPDATE VERFÜGBAR ---\nVersion: %1$s</string>
     <string name="preset_info_format">%1$s (%2$s kg)</string>
     <string name="presets_count_toast">%1$s Presets vorgemerkt</string>
+
+    <!-- PDF Export Strings -->
+    <string name="menu_item_export_pdf">Als PDF exportieren</string>
+    <string name="pdf_report_title">Weight &amp; Balance Report</string>
+    <string name="pdf_date">Datum:</string>
+    <string name="pdf_time">Uhrzeit:</string>
+    <string name="pdf_registration">Kennzeichen:</string>
+    <string name="pdf_type">Typ:</string>
+    <string name="pdf_station_name">Station</string>
+    <string name="pdf_mass">Masse (%s)</string>
+    <string name="pdf_arm">Hebelarm (mm)</string>
+    <string name="pdf_moment">Moment (kg·mm)</string>
+    <string name="pdf_summary">Zusammenfassung</string>
+    <string name="pdf_total_mass">Gesamtgewicht:</string>
+    <string name="pdf_cg_location">Schwerpunktlage:</string>
+    <string name="pdf_cg_mac">Schwerpunktlage (%):</string>
+    <string name="pdf_status">Status:</string>
+    <string name="pdf_error_no_profile">Kein Flugzeug für Export ausgewählt.</string>
+    <string name="pdf_export_error">Fehler beim Erstellen der PDF.</string>
     <string name="label_slider_min">%1$s %2$s</string>
     <string name="label_slider_max">%1$s %2$s</string>
     <string name="feature_slider">Schieberegler</string>

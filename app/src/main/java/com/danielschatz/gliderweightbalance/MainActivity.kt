@@ -1,6 +1,7 @@
 package com.danielschatz.gliderweightbalance
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -20,12 +22,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.danielschatz.gliderweightbalance.databinding.ActivityMainBinding
 import com.danielschatz.gliderweightbalance.updater.UpdateManager
+import com.danielschatz.gliderweightbalance.utils.PdfExporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
@@ -163,8 +167,64 @@ class MainActivity : AppCompatActivity() {
         menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
         menu.findItem(R.id.show_disclaimer)?.isVisible = showMenu
         menu.findItem(R.id.show_about)?.isVisible = showMenu
+        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu
 
         return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun exportToPdf() {
+        val profile = sharedViewModel.selectedProfile.value
+        if (profile == null) {
+            Toast.makeText(this, R.string.pdf_error_no_profile, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val totalMassResult = sharedViewModel.totalMass.value
+        val cgLocationResult = sharedViewModel.cg.value
+        
+        if (totalMassResult !is CalculationResult.Success || cgLocationResult !is CalculationResult.Success) {
+            // Sollte im Normalfall nicht passieren, wenn ein Profil geladen ist
+            return
+        }
+
+        // Wir brauchen noch die Info, ob es innerhalb der Limits ist
+        // Diese Logik ist aktuell im HomeFragment.kt versteckt. 
+        // Für den Export berechnen wir sie hier kurz nach.
+        val aircraft = profile.aircraft
+        val isWithinLimits = (totalMassResult.value <= (aircraft.maxTotalMass ?: Double.MAX_VALUE)) &&
+                (cgLocationResult.value in (aircraft.minCg ?: Double.MIN_VALUE)..(aircraft.maxCg ?: Double.MAX_VALUE))
+
+        // CG in % MAC berechnen
+        val minCG = aircraft.minCg ?: 0.0
+        val maxCG = aircraft.maxCg ?: 0.0
+        val range = maxCG - minCG
+        val cgMac = if (range > 0) (cgLocationResult.value - minCG) / range * 100 else null
+
+        val exporter = PdfExporter(this)
+        val pdfFile = exporter.generateReport(
+            profile,
+            totalMassResult.value,
+            cgLocationResult.value,
+            cgMac,
+            isWithinLimits
+        )
+
+        if (pdfFile != null) {
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.fileprovider",
+                pdfFile
+            )
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intent, getString(R.string.menu_item_export_pdf)))
+        } else {
+            Toast.makeText(this, R.string.pdf_export_error, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -175,6 +235,10 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.show_about -> {
                 showAboutDialog()
+                return true
+            }
+            R.id.action_export_pdf -> {
+                exportToPdf()
                 return true
             }
         }
