@@ -5,11 +5,15 @@ object VersionComparator {
     /**
      * Compares two version strings.
      * Returns a positive number if v1 > v2, negative if v1 < v2, and 0 if equal.
-     * Handles versions like "1.1.0" and "1.1.0-beta3".
+     * Handles versions like "v1.1.0-debug" and "1.1.0-beta3".
      */
     fun compare(v1: String, v2: String): Int {
-        val parts1 = v1.split("-")
-        val parts2 = v2.split("-")
+        // Normalize: remove "v" prefix and "-debug" suffix
+        val clean1 = v1.removePrefix("v").removeSuffix("-debug")
+        val clean2 = v2.removePrefix("v").removeSuffix("-debug")
+
+        val parts1 = clean1.split("-")
+        val parts2 = clean2.split("-")
 
         val version1 = parts1[0].split(".").map { it.toIntOrNull() ?: 0 }
         val version2 = parts2[0].split(".").map { it.toIntOrNull() ?: 0 }
@@ -35,7 +39,6 @@ object VersionComparator {
     }
 
     private fun compareSuffixes(s1: String, s2: String): Int {
-        // Try to extract numbers from the end, e.g. "beta10" -> ("beta", 10)
         val r = Regex("(\\D+)(\\d*)")
         val match1 = r.matchEntire(s1)
         val match2 = r.matchEntire(s2)
@@ -53,9 +56,6 @@ object VersionComparator {
         return s1.compareTo(s2)
     }
 
-    /**
-     * Returns true if [latest] is newer than [current].
-     */
     fun isNewer(latest: String, current: String): Boolean {
         return compare(latest, current) > 0
     }
