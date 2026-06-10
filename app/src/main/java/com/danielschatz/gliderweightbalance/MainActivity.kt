@@ -181,18 +181,22 @@ class MainActivity : AppCompatActivity() {
 
         val totalMassResult = sharedViewModel.totalMass.value
         val cgLocationResult = sharedViewModel.cg.value
+        val nonLiftingMassResult = sharedViewModel.nonLiftingMass.value
         
         if (totalMassResult !is CalculationResult.Success || cgLocationResult !is CalculationResult.Success) {
             // Sollte im Normalfall nicht passieren, wenn ein Profil geladen ist
             return
         }
 
+        val totalMass = totalMassResult.value
+        val totalMoment = totalMass * cgLocationResult.value
+        val nonLiftingMass = if (nonLiftingMassResult is CalculationResult.Success) nonLiftingMassResult.value else 0.0
+
         // Wir brauchen noch die Info, ob es innerhalb der Limits ist
-        // Diese Logik ist aktuell im HomeFragment.kt versteckt. 
-        // Für den Export berechnen wir sie hier kurz nach.
         val aircraft = profile.aircraft
-        val isWithinLimits = (totalMassResult.value <= (aircraft.maxTotalMass ?: Double.MAX_VALUE)) &&
-                (cgLocationResult.value in (aircraft.minCg ?: Double.MIN_VALUE)..(aircraft.maxCg ?: Double.MAX_VALUE))
+        val isWithinLimits = (totalMass <= (aircraft.maxTotalMass ?: Double.MAX_VALUE)) &&
+                (cgLocationResult.value in (aircraft.minCg ?: Double.MIN_VALUE)..(aircraft.maxCg ?: Double.MAX_VALUE)) &&
+                (nonLiftingMass <= (aircraft.maxNonLiftingMass ?: Double.MAX_VALUE))
 
         // CG in % MAC berechnen
         val minCG = aircraft.minCg ?: 0.0
@@ -203,7 +207,9 @@ class MainActivity : AppCompatActivity() {
         val exporter = PdfExporter(this)
         val pdfFile = exporter.generateReport(
             profile,
-            totalMassResult.value,
+            totalMass,
+            totalMoment,
+            nonLiftingMass,
             cgLocationResult.value,
             cgMac,
             isWithinLimits

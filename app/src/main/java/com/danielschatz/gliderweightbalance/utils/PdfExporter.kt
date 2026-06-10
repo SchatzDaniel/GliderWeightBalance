@@ -18,6 +18,8 @@ class PdfExporter(private val context: Context) {
     fun generateReport(
         profile: AircraftProfile,
         totalMass: Double,
+        totalMoment: Double,
+        nonLiftingMass: Double,
         cgLocation: Double,
         cgMac: Double?,
         isWithinLimits: Boolean
@@ -34,11 +36,11 @@ class PdfExporter(private val context: Context) {
         }
         val headerPaint = Paint().apply {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            textSize = 12f
+            textSize = 10f
             color = Color.BLACK
         }
         val normalPaint = Paint().apply {
-            textSize = 10f
+            textSize = 9f
             color = Color.BLACK
         }
         val statusPaint = Paint().apply {
@@ -47,7 +49,7 @@ class PdfExporter(private val context: Context) {
         }
 
         var y = 50f
-        val margin = 50f
+        val margin = 40f
 
         // Title
         canvas.drawText(context.getString(R.string.pdf_report_title), margin, y, titlePaint)
@@ -70,43 +72,61 @@ class PdfExporter(private val context: Context) {
 
         // Table Headers
         val col1 = margin
-        val col2 = 250f
-        val col3 = 350f
-        val col4 = 450f
+        val col2 = 170f // Masse
+        val col3 = 260f // n.t. Teile
+        val col4 = 350f // Arm
+        val col5 = 450f // Moment
 
         canvas.drawText(context.getString(R.string.pdf_station_name), col1, y, headerPaint)
         canvas.drawText(context.getString(R.string.pdf_mass, "kg/L"), col2, y, headerPaint)
-        canvas.drawText(context.getString(R.string.pdf_arm), col3, y, headerPaint)
-        canvas.drawText(context.getString(R.string.pdf_moment), col4, y, headerPaint)
+        canvas.drawText(context.getString(R.string.pdf_non_lifting), col3, y, headerPaint)
+        canvas.drawText(context.getString(R.string.pdf_arm), col4, y, headerPaint)
+        canvas.drawText(context.getString(R.string.pdf_moment), col5, y, headerPaint)
         y += 5f
-        canvas.drawLine(margin, y, 545f, y, normalPaint)
+        canvas.drawLine(margin, y, 555f, y, normalPaint)
         y += 15f
 
         // Table Content: 1. Leermasse
-        val emptyMass = profile.aircraft.emptyWeight ?: 0.0
+        val emptyWeight = profile.aircraft.emptyWeight ?: 0.0
         val emptyArm = profile.aircraft.emptyWeightArm ?: 0.0
-        val emptyMoment = emptyMass * emptyArm
+        val emptyMoment = emptyWeight * emptyArm
         
         canvas.drawText(context.getString(R.string.Leermasse), col1, y, normalPaint)
-        canvas.drawText(String.format(Locale.getDefault(), "%.1f", emptyMass), col2, y, normalPaint)
-        canvas.drawText(String.format(Locale.getDefault(), "%.1f", emptyArm), col3, y, normalPaint)
-        canvas.drawText(String.format(Locale.getDefault(), "%.0f", emptyMoment), col4, y, normalPaint)
+        canvas.drawText(String.format(Locale.getDefault(), "%.1f", emptyWeight), col2, y, normalPaint)
+        canvas.drawText(String.format(Locale.getDefault(), "%.1f", emptyArm), col4, y, normalPaint)
+        canvas.drawText(String.format(Locale.getDefault(), "%.0f", emptyMoment), col5, y, normalPaint)
         y += 15f
 
-        // Table Content: Stations
+        // 1a. Rumpf (Bestandteil der Leermasse)
+        profile.aircraft.fuselageMass?.let {
+            canvas.drawText(" - ${context.getString(R.string.pdf_label_fuselage)}", col1, y, normalPaint)
+            canvas.drawText(String.format(Locale.getDefault(), "%.1f", it), col3, y, normalPaint)
+            y += 15f
+        }
+        // 1b. HLW (Bestandteil der Leermasse)
+        profile.aircraft.stabilizerMass?.let {
+            canvas.drawText(" - ${context.getString(R.string.pdf_label_stabilizer)}", col1, y, normalPaint)
+            canvas.drawText(String.format(Locale.getDefault(), "%.1f", it), col3, y, normalPaint)
+            y += 15f
+        }
+
+        // Table Content: Stations (Payload)
         profile.sortedStations.forEach { station ->
             val mass = station.defaultValue ?: 0.0
             val moment = mass * station.arm
             
             canvas.drawText(station.name, col1, y, normalPaint)
             canvas.drawText(String.format(Locale.getDefault(), "%.1f", mass), col2, y, normalPaint)
-            canvas.drawText(String.format(Locale.getDefault(), "%.1f", station.arm), col3, y, normalPaint)
-            canvas.drawText(String.format(Locale.getDefault(), "%.0f", moment), col4, y, normalPaint)
+            if (station.isNonLifting) {
+                canvas.drawText(String.format(Locale.getDefault(), "%.1f", mass), col3, y, normalPaint)
+            }
+            canvas.drawText(String.format(Locale.getDefault(), "%.1f", station.arm), col4, y, normalPaint)
+            canvas.drawText(String.format(Locale.getDefault(), "%.0f", moment), col5, y, normalPaint)
             y += 15f
         }
 
         y += 10f
-        canvas.drawLine(margin, y, 545f, y, normalPaint)
+        canvas.drawLine(margin, y, 555f, y, normalPaint)
         y += 30f
 
         // Summary
@@ -114,6 +134,10 @@ class PdfExporter(private val context: Context) {
         y += 20f
 
         canvas.drawText("${context.getString(R.string.pdf_total_mass)} ${String.format(Locale.getDefault(), "%.1f kg", totalMass)}", margin, y, normalPaint)
+        y += 15f
+        canvas.drawText("${context.getString(R.string.pdf_total_non_lifting)} ${String.format(Locale.getDefault(), "%.1f kg", nonLiftingMass)}", margin, y, normalPaint)
+        y += 15f
+        canvas.drawText("${context.getString(R.string.pdf_total_moment)} ${String.format(Locale.getDefault(), "%.0f kg·mm", totalMoment)}", margin, y, normalPaint)
         y += 15f
         canvas.drawText("${context.getString(R.string.pdf_cg_location)} ${String.format(Locale.getDefault(), "%.1f mm", cgLocation)}", margin, y, normalPaint)
         
