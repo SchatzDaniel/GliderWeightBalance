@@ -88,7 +88,8 @@ class AddAircraftFragment : Fragment() {
                     unit = "kg",
                     maxMass = null,
                     displayOrder = stationsAdapter.itemCount,
-                    isNonLifting = false
+                    isNonLifting = false,
+                    isConsumable = false
                 )
                 stationsAdapter.addStation(newStation)
             }

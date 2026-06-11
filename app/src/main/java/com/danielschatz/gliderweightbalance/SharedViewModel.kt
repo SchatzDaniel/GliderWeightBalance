@@ -38,6 +38,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val _cg = MutableLiveData<CalculationResult>()
     val cg: LiveData<CalculationResult> = _cg
 
+    private val _cgRange = MutableLiveData<Pair<Double, Double>?>()
+    val cgRange: LiveData<Pair<Double, Double>?> = _cgRange
+
     // NonLiftingMass wird vereinfacht, da es nicht mehr aus festen Feldern berechnet wird.
     private val _nonLiftingMass = MutableLiveData<CalculationResult>()
     val nonLiftingMass: LiveData<CalculationResult > = _nonLiftingMass
@@ -161,22 +164,65 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         // --- 2. Schwerpunkt (CG) berechnen ---
         if (profile.aircraft.emptyWeightArm == null) {
             _cg.value = CalculationResult.Error // Fehler, wenn Leermassen-Hebelarm fehlt
+            _cgRange.value = null
         } else {
-            // Berechne das Moment der Zuladung
+            // 2a. Aktueller CG (Take-off)
             val payloadMoment = profile.sortedStations.sumOf { station ->
                 val rawValue = masses[station.stationId] ?: 0.0
                 val density = getDensity(station.fluidType)
                 val mass = rawValue * density
                 mass * station.arm
             }
-
-            // Berechne das Gesamtmoment
-            val totalMoment = (profile.aircraft.emptyWeight * profile.aircraft.emptyWeightArm) + payloadMoment
-
+            val takeOffMoment = (profile.aircraft.emptyWeight * profile.aircraft.emptyWeightArm) + payloadMoment
             if (mGes > 0) {
-                _cg.value = CalculationResult.Success(totalMoment / mGes)
+                _cg.value = CalculationResult.Success(takeOffMoment / mGes)
             } else {
                 _cg.value = CalculationResult.Success(0.0)
+            }
+
+            // 2b. CG Range (Worst-Case) berechnen
+            val consumableStations = profile.stations.filter { it.station.isConsumable }
+            
+            if (consumableStations.isEmpty()) {
+                _cgRange.value = null
+            } else {
+                // Wir berechnen alle Kombinationen von Voll/Leer für veränderbare Stationen
+                val results = mutableListOf<Double>()
+                val numCombinations = 1 shl consumableStations.size // 2^N
+
+                for (i in 0 until numCombinations) {
+                    val baseMass = profile.aircraft.emptyWeight ?: 0.0
+                    val baseArm = profile.aircraft.emptyWeightArm ?: 0.0
+                    var comboMass = baseMass
+                    var comboMoment = baseMass * baseArm
+
+                    // Feste Zuladung hinzufügen
+                    profile.stations.filter { !it.station.isConsumable }.forEach { swp ->
+                        val m = (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                        comboMass += m
+                        comboMoment += m * swp.station.arm
+                    }
+
+                    // Veränderbare Zuladung basierend auf Bitmaske hinzufügen
+                    consumableStations.forEachIndexed { index, swp ->
+                        // Wenn Bit gesetzt -> Aktueller Wert, sonst 0
+                        val m = if ((i shr index) and 1 == 1) {
+                            (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                        } else 0.0
+                        comboMass += m
+                        comboMoment += m * swp.station.arm
+                    }
+
+                    if (comboMass > 0) {
+                        results.add(comboMoment / comboMass)
+                    }
+                }
+                
+                if (results.isNotEmpty()) {
+                    _cgRange.value = Pair(results.min(), results.max())
+                } else {
+                    _cgRange.value = null
+                }
             }
         }
 

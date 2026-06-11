@@ -123,55 +123,13 @@ class HomeFragment : Fragment() {
 
         // 2. Schwerpunkt Observer
         sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
-            val profile = sharedViewModel.selectedProfile.value?.aircraft ?: return@observe
-            val minCG = profile.minCg ?: 0.0
-            val maxCG = profile.maxCg ?: 0.0
-            val range = maxCG - minCG
-            val hasLimit = profile.maxCg != null && profile.minCg != null
-
-            when (result) {
-                is CalculationResult.Success -> {
-                    val value = result.value
-                    binding.twSchwerpunktlageErgebnis.text = String.format(Locale.getDefault(), "%.1f mm", value)
-
-                    // Prozentuale Lage (MAC)
-                    val percentage = if (range > 0) (value - minCG) / range * 100 else 0.0
-                    binding.twCgPercent.text = String.format(Locale.getDefault(), "(%.1f%%)", percentage)
-
-                    // Validierung
-                    val isOutsideLimits = (minCG > 0.0 || maxCG > 0.0) && (value !in minCG..maxCG)
-
-                    updateCardVisuals(
-                        binding.cardCg,
-                        binding.progressCg,
-                        binding.statusCg,
-                        binding.cardStatusCg,
-                        percentage.toInt(),
-                        isOutsideLimits,
-                        isError = false,
-                        hasLimit
-                    )
-                }
-                is CalculationResult.Error -> {
-                    binding.twSchwerpunktlageErgebnis.text = "---"
-                    binding.twCgPercent.text = "---"
-                    binding.statusCg.text = getString(R.string.status_error)
-
-                    updateCardVisuals(
-                        binding.cardCg,
-                        binding.progressCg,
-                        binding.statusCg,
-                        binding.cardStatusCg,
-                        progressValue = null,
-                        isOutsideLimits = false,
-                        isError = true,
-                        hasLimit
-                    )
-                }
-            }
+            updateCgUi()
         }
 
-        // 3. Masse n.t.T. Observer
+        sharedViewModel.cgRange.observe(viewLifecycleOwner) { range ->
+            updateCgUi()
+        }
+
         sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
             val aircraft = sharedViewModel.selectedProfile.value?.aircraft
             val maxNonLifting = aircraft?.maxNonLiftingMass ?: 0.0
@@ -215,12 +173,88 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun updateCgUi() {
+        val result = sharedViewModel.cg.value ?: return
+        val flightRange = sharedViewModel.cgRange.value
+        val profile = sharedViewModel.selectedProfile.value?.aircraft ?: return
+        
+        val minCG = profile.minCg ?: 0.0
+        val maxCG = profile.maxCg ?: 0.0
+        val totalRange = maxCG - minCG
+        val hasLimit = profile.maxCg != null && profile.minCg != null
+
+        when (result) {
+            is CalculationResult.Success -> {
+                val value = result.value
+                binding.twSchwerpunktlageErgebnis.text = String.format(Locale.getDefault(), "%.1f mm", value)
+
+                // Prozentuale Lage (MAC)
+                val percentage = if (totalRange > 0) (value - minCG) / totalRange * 100 else 0.0
+                binding.twCgPercent.text = String.format(Locale.getDefault(), "(%.1f%%)", percentage)
+
+                // Validierung (muss auch für die gesamte Range im Flug gelten!)
+                var isOutsideLimits = (minCG > 0.0 || maxCG > 0.0) && (value !in minCG..maxCG)
+                
+                // Falls es eine Flug-Range gibt, muss der gesamte Bereich innerhalb der Limits liegen
+                var rangeStartPct: Float? = null
+                var rangeEndPct: Float? = null
+                
+                if (flightRange != null) {
+                    val (minInFlight, maxInFlight) = flightRange
+                    if (minInFlight < minCG || maxInFlight > maxCG) {
+                        isOutsideLimits = true
+                    }
+                    if (totalRange > 0) {
+                        rangeStartPct = ((minInFlight - minCG) / totalRange).toFloat()
+                        rangeEndPct = ((maxInFlight - minCG) / totalRange).toFloat()
+                    }
+                }
+
+                // UI Update
+                updateCardVisuals(
+                    binding.cardCg,
+                    binding.progressCg,
+                    binding.statusCg,
+                    binding.cardStatusCg,
+                    percentage.toInt(),
+                    isOutsideLimits,
+                    isError = false,
+                    hasLimit
+                )
+                
+                // Custom Progress Bar Update
+                (binding.progressCg as? com.danielschatz.gliderweightbalance.views.CgRangeProgressBar)?.setProgress(
+                    (percentage / 100.0).toFloat(),
+                    rangeStartPct,
+                    rangeEndPct
+                )
+            }
+            is CalculationResult.Error -> {
+                binding.twSchwerpunktlageErgebnis.text = "---"
+                binding.twCgPercent.text = "---"
+                binding.statusCg.text = getString(R.string.status_error)
+
+                updateCardVisuals(
+                    binding.cardCg,
+                    binding.progressCg,
+                    binding.statusCg,
+                    binding.cardStatusCg,
+                    progressValue = null,
+                    isOutsideLimits = false,
+                    isError = true,
+                    hasLimit
+                )
+                (binding.progressCg as? com.danielschatz.gliderweightbalance.views.CgRangeProgressBar)?.setProgress(0f, null, null)
+            }
+        }
+    }
+
     /**
      * Zentralisierte Funktion zum Stylen der einzelnen Dashboard-Karten
      */
     private fun updateCardVisuals(
         card: com.google.android.material.card.MaterialCardView,
-        progressIndicator: com.google.android.material.progressindicator.LinearProgressIndicator,
+        progressIndicator: View,
         statusLabel: android.widget.TextView,
         statusCard: com.google.android.material.card.MaterialCardView,
         progressValue: Int?,
@@ -228,13 +262,12 @@ class HomeFragment : Fragment() {
         isError: Boolean,
         limitExists: Boolean
     ) {
-        // 1. Logik für Sichtbarkeit und Fortschritt der ProgressBar
-        when {
-            isError || !limitExists ||progressValue == null -> {
-                progressIndicator.visibility = View.INVISIBLE
-            }
-            else -> {
-                progressIndicator.visibility = View.VISIBLE
+        // 1. Logik für Sichtbarkeit der ProgressBar
+        if (isError || !limitExists || progressValue == null) {
+            progressIndicator.visibility = View.INVISIBLE
+        } else {
+            progressIndicator.visibility = View.VISIBLE
+            if (progressIndicator is com.google.android.material.progressindicator.LinearProgressIndicator) {
                 progressIndicator.progress = progressValue.coerceIn(0, 100)
             }
         }
@@ -245,17 +278,20 @@ class HomeFragment : Fragment() {
             val colorRed = getThemeColor(com.google.android.material.R.attr.colorOnErrorContainer)
             val bgRed = getThemeColor(com.google.android.material.R.attr.colorErrorContainer)
 
-            // Karte Rot färben
             card.setCardBackgroundColor(ColorStateList.valueOf(bgRed))
             card.setStrokeColor(ColorStateList.valueOf(colorRed))
             card.strokeWidth = 8
             card.cardElevation = 0f
-            progressIndicator.setIndicatorColor(colorRed)
+            
+            if (progressIndicator is com.google.android.material.progressindicator.LinearProgressIndicator) {
+                progressIndicator.setIndicatorColor(colorRed)
+            } else if (progressIndicator is com.danielschatz.gliderweightbalance.views.CgRangeProgressBar) {
+                progressIndicator.setIndicatorColor(colorRed)
+            }
 
-            // Dynamischer Status-Text
             statusLabel.text = when {
                 isError -> getString(R.string.status_error)
-                !limitExists -> getString(R.string.status_limit_missing) // Signalisiert: Berechnung ok, aber keine Grenze
+                !limitExists -> getString(R.string.status_limit_missing)
                 else -> getString(R.string.status_out_of_limits)
             }
 
@@ -270,14 +306,17 @@ class HomeFragment : Fragment() {
             card.strokeWidth = 0
             card.cardElevation = 4 * resources.displayMetrics.density
 
-            // Progress & Status auf OK
             val colorIndicator = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
             val colorTrack = getThemeColor(com.google.android.material.R.attr.colorPrimaryInverse)
             
-            progressIndicator.setIndicatorColor(colorIndicator)
-            progressIndicator.trackColor = colorTrack
+            if (progressIndicator is com.google.android.material.progressindicator.LinearProgressIndicator) {
+                progressIndicator.setIndicatorColor(colorIndicator)
+                progressIndicator.trackColor = colorTrack
+            } else if (progressIndicator is com.danielschatz.gliderweightbalance.views.CgRangeProgressBar) {
+                progressIndicator.setIndicatorColor(colorIndicator)
+                progressIndicator.setTrackColor(colorTrack)
+            }
 
-            // Statuslabel setzen
             statusLabel.text = getString(R.string.status_ok)
             statusLabel.setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnPrimaryContainer))
             statusCard.setCardBackgroundColor(getThemeColor(com.google.android.material.R.attr.colorPrimaryContainer))

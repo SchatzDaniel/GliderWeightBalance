@@ -54,6 +54,10 @@
     <string name="label_arm">"Hebelarm: %s mm"</string>
     <string name="Move">Verschieben</string>
     <string name="option_is_non_lifting">Zählt zu nicht-tragenden Teilen</string>
+    <string name="option_is_consumable">Veränderbar im Flug (z.B. Wasser, Benzin)</string>
+    <string name="consumable_info_title">Veränderbare Massen</string>
+    <string name="consumable_info_message">Stationen, die als \"veränderbar\" markiert sind, werden für die Worst-Case-Berechnung herangezogen.\n\nDie App berechnet automatisch die Schwerpunktlage für alle Zustände (z.B. Wasser voll vs. Wasser abgelassen), um sicherzustellen, dass der Schwerpunkt zu jedem Zeitpunkt des Fluges innerhalb der Limits bleibt.</string>
+    <string name="label_cg_range">Bereich im Flug: %1$s — %2$s mm</string>
     <string name="new_aircraft">Neues Flugzeug</string>
     <string name="status_ok">O.K.</string>
     <string name="status_limit_missing">Limit ?</string>
