@@ -22,6 +22,7 @@ class PdfExporter(private val context: Context) {
         nonLiftingMass: Double,
         cgLocation: Double,
         cgMac: Double?,
+        cgRange: Pair<Double, Double>?,
         isWithinLimits: Boolean
     ): File? {
         val pdfDocument = PdfDocument()
@@ -129,6 +130,16 @@ class PdfExporter(private val context: Context) {
         canvas.drawLine(margin, y, 555f, y, normalPaint)
         y += 30f
 
+        // Betriebsgrenzen
+        canvas.drawText(context.getString(R.string.pdf_limits_title), margin, y, headerPaint)
+        y += 20f
+        canvas.drawText("${context.getString(R.string.pdf_limit_mass)} ${String.format(Locale.getDefault(), "%.1f kg", profile.aircraft.maxTotalMass ?: 0.0)}", margin, y, normalPaint)
+        y += 15f
+        canvas.drawText("${context.getString(R.string.pdf_limit_non_lifting)} ${String.format(Locale.getDefault(), "%.1f kg", profile.aircraft.maxNonLiftingMass ?: 0.0)}", margin, y, normalPaint)
+        y += 15f
+        canvas.drawText("${context.getString(R.string.pdf_limit_cg)} ${String.format(Locale.getDefault(), "%.1f — %.1f mm", profile.aircraft.minCg ?: 0.0, profile.aircraft.maxCg ?: 0.0)}", margin, y, normalPaint)
+        y += 35f
+
         // Summary
         canvas.drawText(context.getString(R.string.pdf_summary), margin, y, headerPaint)
         y += 20f
@@ -144,6 +155,11 @@ class PdfExporter(private val context: Context) {
         if (cgMac != null) {
             y += 15f
             canvas.drawText("${context.getString(R.string.pdf_cg_mac)} ${String.format(Locale.getDefault(), "%.1f %%", cgMac)}", margin, y, normalPaint)
+        }
+
+        if (cgRange != null) {
+            y += 15f
+            canvas.drawText("${context.getString(R.string.pdf_flight_range)} ${String.format(Locale.getDefault(), "%.1f — %.1f mm", cgRange.first, cgRange.second)}", margin, y, normalPaint)
         }
         
         y += 35f

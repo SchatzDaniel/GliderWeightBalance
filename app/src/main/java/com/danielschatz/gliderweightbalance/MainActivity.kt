@@ -218,15 +218,39 @@ class MainActivity : AppCompatActivity() {
         val nonLiftingMass = if (nonLiftingMassResult is CalculationResult.Success) nonLiftingMassResult.value else 0.0
 
         val aircraft = profile.aircraft
-        val isWithinLimits = (totalMass <= (aircraft.maxTotalMass ?: Double.MAX_VALUE)) &&
-                (cgLocationResult.value in (aircraft.minCg ?: Double.MIN_VALUE)..(aircraft.maxCg ?: Double.MAX_VALUE)) &&
-                (nonLiftingMass <= (aircraft.maxNonLiftingMass ?: Double.MAX_VALUE))
+        val minLimitCg = aircraft.minCg ?: 0.0
+        val maxLimitCg = aircraft.maxCg ?: 0.0
+        val hasCgLimit = aircraft.minCg != null || aircraft.maxCg != null
 
-        val range = (aircraft.maxCg ?: 0.0) - (aircraft.minCg ?: 0.0)
-        val cgMac = if (range > 0) (cgLocationResult.value - (aircraft.minCg ?: 0.0)) / range * 100 else null
+        val isCgOk = !hasCgLimit || (cgLocationResult.value in minLimitCg..maxLimitCg)
+        val isTotalMassOk = aircraft.maxTotalMass == null || totalMass <= aircraft.maxTotalMass
+        val isNonLiftingOk = aircraft.maxNonLiftingMass == null || nonLiftingMass <= aircraft.maxNonLiftingMass
+        
+        var isWithinLimits = isCgOk && isTotalMassOk && isNonLiftingOk
+
+        // WICHTIG: Falls es eine Range im Flug gibt, muss auch diese komplett innerhalb der Limits liegen
+        val cgRange = sharedViewModel.cgRange.value
+        if (cgRange != null && hasCgLimit) {
+            if (cgRange.first < minLimitCg || cgRange.second > maxLimitCg) {
+                isWithinLimits = false
+            }
+        }
+
+        // CG in % MAC berechnen
+        val range = maxLimitCg - minLimitCg
+        val cgMac = if (range > 0 && hasCgLimit) (cgLocationResult.value - minLimitCg) / range * 100 else null
 
         val exporter = PdfExporter(this)
-        val pdfFile = exporter.generateReport(profile, totalMass, totalMoment, nonLiftingMass, cgLocationResult.value, cgMac, isWithinLimits)
+        val pdfFile = exporter.generateReport(
+            profile,
+            totalMass,
+            totalMoment,
+            nonLiftingMass,
+            cgLocationResult.value,
+            cgMac,
+            cgRange,
+            isWithinLimits
+        )
 
         if (pdfFile != null) {
             val uri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.fileprovider", pdfFile)

@@ -125,6 +125,11 @@
     <string name="pdf_total_moment">Gesamtmoment:</string>
     <string name="pdf_cg_location">Schwerpunktlage:</string>
     <string name="pdf_cg_mac">Schwerpunktlage (%):</string>
+    <string name="pdf_flight_range">Schwerpunktverlagerung im Flug:</string>
+    <string name="pdf_limits_title">Betriebsgrenzen</string>
+    <string name="pdf_limit_mass">Max. Abflugmasse:</string>
+    <string name="pdf_limit_non_lifting">Max. n.t. Teile:</string>
+    <string name="pdf_limit_cg">Zul. Schwerpunktbereich:</string>
     <string name="pdf_status">Status:</string>
     <string name="pdf_error_no_profile">Kein Flugzeug für Export ausgewählt.</string>
     <string name="pdf_export_error">Fehler beim Erstellen der PDF.</string>
