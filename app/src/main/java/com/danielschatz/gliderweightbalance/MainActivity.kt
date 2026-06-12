@@ -37,6 +37,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import java.io.File
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.net.toUri
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,6 +53,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val theme = prefs.getString("theme", "system")
+        val themeMode = when (theme) {
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        AppCompatDelegate.setDefaultNightMode(themeMode)
+
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
@@ -143,13 +154,13 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.update_permission_grant) { _, _ ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                        data = Uri.parse("package:$packageName")
+                        data = "package:$packageName".toUri()
                     }
                     startActivity(intent)
                 }
             }
             .setNegativeButton(R.string.update_manual_download) { _, _ ->
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(manualUrl))
+                val intent = Intent(Intent.ACTION_VIEW, manualUrl.toUri())
                 startActivity(intent)
             }
             .show()
@@ -277,7 +288,7 @@ class MainActivity : AppCompatActivity() {
     private fun showAboutDialog() {
         val versionName = try {
             packageManager.getPackageInfo(packageName, 0).versionName
-        } catch (e: Exception) { "N/A" }
+        } catch (_: Exception) { "N/A" }
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val latestVersion = prefs.getString("latest_available_version", null)
