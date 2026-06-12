@@ -74,11 +74,17 @@
     <string name="hint_choose_preset">Preset wählen</string>
     <string name="max_weight_hint">max. %1$s %2$s</string>
     <string name="export_aircraft">Exportieren</string>
+    <string name="export_json">JSON Exportieren</string>
     <string name="import_aircraft">Importieren</string>
+    <string name="import_json">JSON Importieren</string>
     <string name="export_success">Profil erfolgreich exportiert!</string>
     <string name="import_success">Profil erfolgreich importiert!</string>
     <string name="error_export_failed">Export fehlgeschlagen.</string>
     <string name="error_import_failed">Import fehlgeschlagen.</string>
+    <string name="share_qr_title">Profil via QR teilen</string>
+    <string name="scan_qr_title">Profil via QR importieren</string>
+    <string name="qr_export_limitation_info">Hinweis: QR-Codes übertragen nur die Basisdaten. Komfort-Funktionen (Presets, Schieberegler, Reihenfolge) werden nicht mit übertragen. Nutze den JSON-Export für vollständige Profile.</string>
+    <string name="error_qr_too_large">Profil zu groß für QR-Code. Bitte JSON nutzen.</string>
     <string name="menu_item_about">Über</string>
     <string name="about_title">Über diese App</string>
     <string name="about_version">Version: %1$s</string>
