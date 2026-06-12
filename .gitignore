@@ -13,3 +13,5 @@ local.properties
 *.keystore
 *.pk8
 *.p12
+**/build
+**/release
