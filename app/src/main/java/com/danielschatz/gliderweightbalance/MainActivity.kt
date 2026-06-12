@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -89,15 +88,50 @@ class MainActivity : AppCompatActivity() {
             appBarConfiguration
         )
 
+        NavigationUI.setupWithNavController(
+            binding.bottomNavigation,
+            navController
+        )
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.scenarioFragment -> {
+                    ScenarioBottomSheetFragment().show(supportFragmentManager, "ScenarioBottomSheet")
+                    false // Nicht navigieren, nur Sheet öffnen
+                }
+                else -> {
+                    NavigationUI.onNavDestinationSelected(item, navController)
+                    true
+                }
+            }
+        }
+
         UpdateManager.scheduleUpdateCheck(this)
         requestNotificationPermission()
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             currentDestinationId = destination.id
             invalidateOptionsMenu()
+
+            val showBottomNav = destination.id in setOf(R.id.homeFragment, R.id.aircraftFragment)
+            binding.bottomNavigation.visibility = if (showBottomNav) android.view.View.VISIBLE else android.view.View.GONE
+
             if (destination.id == R.id.homeFragment) { 
                 updateAppBarTitleWithSelectedProfile()
             }
+        }
+
+        // Hide bottom navigation when keyboard is shown
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val showBottomNav = currentDestinationId in setOf(R.id.homeFragment, R.id.aircraftFragment)
+            
+            if (isKeyboardVisible) {
+                binding.bottomNavigation.visibility = android.view.View.GONE
+            } else if (showBottomNav) {
+                binding.bottomNavigation.visibility = android.view.View.VISIBLE
+            }
+            insets
         }
 
         sharedViewModel.selectedProfile.observe(this) { 

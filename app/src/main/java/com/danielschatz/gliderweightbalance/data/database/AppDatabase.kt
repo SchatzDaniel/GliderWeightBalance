@@ -10,13 +10,16 @@ import com.danielschatz.gliderweightbalance.data.dao.AircraftDao
 import com.danielschatz.gliderweightbalance.data.dao.AircraftProfileDao
 import com.danielschatz.gliderweightbalance.data.dao.PayloadStationDao
 import com.danielschatz.gliderweightbalance.data.dao.PresetDao
+import com.danielschatz.gliderweightbalance.data.dao.ScenarioDao
 import com.danielschatz.gliderweightbalance.data.model.Aircraft
 import com.danielschatz.gliderweightbalance.data.model.PayloadStation
 import com.danielschatz.gliderweightbalance.data.model.Preset
+import com.danielschatz.gliderweightbalance.data.model.Scenario
+import com.danielschatz.gliderweightbalance.data.model.ScenarioEntry
 
 @Database(
-    entities = [Aircraft::class, PayloadStation::class, Preset::class],
-    version = 10,
+    entities = [Aircraft::class, PayloadStation::class, Preset::class, Scenario::class, ScenarioEntry::class],
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,6 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun payloadStationDao(): PayloadStationDao
     abstract fun aircraftProfileDao(): AircraftProfileDao
     abstract fun presetDao(): PresetDao
+    abstract fun scenarioDao(): ScenarioDao
 
     companion object {
         @Volatile
@@ -37,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "aircraft_database"
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
-                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                     .build()
                 INSTANCE = instance
                 instance
@@ -130,6 +134,35 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_9_10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE payload_stations ADD COLUMN isConsumable INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS scenarios (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        aircraftId INTEGER NOT NULL,
+                        name TEXT NOT NULL,
+                        FOREIGN KEY(aircraftId) REFERENCES aircraft_table(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scenarios_aircraftId ON scenarios (aircraftId)")
+
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS scenario_entries (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        scenarioId INTEGER NOT NULL,
+                        stationId INTEGER NOT NULL,
+                        value REAL,
+                        selectedPresetLabel TEXT,
+                        amount INTEGER NOT NULL,
+                        FOREIGN KEY(scenarioId) REFERENCES scenarios(id) ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(stationId) REFERENCES payload_stations(stationId) ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scenario_entries_scenarioId ON scenario_entries (scenarioId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scenario_entries_stationId ON scenario_entries (stationId)")
             }
         }
     }

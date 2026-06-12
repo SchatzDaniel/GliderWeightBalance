@@ -53,7 +53,16 @@ class HomeFragment : Fragment() {
         setupCalculationObservers()
     }
 
+    private var currentAircraftId: Int? = null
+
     private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile?) {
+        val newId = aircraftProfile?.aircraft?.id
+        if (newId == currentAircraftId && childFragmentManager.findFragmentById(R.id.bottom_fragment_container) != null) {
+            // Gleiches Flugzeug, nur Werte geändert -> Fragment behalten
+            return
+        }
+        currentAircraftId = newId
+
         if (aircraftProfile == null) {
             childFragmentManager.beginTransaction()
                 .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())

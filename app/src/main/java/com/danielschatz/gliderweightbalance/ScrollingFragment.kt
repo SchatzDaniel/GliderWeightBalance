@@ -46,26 +46,33 @@ class ScrollingFragment : Fragment() {
         binding.recyclerViewMassInputs.apply {
             adapter = calculationsAdapter
             layoutManager = LinearLayoutManager(requireContext())
+            
+            // WICHTIG: Change-Animationen deaktivieren, um das "Warpen" der Hints zu verhindern
+            (itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.supportsChangeAnimations = false
         }
     }
 
     private fun observeViewModel() {
         sharedViewModel.headerHeight.observe(viewLifecycleOwner) { height ->
-            binding.recyclerViewMassInputs.setPadding(0, height, 0, 0)
+            binding.recyclerViewMassInputs.setPadding(
+                binding.recyclerViewMassInputs.paddingLeft,
+                height,
+                binding.recyclerViewMassInputs.paddingRight,
+                binding.recyclerViewMassInputs.paddingBottom
+            )
         }
 
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
             if (profile == null) {
                 binding.recyclerViewMassInputs.isVisible = false
                 binding.textViewNoAircraftSelected.isVisible = true
-                // Hier ist submitList okay, um die Liste zu leeren
                 calculationsAdapter.submitList(emptyList())
             } else {
                 binding.recyclerViewMassInputs.isVisible = true
                 binding.textViewNoAircraftSelected.isVisible = false
 
-                // WICHTIG: Nur diese eine Zeile nutzen!
-                // Sie gruppiert die Daten und aktualisiert die Anzeige.
+                // Wir überlassen dem ListAdapter/DiffUtil die Arbeit.
+                // notifyDataSetChanged() würde die Payloads umgehen und Flackern verursachen.
                 calculationsAdapter.updateData(profile.stations)
             }
         }

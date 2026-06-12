@@ -135,6 +135,41 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun applyScenarioEntries(entries: List<com.danielschatz.gliderweightbalance.data.model.ScenarioEntry>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. In der Datenbank aktualisieren
+            entries.forEach { entry ->
+                payloadStationDao.updateStationState(entry.stationId, entry.value ?: 0.0, entry.selectedPresetLabel, entry.amount)
+            }
+            
+            // 2. UI im Main-Thread aktualisieren
+            launch(Dispatchers.Main) {
+                _selectedProfile.value?.let { profile ->
+                    val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
+                    
+                    // Wir erstellen neue Instanzen der Stationen, damit DiffUtil den Unterschied erkennt
+                    val updatedStations = profile.stations.map { swp ->
+                        val entry = entries.find { it.stationId == swp.station.stationId }
+                        if (entry != null) {
+                            currentMasses[entry.stationId] = entry.value ?: 0.0
+                            val updatedStation = swp.station.copy(
+                                defaultValue = entry.value,
+                                selectedPresetLabel = entry.selectedPresetLabel,
+                                amount = entry.amount
+                            )
+                            swp.copy(station = updatedStation)
+                        } else {
+                            swp
+                        }
+                    }
+                    
+                    _stationMasses.value = currentMasses
+                    _selectedProfile.value = profile.copy(stations = updatedStations)
+                }
+            }
+        }
+    }
+
     /**
      * Die NEUE, VIEL EINFACHERE Berechnungsfunktion.
      */

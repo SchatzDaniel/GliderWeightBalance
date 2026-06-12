@@ -73,11 +73,63 @@ class CalculationsAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty() && payloads.any { it == "ONLY_VALUES" }) {
+            val item = getItem(position)
+            if (holder is SingleViewHolder && item is CalculationItem.SingleStation) {
+                holder.updateValuesOnly(item.swp)
+            } else if (holder is GroupViewHolder && item is CalculationItem.StationGroup) {
+                holder.updateValuesOnly(item.stations)
+            }
+        } else {
+            onBindViewHolder(holder, position)
+        }
+    }
+
     inner class SingleViewHolder(private val binding: ItemScrollingStationBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         private var manualWatcher: TextWatcher? = null
         private var amountWatcher: TextWatcher? = null
+
+        fun updateValuesOnly(swp: StationWithPresets) {
+            val station = swp.station
+            
+            // Gewicht oben rechts
+            val etWeightDisplay = binding.etManualInput
+            val value = station.defaultValue ?: 0.0
+            val formatted = if (value % 1.0 == 0.0) {
+                String.format(Locale.getDefault(), "%.0f", value)
+            } else {
+                String.format(Locale.getDefault(), "%.1f", value)
+            }
+            if (etWeightDisplay.text.toString() != formatted && !etWeightDisplay.hasFocus()) {
+                etWeightDisplay.setText(formatted)
+            }
+
+            // Menge
+            if (station.hasAmountInput) {
+                val amountStr = station.amount.toString()
+                if (binding.etAmount.text.toString() != amountStr && !binding.etAmount.hasFocus()) {
+                    binding.etAmount.setText(amountStr)
+                }
+            }
+
+            // Preset
+            if (station.hasPresets) {
+                val newPresetText = station.selectedPresetLabel ?: "Keine Auswahl"
+                if (binding.spinnerPresets.text.toString() != newPresetText) {
+                    binding.spinnerPresets.setText(newPresetText, false)
+                }
+            }
+
+            // Slider
+            if (station.hasSlider && station.maxMass != null) {
+                val step = if (station.maxMass % 1.0 != 0.0) 0.1f else 1.0f
+                val snappedVal = ((station.defaultValue ?: 0.0) / step).roundToInt() * step
+                binding.weightSlider.value = snappedVal.coerceIn(0f, station.maxMass.toFloat())
+            }
+        }
 
         fun bind(swp: StationWithPresets) {
             val station = swp.station
@@ -86,36 +138,24 @@ class CalculationsAdapter(
             // Alten Watcher entfernen
             binding.etManualInput.removeTextChangedListener(manualWatcher)
             binding.etAmount.removeTextChangedListener(amountWatcher)
+            
+            // Initial-Bindung
+            updateValuesOnly(swp)
 
             // Das kombinierte Eingabe-/Anzeigefeld oben rechts
-            val etWeightDisplay = binding.etManualInput
-
-            // --- WICHTIG: Das Feld oben rechts muss IMMER sichtbar sein ---
-            // Falls das übergeordnete TextInputLayout eine ID hat (z.B. layoutManualInput oben),
-            // stelle sicher, dass es sichtbar ist.
             binding.layoutManualInput.visibility = View.VISIBLE
             binding.tvUnitSuffix.text = station.unit ?: "kg"
-
-            val updateTextProgrammatically = { value: Double ->
-                if (!etWeightDisplay.hasFocus()) {
-                    val formatted = if (value % 1.0 == 0.0) {
-                        String.format(Locale.getDefault(), "%.0f", value)
-                    } else {
-                        String.format(Locale.getDefault(), "%.1f", value)
-                    }
-                    etWeightDisplay.setText(formatted)
-                }
-            }
-
-            updateTextProgrammatically(station.defaultValue ?: 0.0)
 
             // Haupt-TextWatcher (Manuelle Eingabe oben rechts)
             manualWatcher = object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    if (etWeightDisplay.hasFocus()) {
+                    if (binding.etManualInput.hasFocus()) {
                         val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
                         if (station.hasPresets) {
-                            binding.spinnerPresets.setText(R.string.option_no_selection)
+                            val noSelectionText = itemView.context.getString(R.string.option_no_selection)
+                            if (binding.spinnerPresets.text.toString() != noSelectionText) {
+                                binding.spinnerPresets.setText(noSelectionText, false)
+                            }
                         }
                         if (station.hasSlider && station.maxMass != null) {
                             val sliderVal = weight.toFloat().coerceIn(0f, station.maxMass.toFloat())
@@ -127,7 +167,7 @@ class CalculationsAdapter(
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
                 override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
             }
-            etWeightDisplay.addTextChangedListener(manualWatcher)
+            binding.etManualInput.addTextChangedListener(manualWatcher)
 
             // --- LOGIK FÜR DIE ZUSATZ-CONTROLS (UNTERHALB) ---
             if (station.hasPresets && swp.presets.isNotEmpty()) {
@@ -139,19 +179,14 @@ class CalculationsAdapter(
                 // Mengen-Feld
                 if (station.hasAmountInput) {
                     binding.layoutAmount.visibility = View.VISIBLE
-                    binding.etAmount.setText(station.amount.toString())
                 } else {
                     binding.layoutAmount.visibility = View.GONE
-                    binding.etAmount.setText("1")
                 }
 
                 val presetLabels = mutableListOf("Keine Auswahl")
                 presetLabels.addAll(swp.presets.map { it.label })
                 val adapter = ArrayAdapter(itemView.context, android.R.layout.simple_dropdown_item_1line, presetLabels)
                 binding.spinnerPresets.setAdapter(adapter)
-
-                // Gespeicherten Zustand wiederherstellen
-                binding.spinnerPresets.setText(station.selectedPresetLabel ?: "Keine Auswahl", false)
 
                 val calculateFromPresets = {
                     val selectedText = binding.spinnerPresets.text.toString()
@@ -160,10 +195,18 @@ class CalculationsAdapter(
                         val amountText = binding.etAmount.text.toString()
                         val amount = if (station.hasAmountInput) amountText.toDoubleOrNull() ?: 0.0 else 1.0
                         val total = selectedPreset.weight * amount
-                        updateTextProgrammatically(total)
+                        
+                        // Text oben rechts nur setzen wenn nötig
+                        val formatted = if (total % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", total) else String.format(Locale.getDefault(), "%.1f", total)
+                        if (binding.etManualInput.text.toString() != formatted) {
+                            binding.etManualInput.setText(formatted)
+                        }
+                        
                         onWeightChanged(station.stationId, total, selectedText, amount.toInt())
-                    } else if (selectedText == "Keine Auswahl" && binding.spinnerPresets.hasFocus()) {
-                        updateTextProgrammatically(0.0)
+                    } else if (selectedText == "Keine Auswahl" && (binding.spinnerPresets.hasFocus() || binding.etAmount.hasFocus())) {
+                        if (binding.etManualInput.text.toString() != "0") {
+                            binding.etManualInput.setText("0")
+                        }
                         onWeightChanged(station.stationId, 0.0, null, 1)
                     }
                 }
@@ -191,26 +234,24 @@ class CalculationsAdapter(
 
                 binding.weightSlider.valueFrom = 0f
                 binding.weightSlider.valueTo = station.maxMass.toFloat()
-                
-                // Dynamische stepSize: 0.1 wenn maxMass Kommastellen hat, sonst 1.0
                 val step = if (station.maxMass % 1.0 != 0.0) 0.1f else 1.0f
                 binding.weightSlider.stepSize = step
-                
-                val currentVal = station.defaultValue?.toFloat() ?: 0f
-                // Sicherstellen, dass der Wert ein Vielfaches der stepSize ist, um Crash zu vermeiden
-                val snappedVal = (currentVal / step).roundToInt() * step
-                binding.weightSlider.value = snappedVal.coerceIn(0f, station.maxMass.toFloat())
 
+                binding.weightSlider.clearOnChangeListeners()
                 binding.weightSlider.addOnChangeListener { slider, value, fromUser ->
                     if (fromUser) {
                         slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                         val weight = value.toDouble()
-                        updateTextProgrammatically(weight)
+                        
+                        val formatted = if (weight % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", weight) else String.format(Locale.getDefault(), "%.1f", weight)
+                        if (binding.etManualInput.text.toString() != formatted) {
+                            binding.etManualInput.setText(formatted)
+                        }
+                        
                         onWeightChanged(station.stationId, weight, null, 1)
                     }
                 }
             } else {
-                // Fall: nur manuelle Eingabe oben rechts
                 binding.layoutPresetControls.visibility = View.GONE
                 binding.weightSlider.visibility = View.GONE
                 binding.layoutSliderLabels.visibility = View.GONE
@@ -221,10 +262,30 @@ class CalculationsAdapter(
     inner class GroupViewHolder(private val binding: ItemScrollingGroupBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        fun updateValuesOnly(stations: List<StationWithPresets>) {
+            // Wir loopen durch die existierenden Views im Grid und aktualisieren nur die EditTexts
+            stations.forEachIndexed { index, swp ->
+                val view = binding.gridLayout.getChildAt(index) ?: return@forEachIndexed
+                val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
+                
+                val value = swp.station.defaultValue ?: 0.0
+                val formatted = if (value % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", value) else String.format(Locale.getDefault(), "%.1f", value)
+                
+                if (etInput.text.toString() != formatted && !etInput.hasFocus()) {
+                    etInput.setText(formatted)
+                }
+            }
+        }
+
         fun bind(stations: List<StationWithPresets>) {
-            binding.gridLayout.removeAllViews()
-            stations.forEach { swp ->
-                binding.gridLayout.addView(createSmallInputView(swp))
+            // Nur wenn die Anzahl der Kinder nicht passt, bauen wir neu auf
+            if (binding.gridLayout.childCount != stations.size) {
+                binding.gridLayout.removeAllViews()
+                stations.forEach { swp ->
+                    binding.gridLayout.addView(createSmallInputView(swp))
+                }
+            } else {
+                updateValuesOnly(stations)
             }
         }
 
@@ -309,6 +370,14 @@ class CalculationsAdapter(
         }
         override fun areContentsTheSame(oldItem: CalculationItem, newItem: CalculationItem): Boolean {
             return oldItem == newItem
+        }
+
+        override fun getChangePayload(oldItem: CalculationItem, newItem: CalculationItem): Any? {
+            return if (oldItem is CalculationItem.SingleStation && newItem is CalculationItem.SingleStation) {
+                "ONLY_VALUES"
+            } else {
+                null
+            }
         }
     }
 }

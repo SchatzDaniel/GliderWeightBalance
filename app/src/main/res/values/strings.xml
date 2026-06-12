@@ -79,10 +79,16 @@
     <string name="import_json">JSON Importieren</string>
     <string name="export_success">Profil erfolgreich exportiert!</string>
     <string name="import_success">Profil erfolgreich importiert!</string>
+    <string name="save_success">Erfolgreich gespeichert!</string>
     <string name="error_export_failed">Export fehlgeschlagen.</string>
     <string name="error_import_failed">Import fehlgeschlagen.</string>
     <string name="share_qr_title">Profil via QR teilen</string>
     <string name="scan_qr_title">Profil via QR importieren</string>
+    <string name="title_scenarios">Konfigurationen</string>
+    <string name="no_scenarios_hint">Keine Konfigurationen für dieses Flugzeug vorhanden.</string>
+    <string name="save_scenario">Als Konfiguration speichern</string>
+    <string name="scenario_name_hint">Name (z.B. Solo Training)</string>
+    <string name="nav_calculator">Rechner</string>
     <string name="qr_export_limitation_info">Hinweis: QR-Codes übertragen nur die Basisdaten. Komfort-Funktionen (Presets, Schieberegler, Reihenfolge) werden nicht mit übertragen. Nutze den JSON-Export für vollständige Profile.</string>
     <string name="error_qr_too_large">Profil zu groß für QR-Code. Bitte JSON nutzen.</string>
     <string name="menu_item_about">Über</string>
@@ -169,4 +175,5 @@
     <string name="label_fluid_type">Flüssigkeitstyp</string>
     <string name="fluid_info_title">Dichtewerte</string>
     <string name="fluid_info_message">Für die Umrechnung von Litern in Kilogramm werden folgende Dichtewerte verwendet:\n\n• Wasser: 1,00 kg/L\n• Benzin (AVGAS): 0,72 kg/L\n• Kerosin (Jet A-1): 0,80 kg/L\n\nBitte beachte, dass die tatsächliche Dichte je nach Temperatur leicht variieren kann.</string>
+    <string name="delete_scenario">Szenario löschen</string>
 </resources>
