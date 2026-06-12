@@ -52,6 +52,7 @@ class PayloadStationsAdapter(
             binding.textViewStationArm.text = context.getString(R.string.label_arm, station.arm.toString())
 
             // Einheit & Flüssigkeits-Info
+            val features = mutableListOf<String>()
             if (station.unit == context.getString(R.string.unit_liter) && station.fluidType != null) {
                 val fluidName = when (station.fluidType) {
                     "WATER" -> context.getString(R.string.fluid_water)
@@ -65,7 +66,6 @@ class PayloadStationsAdapter(
             }
 
             // Anzeige der konfigurierten Features
-            val features = mutableListOf<String>()
             if (station.hasSlider) features.add(context.getString(R.string.feature_slider))
             if (station.hasPresets) {
                 val count = station.presets.size
@@ -73,6 +73,7 @@ class PayloadStationsAdapter(
             }
             if (station.hasAmountInput) features.add(context.getString(R.string.feature_amount))
             if (station.isNonLifting) features.add(context.getString(R.string.feature_non_lifting))
+            if (station.isConsumable) features.add(context.getString(R.string.option_is_consumable).split("(")[0].trim())
 
             if (features.isNotEmpty()) {
                 binding.textViewStationFeatures.text = features.joinToString(" | ")
@@ -109,6 +110,7 @@ class PayloadStationsAdapter(
             dialogBinding.dialogEditTextStationUnit.setText(station.unit)
             dialogBinding.dialogEditTextStationMaxInput.setText(station.maxMass?.toString() ?: "")
             dialogBinding.cbIsNonLifting.isChecked = station.isNonLifting
+            dialogBinding.cbIsConsumable.isChecked = station.isConsumable
 
             // NEU: Feature-Checkboxen füllen
             dialogBinding.cbHasSlider.isChecked = station.hasSlider
@@ -157,6 +159,14 @@ class PayloadStationsAdapter(
                 MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.fluid_info_title)
                     .setMessage(R.string.fluid_info_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+
+            dialogBinding.btnConsumableInfo.setOnClickListener {
+                MaterialAlertDialogBuilder(context)
+                    .setTitle(R.string.consumable_info_title)
+                    .setMessage(R.string.consumable_info_message)
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
             }
@@ -220,6 +230,7 @@ class PayloadStationsAdapter(
                             unit = newUnit,
                             maxMass = newMaxMass,
                             isNonLifting = dialogBinding.cbIsNonLifting.isChecked,
+                            isConsumable = dialogBinding.cbIsConsumable.isChecked,
                             hasSlider = dialogBinding.cbHasSlider.isChecked,
                             hasPresets = dialogBinding.cbHasPresets.isChecked,
                             hasAmountInput = dialogBinding.cbHasAmountInput.isChecked,

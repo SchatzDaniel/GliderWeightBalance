@@ -3,6 +3,7 @@ package com.danielschatz.gliderweightbalance
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -18,19 +19,20 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.danielschatz.gliderweightbalance.data.model.AircraftProfile
 import com.danielschatz.gliderweightbalance.databinding.FragmentAircraftBinding
+import com.danielschatz.gliderweightbalance.utils.QrHelper
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.google.zxing.WriterException
 import kotlinx.coroutines.launch
 
 class AircraftFragment : Fragment() {
 
-    // 1. View Binding deklarieren (korrekte Methode für Fragments)
     private var _binding: FragmentAircraftBinding? = null
     private val binding get() = _binding!!
 
-    // 2. ViewModel-Instanzen holen
     private val viewModel: AircraftViewModel by activityViewModels()
     private val sharedViewModel: SharedViewModel by activityViewModels()
-
-    // 3. Adapter-Instanz deklarieren
     private lateinit var aircraftAdapter: AircraftAdapter
 
     private var pendingExportJson: String? = null
@@ -43,14 +45,10 @@ class AircraftFragment : Fragment() {
         uri?.let { importFromFile(it) }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAircraftBinding.inflate(inflater, container, false)
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -58,27 +56,20 @@ class AircraftFragment : Fragment() {
         setupRecyclerView()
         setupMenu()
 
-        // Schritt 2: Daten beobachten und die UI (Liste und Sichtbarkeit) aktualisieren.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.allProfiles.collect { aircrafts ->
-                    // a) Die neue Liste an den Adapter übergeben.
                     aircraftAdapter.submitList(aircrafts)
-
-                    // b) Die Sichtbarkeit der Views basierend auf der Liste steuern.
-                    // Dieser Block wird JEDES MAL ausgeführt, wenn sich die Liste ändert.
                     binding.recyclerViewAircraft.isVisible = aircrafts.isNotEmpty()
                     binding.textViewEmpty.isVisible = aircrafts.isEmpty()
                 }
             }
         }
 
-        // Beobachte das aktuell ausgewählte Profil, um die Markierung in der Liste zu aktualisieren
         sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
             aircraftAdapter.setSelectedAircraftId(profile?.aircraft?.id)
         }
 
-        // Schritt 3: Click Listener für den "Hinzufügen"-Button
         binding.fabAddAircraft.setOnClickListener {
             val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()
             findNavController().navigate(action)
@@ -87,30 +78,22 @@ class AircraftFragment : Fragment() {
 
     private fun setupRecyclerView() {
         aircraftAdapter = AircraftAdapter(
-            // Normaler Klick: Flugzeug auswählen und zum Home-Screen navigieren
             onItemClicked = { aircraftProfile ->
                 sharedViewModel.selectProfile(aircraftProfile)
                 findNavController().navigateUp()
-
             },
-            // Klick auf Bearbeiten-Button
             onEditClicked = { aircraftProfile ->
-                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(
-                    aircraftProfile.aircraft.id)
+                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(aircraftProfile.aircraft.id)
                 findNavController().navigate(action)
             },
-            // Langes Drücken: Zeige den Bestätigungsdialog zum Löschen
             onItemLongClicked = { aircraftProfile ->
                 showDeleteConfirmationDialog(aircraftProfile)
             },
             onExportClicked = { aircraftProfile ->
-                pendingExportJson = viewModel.exportProfileToJson(aircraftProfile)
-                val fileName = "${aircraftProfile.aircraft.registration.replace("/", "_")}_profile.json"
-                createDocumentLauncher.launch(fileName)
+                showExportOptionsDialog(aircraftProfile)
             }
         )
 
-        // Weise den Adapter und das Layout dem RecyclerView zu.
         binding.recyclerViewAircraft.apply {
             adapter = aircraftAdapter
             layoutManager = LinearLayoutManager(requireContext())
@@ -141,7 +124,7 @@ class AircraftFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.action_import -> {
-                        openDocumentLauncher.launch(arrayOf("application/json"))
+                        showImportOptionsDialog()
                         true
                     }
                     else -> false
@@ -150,14 +133,93 @@ class AircraftFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+    private fun showExportOptionsDialog(profile: AircraftProfile) {
+        val options = arrayOf(getString(R.string.export_json), getString(R.string.share_qr_title))
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.export_aircraft)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> { // JSON
+                        pendingExportJson = viewModel.exportProfileToJson(profile)
+                        val fileName = "${profile.aircraft.registration.replace("/", "_")}_profile.json"
+                        createDocumentLauncher.launch(fileName)
+                    }
+                    1 -> showQrCodeDialog(profile)
+                }
+            }
+            .show()
+    }
+
+    private fun showImportOptionsDialog() {
+        val options = arrayOf(getString(R.string.import_json), getString(R.string.scan_qr_title))
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.import_aircraft)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> openDocumentLauncher.launch(arrayOf("application/json")) // JSON
+                    1 -> startQrScan()
+                }
+            }
+            .show()
+    }
+
+    private fun showQrCodeDialog(profile: AircraftProfile) {
+        try {
+            val qrString = QrHelper.toQrString(profile)
+            val bitmap = QrHelper.generateQrBitmap(qrString)
+            val imageView = ImageView(requireContext()).apply {
+                setImageBitmap(bitmap)
+                setPadding(16, 16, 16, 16)
+                adjustViewBounds = true
+            }
+            AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.share_qr_title))
+                .setMessage(R.string.qr_export_limitation_info)
+                .setView(imageView)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        } catch (_: WriterException) {
+            Toast.makeText(requireContext(), R.string.error_qr_too_large, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun startQrScan() {
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .build()
+            
+        val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
+        scanner.startScan()
+            .addOnSuccessListener { barcode ->
+                barcode.rawValue?.let { qrString ->
+                    val profile = QrHelper.fromQrString(qrString)
+                    if (profile != null) {
+                        viewModel.importProfileFromObject(profile)
+                        Toast.makeText(requireContext(), R.string.import_success, Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), R.string.error_import_failed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .addOnCanceledListener {
+                // Nur Loggen, kein Toast bei einfachem Abbruch
+            }
+            .addOnFailureListener { e ->
+                val errorMessage = when {
+                    e.message?.contains("Waiting for the barcode module") == true -> 
+                        "Scanner-Modul wird noch heruntergeladen. Bitte kurz warten..."
+                    else -> "Fehler: ${e.localizedMessage ?: "Unbekannter Fehler"}"
+                }
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
+            }
+    }
+
     private fun exportToFile(uri: Uri) {
         val json = pendingExportJson ?: return
         try {
-            requireContext().contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(json.toByteArray())
-            }
+            requireContext().contentResolver.openOutputStream(uri)?.use { os -> os.write(json.toByteArray()) }
             Toast.makeText(requireContext(), R.string.export_success, Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(requireContext(), R.string.error_export_failed, Toast.LENGTH_SHORT).show()
         } finally {
             pendingExportJson = null
@@ -166,20 +228,20 @@ class AircraftFragment : Fragment() {
 
     private fun importFromFile(uri: Uri) {
         try {
-            requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
-                val json = inputStream.bufferedReader().readText()
+            requireContext().contentResolver.openInputStream(uri)?.use { ins ->
+                val json = ins.bufferedReader().readText()
                 viewModel.importProfileFromJson(json,
                     onSuccess = { Toast.makeText(requireContext(), R.string.import_success, Toast.LENGTH_SHORT).show() },
                     onError = { error -> Toast.makeText(requireContext(), "${getString(R.string.error_import_failed)}: $error", Toast.LENGTH_LONG).show() }
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Toast.makeText(requireContext(), R.string.error_import_failed, Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Wichtig für Speicherbereinigung
+        _binding = null
     }
 }

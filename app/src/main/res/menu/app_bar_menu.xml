@@ -12,6 +12,10 @@
         app:icon="@drawable/ic_settings"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_export_pdf"
+        android:title="@string/menu_item_export_pdf"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/show_disclaimer"
         android:title="@string/menu_item_disclaimer"
         app:showAsAction="never"/>

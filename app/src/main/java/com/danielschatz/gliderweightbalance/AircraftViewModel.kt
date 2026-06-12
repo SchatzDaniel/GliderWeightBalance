@@ -78,26 +78,28 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
      * Importiert ein Profil aus einem JSON-String.
      */
     fun importProfileFromJson(json: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        try {
+            val profile = Gson().fromJson(json, AircraftProfile::class.java)
+            importProfileFromObject(profile)
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e.message ?: "Unbekannter Fehler beim Import")
+        }
+    }
+
+    fun importProfileFromObject(profile: AircraftProfile) {
         viewModelScope.launch {
-            try {
-                val profile = Gson().fromJson(json, AircraftProfile::class.java)
-                
-                // IDs zurücksetzen, damit es als neues Flugzeug angelegt wird
-                val cleanProfile = profile.copy(
-                    aircraft = profile.aircraft.copy(id = 0),
-                    stations = profile.stations.map { swp ->
-                        swp.copy(
-                            station = swp.station.copy(stationId = 0, aircraftOwnerId = 0),
-                            presets = swp.presets.map { it.copy(presetId = 0, parentStationId = 0) }
-                        )
-                    }
-                )
-                
-                repository.saveProfile(cleanProfile)
-                onSuccess()
-            } catch (e: Exception) {
-                onError(e.message ?: "Unbekannter Fehler beim Import")
-            }
+            // IDs zurücksetzen, damit es als neues Flugzeug angelegt wird
+            val cleanProfile = profile.copy(
+                aircraft = profile.aircraft.copy(id = 0),
+                stations = profile.stations.map { swp ->
+                    swp.copy(
+                        station = swp.station.copy(stationId = 0, aircraftOwnerId = 0),
+                        presets = swp.presets.map { it.copy(presetId = 0, parentStationId = 0) }
+                    )
+                }
+            )
+            repository.saveProfile(cleanProfile)
         }
     }
 }

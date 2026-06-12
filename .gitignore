@@ -8,5 +8,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+/release
+*.jks
+*.keystore
+*.pk8
+*.p12
 **/build
 **/release
