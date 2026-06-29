@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import androidx.navigation.navOptions
 import com.danielschatz.gliderweightbalance.databinding.ActivityMainBinding
 import com.danielschatz.gliderweightbalance.updater.UpdateManager
 import com.danielschatz.gliderweightbalance.utils.PdfExporter
@@ -80,7 +81,8 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment))
+        // Beide Fragmente als Top-Level definieren, um den Back-Pfeil in der Bottom-Nav zu verhindern
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment, R.id.aircraftFragment))
 
         NavigationUI.setupWithNavController(
             binding.toolbar,
@@ -94,16 +96,49 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.scenarioFragment -> {
-                    ScenarioBottomSheetFragment().show(supportFragmentManager, "ScenarioBottomSheet")
-                    false // Nicht navigieren, nur Sheet öffnen
+            val destinationId = item.itemId
+            if (destinationId == currentDestinationId) return@setOnItemSelectedListener false
+
+            if (destinationId == R.id.scenarioFragment) {
+                ScenarioBottomSheetFragment().show(supportFragmentManager, "ScenarioBottomSheet")
+                return@setOnItemSelectedListener false
+            }
+
+            // Bestimme die Richtung (0: Flugzeuge, 1: Rechner)
+            val oldIndex = when (currentDestinationId) {
+                R.id.aircraftFragment -> 0
+                R.id.homeFragment -> 1
+                else -> 1
+            }
+            val newIndex = when (destinationId) {
+                R.id.aircraftFragment -> 0
+                R.id.homeFragment -> 1
+                else -> 1
+            }
+
+            val navOptions = navOptions {
+                anim {
+                    if (newIndex > oldIndex) {
+                        enter = R.anim.slide_in_right
+                        exit = R.anim.slide_out_left
+                        popEnter = R.anim.slide_in_left
+                        popExit = R.anim.slide_out_right
+                    } else {
+                        enter = R.anim.slide_in_left
+                        exit = R.anim.slide_out_right
+                        popEnter = R.anim.slide_in_right
+                        popExit = R.anim.slide_out_left
+                    }
                 }
-                else -> {
-                    NavigationUI.onNavDestinationSelected(item, navController)
-                    true
+                launchSingleTop = true
+                restoreState = true
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
                 }
             }
+
+            navController.navigate(destinationId, null, navOptions)
+            true
         }
 
         UpdateManager.scheduleUpdateCheck(this)

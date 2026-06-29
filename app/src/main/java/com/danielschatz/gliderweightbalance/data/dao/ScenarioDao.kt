@@ -28,4 +28,14 @@ interface ScenarioDao {
         val entriesWithId = entries.map { it.copy(scenarioId = id.toInt()) }
         insertScenarioEntries(entriesWithId)
     }
+
+    @Query("DELETE FROM scenario_entries WHERE scenarioId = :scenarioId")
+    suspend fun deleteEntriesForScenario(scenarioId: Int)
+
+    @Transaction
+    suspend fun updateScenarioWithEntries(scenarioId: Int, entries: List<ScenarioEntry>) {
+        deleteEntriesForScenario(scenarioId)
+        val entriesWithId = entries.map { it.copy(scenarioId = scenarioId) }
+        insertScenarioEntries(entriesWithId)
+    }
 }

@@ -41,6 +41,12 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
             scenarioDao.deleteScenario(scenario)
         }
     }
+
+    fun updateScenario(scenarioId: Int, entries: List<ScenarioEntry>) {
+        viewModelScope.launch {
+            scenarioDao.updateScenarioWithEntries(scenarioId, entries)
+        }
+    }
     
     suspend fun getEntriesForScenario(scenarioId: Int): List<ScenarioEntry> {
         return scenarioDao.getEntriesForScenario(scenarioId)

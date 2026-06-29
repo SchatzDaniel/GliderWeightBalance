@@ -53,22 +53,25 @@ class HomeFragment : Fragment() {
         setupCalculationObservers()
     }
 
-    private var currentAircraftId: Int? = null
-
     private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile?) {
-        val newId = aircraftProfile?.aircraft?.id
-        if (newId == currentAircraftId && childFragmentManager.findFragmentById(R.id.bottom_fragment_container) != null) {
-            // Gleiches Flugzeug, nur Werte geändert -> Fragment behalten
-            return
-        }
-        currentAircraftId = newId
+        val currentFragment = childFragmentManager.findFragmentById(R.id.bottom_fragment_container)
 
         if (aircraftProfile == null) {
+            // Wenn schon das "Kein Flugzeug"-Fragment da ist, nichts tun
+            if (currentFragment is NoSelectedAircraftFragment) return
+            
             childFragmentManager.beginTransaction()
-                .replace(R.id.bottom_fragment_container, NoAircraftSelectedFragment())
+                .setReorderingAllowed(true)
+                .replace(R.id.bottom_fragment_container, NoSelectedAircraftFragment())
                 .commit()
         } else {
+            // WICHTIG: Wenn das ScrollingFragment bereits da ist, prüfen wir im Tag oder ViewModel,
+            // ob es das gleiche Flugzeug ist. Da das ScrollingFragment ohnehin auf das 
+            // SharedViewModel hört, müssen wir es NUR austauschen, wenn es noch gar nicht da ist.
+            if (currentFragment is ScrollingFragment) return
+            
             childFragmentManager.beginTransaction()
+                .setReorderingAllowed(true)
                 .replace(R.id.bottom_fragment_container, ScrollingFragment())
                 .commit()
         }
@@ -131,11 +134,11 @@ class HomeFragment : Fragment() {
         }
 
         // 2. Schwerpunkt Observer
-        sharedViewModel.cg.observe(viewLifecycleOwner) { result ->
+        sharedViewModel.cg.observe(viewLifecycleOwner) {
             updateCgUi()
         }
 
-        sharedViewModel.cgRange.observe(viewLifecycleOwner) { range ->
+        sharedViewModel.cgRange.observe(viewLifecycleOwner) {
             updateCgUi()
         }
 

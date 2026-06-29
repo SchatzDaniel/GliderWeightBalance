@@ -68,6 +68,9 @@ class ScenarioBottomSheetFragment : BottomSheetDialogFragment() {
             },
             onDeleteClicked = { scenario ->
                 scenarioViewModel.deleteScenario(scenario)
+            },
+            onUpdateClicked = { scenario ->
+                updateExistingScenario(scenario)
             }
         )
 
@@ -106,6 +109,29 @@ class ScenarioBottomSheetFragment : BottomSheetDialogFragment() {
                     scenarioViewModel.saveScenario(name, profile.aircraft.id, entries)
                     Toast.makeText(requireContext(), R.string.save_success, Toast.LENGTH_SHORT).show()
                 }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateExistingScenario(scenario: com.danielschatz.gliderweightbalance.data.model.Scenario) {
+        val profile = sharedViewModel.selectedProfile.value ?: return
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Konfiguration aktualisieren")
+            .setMessage("Möchtest du die aktuellen Werte in der Konfiguration '${scenario.name}' speichern?")
+            .setPositiveButton(R.string.save) { _, _ ->
+                val entries = profile.stations.map { swp ->
+                    ScenarioEntry(
+                        scenarioId = scenario.id,
+                        stationId = swp.station.stationId,
+                        value = swp.station.defaultValue,
+                        selectedPresetLabel = swp.station.selectedPresetLabel,
+                        amount = swp.station.amount
+                    )
+                }
+                scenarioViewModel.updateScenario(scenario.id, entries)
+                Toast.makeText(requireContext(), R.string.save_success, Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

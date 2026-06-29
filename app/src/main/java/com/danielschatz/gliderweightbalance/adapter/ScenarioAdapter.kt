@@ -10,7 +10,8 @@ import com.danielschatz.gliderweightbalance.databinding.ItemScenarioListBinding
 
 class ScenarioAdapter(
     private val onItemClicked: (Scenario) -> Unit,
-    private val onDeleteClicked: (Scenario) -> Unit
+    private val onDeleteClicked: (Scenario) -> Unit,
+    private val onUpdateClicked: (Scenario) -> Unit
 ) : ListAdapter<Scenario, ScenarioAdapter.ScenarioViewHolder>(ScenarioDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScenarioViewHolder {
@@ -27,6 +28,7 @@ class ScenarioAdapter(
             binding.textViewScenarioName.text = scenario.name
             binding.root.setOnClickListener { onItemClicked(scenario) }
             binding.buttonDeleteScenario.setOnClickListener { onDeleteClicked(scenario) }
+            binding.buttonUpdateScenario.setOnClickListener { onUpdateClicked(scenario) }
         }
     }
 

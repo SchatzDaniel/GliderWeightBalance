@@ -86,7 +86,7 @@
     <string name="scan_qr_title">Profil via QR importieren</string>
     <string name="title_scenarios">Konfigurationen</string>
     <string name="no_scenarios_hint">Keine Konfigurationen für dieses Flugzeug vorhanden.</string>
-    <string name="save_scenario">Als Konfiguration speichern</string>
+    <string name="save_scenario">Neue Konfiguration</string>
     <string name="scenario_name_hint">Name (z.B. Solo Training)</string>
     <string name="nav_calculator">Rechner</string>
     <string name="qr_export_limitation_info">Hinweis: QR-Codes übertragen nur die Basisdaten. Komfort-Funktionen (Presets, Schieberegler, Reihenfolge) werden nicht mit übertragen. Nutze den JSON-Export für vollständige Profile.</string>
