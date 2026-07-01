@@ -71,7 +71,7 @@ class AircraftFragment : Fragment() {
         }
 
         binding.fabAddAircraft.setOnClickListener {
-            val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()
+            val action = MainPagerFragmentDirections.actionMainPagerFragmentToAddAircraftFragment()
             findNavController().navigate(action)
         }
     }
@@ -80,10 +80,10 @@ class AircraftFragment : Fragment() {
         aircraftAdapter = AircraftAdapter(
             onItemClicked = { aircraftProfile ->
                 sharedViewModel.selectProfile(aircraftProfile)
-                findNavController().navigateUp()
+                (parentFragment as? MainPagerFragment)?.switchToHome()
             },
             onEditClicked = { aircraftProfile ->
-                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(aircraftProfile.aircraft.id)
+                val action = MainPagerFragmentDirections.actionMainPagerFragmentToAddAircraftFragment(aircraftProfile.aircraft.id)
                 findNavController().navigate(action)
             },
             onItemLongClicked = { aircraftProfile ->

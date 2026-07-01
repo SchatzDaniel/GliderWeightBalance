@@ -5,24 +5,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
     tools:context=".AddAircraftFragment">
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintWidth_max="@dimen/max_ui_width"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -62,7 +63,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/registrationLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -92,7 +92,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/aircraftTypeLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -138,7 +137,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/emptyMassLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -168,7 +166,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/emptyMassArmLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -208,7 +205,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/fuselageMassLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -238,7 +234,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/stabilizerMassLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -277,7 +272,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/wingAreaLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -328,7 +322,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/maxTotalMassLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -358,7 +351,6 @@
                             android:layout_marginBottom="4dp"/>
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/maxNonLiftingMassLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -397,7 +389,6 @@
                         android:layout_marginEnd="4dp">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/migCgLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -429,7 +420,6 @@
                         android:layout_marginStart="4dp">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/maxCgLayout"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -459,8 +449,7 @@
                 android:id="@+id/recyclerViewStations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_payload_station"
-                android:paddingBottom="88dp"/>
+                tools:listitem="@layout/item_payload_station" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -468,7 +457,8 @@
         android:id="@+id/buttonSaveAircraft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="56dp"
         android:text="@string/save"
         app:icon="@drawable/ic_save"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -22,7 +22,6 @@
     <string name="edit_aircraft">Flugzeug bearbeiten</string>
     <string name="no_aircrafts">Keine Flugzeuge vorhanden.</string>
     <string name="add_aircraft_fab_desc">Neues Flugzeug hinzufügen</string>
-    <string name="miAircraftTitle">Flugzeuge verwalten</string>
     <string name="no_aircraft_selected_title">Kein Flugzeug</string>
     <string name="aicraft_specs">Allgemeine Informationen</string>
     <string name="registration">Kennzeichen</string>
@@ -57,7 +56,6 @@
     <string name="option_is_consumable">Veränderbar im Flug (z.B. Wasser, Benzin)</string>
     <string name="consumable_info_title">Veränderbare Massen</string>
     <string name="consumable_info_message">Stationen, die als \"veränderbar\" markiert sind, werden für die Worst-Case-Berechnung herangezogen.\n\nDie App berechnet automatisch die Schwerpunktlage für alle Zustände (z.B. Wasser voll vs. Wasser abgelassen), um sicherzustellen, dass der Schwerpunkt zu jedem Zeitpunkt des Fluges innerhalb der Limits bleibt.</string>
-    <string name="label_cg_range">Bereich im Flug: %1$s — %2$s mm</string>
     <string name="new_aircraft">Neues Flugzeug</string>
     <string name="status_ok">O.K.</string>
     <string name="status_limit_missing">Limit ?</string>
@@ -107,7 +105,6 @@
     <string name="update_latest">App ist auf dem neuesten Stand.</string>
     <string name="update_error">Fehler beim Prüfen auf Updates.</string>
     <string name="update_error_rate_limit">GitHub-Limit erreicht. Bitte warte eine Stunde.</string>
-    <string name="update_check_cooldown">Vor kurzem geprüft. App ist aktuell.</string>
     <string name="update_downloading">Update wird heruntergeladen…</string>
     <string name="update_permission_title">Berechtigung benötigt</string>
     <string name="update_permission_msg">Um das Update automatisch zu installieren, benötigt die App die Berechtigung \"Unbekannte Apps zu installieren\". Möchtest du diese erteilen oder die APK manuell von GitHub laden?</string>
@@ -150,14 +147,12 @@
     <string name="pdf_limit_non_lifting">Max. n.t. Teile:</string>
     <string name="pdf_limit_cg">Zul. Schwerpunktbereich:</string>
     <string name="pdf_status">Status:</string>
-    <string name="pdf_error_no_profile">Kein Flugzeug für Export ausgewählt.</string>
     <string name="pdf_export_error">Fehler beim Erstellen der PDF.</string>
     <string name="pdf_label_fuselage">Rumpf</string>
     <string name="pdf_label_stabilizer">Höhenleitwerk</string>
     <string name="label_slider_min">%1$s %2$s</string>
     <string name="label_slider_max">%1$s %2$s</string>
     <string name="feature_slider">Schieberegler</string>
-    <string name="feature_presets">Presets</string>
     <string name="feature_non_lifting">Nicht-tragend</string>
     <string name="feature_amount">Anzahl</string>
     <string name="feature_presets_count">Presets: %1$d</string>
@@ -168,12 +163,10 @@
     <string name="unit_m2">m²</string>
     <string name="unit_kg">kg</string>
     <string name="unit_liter">Liter</string>
-    <string name="fluid_none">Keine Flüssigkeit</string>
     <string name="fluid_water">Wasser</string>
     <string name="fluid_gasoline">Benzin</string>
     <string name="fluid_kerosene">Kerosin</string>
     <string name="label_fluid_type">Flüssigkeitstyp</string>
     <string name="fluid_info_title">Dichtewerte</string>
     <string name="fluid_info_message">Für die Umrechnung von Litern in Kilogramm werden folgende Dichtewerte verwendet:\n\n• Wasser: 1,00 kg/L\n• Benzin (AVGAS): 0,72 kg/L\n• Kerosin (Jet A-1): 0,80 kg/L\n\nBitte beachte, dass die tatsächliche Dichte je nach Temperatur leicht variieren kann.</string>
-    <string name="delete_scenario">Szenario löschen</string>
 </resources>

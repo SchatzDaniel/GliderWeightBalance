@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.danielschatz.gliderweightbalance.R
@@ -19,9 +21,6 @@ import com.danielschatz.gliderweightbalance.data.model.Preset
 import com.danielschatz.gliderweightbalance.databinding.ItemAddStationButtonBinding
 import com.danielschatz.gliderweightbalance.databinding.ItemPayloadStationBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.text.isNotBlank
-import kotlin.text.toDoubleOrNull
-import kotlin.text.trim
 
 interface ItemMoveCallback {
     fun onRowMoved(fromPosition: Int, toPosition: Int)
@@ -31,14 +30,13 @@ class PayloadStationsAdapter(
     private val onStationUpdated: (PayloadStation) -> Unit,
     private val onStationDeleted: (PayloadStation) -> Unit,
     private val onAddItem: () -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ItemMoveCallback {
+) : ListAdapter<PayloadStation, RecyclerView.ViewHolder>(StationDiffCallback()), ItemMoveCallback {
 
     companion object {
         private const val VIEW_TYPE_STATION = 1
         private const val VIEW_TYPE_ADD_BUTTON = 2
     }
 
-    private val stations = mutableListOf<PayloadStation>()
     var itemTouchHelper: ItemTouchHelper? = null
 
     // --- ViewHolder für eine normale Station ---
@@ -93,7 +91,7 @@ class PayloadStationsAdapter(
                 showEditDialog(station, itemView.context)
             }
 
-            binding.ivDragHandle.setOnTouchListener { _, event ->
+            binding.ivDragHandle.setOnTouchListener { _, event: MotionEvent ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN) {
                     itemTouchHelper?.startDrag(this)
                 }
@@ -235,7 +233,7 @@ class PayloadStationsAdapter(
                             hasPresets = dialogBinding.cbHasPresets.isChecked,
                             hasAmountInput = dialogBinding.cbHasAmountInput.isChecked,
                             fluidType = newFluidType
-                        ).apply() {
+                        ).apply {
                             this.presets = station.presets
                         }
                         onStationUpdated(updatedStation)
@@ -257,10 +255,10 @@ class PayloadStationsAdapter(
 
     // --- Adapter-Methoden für mehrere View-Typen ---
     override fun getItemViewType(position: Int): Int {
-        return if (position < stations.size) VIEW_TYPE_STATION else VIEW_TYPE_ADD_BUTTON
+        return if (position < currentList.size) VIEW_TYPE_STATION else VIEW_TYPE_ADD_BUTTON
     }
 
-    override fun getItemCount(): Int = stations.size + 1
+    override fun getItemCount(): Int = currentList.size + 1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -279,60 +277,61 @@ class PayloadStationsAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is StationViewHolder) {
-            holder.bind(stations[position])
+            holder.bind(getItem(position))
         }
-    }
-
-    // --- Öffentliche Methoden zur Interaktion ---
-    
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitList(newStations: List<PayloadStation>) {
-        stations.clear()
-        stations.addAll(newStations)
-        notifyDataSetChanged()
     }
 
     fun addStation(station: PayloadStation) {
-        val insertPosition = stations.size
-        stations.add(station)
-        notifyItemInserted(insertPosition)
+        val newList = currentList.toMutableList()
+        newList.add(station)
+        submitList(newList)
     }
 
     fun removeStation(station: PayloadStation) {
-        val position = stations.indexOf(station)
-        if (position != -1) {
-            stations.removeAt(position)
-            notifyItemRemoved(position)
-        }
+        val newList = currentList.toMutableList()
+        newList.remove(station)
+        submitList(newList)
     }
 
     fun updateStation(updatedStation: PayloadStation) {
-        val position = if (updatedStation.stationId != 0) {
-            stations.indexOfFirst { it.stationId == updatedStation.stationId }
+        val newList = currentList.toMutableList()
+        val index = if (updatedStation.stationId != 0) {
+            newList.indexOfFirst { it.stationId == updatedStation.stationId }
         } else {
-            stations.indexOf(updatedStation)
+            newList.indexOf(updatedStation)
         }
 
-        if (position != -1) {
-            stations[position] = updatedStation
-            notifyItemChanged(position)
+        if (index != -1) {
+            newList[index] = updatedStation
+            submitList(newList)
         }
     }
 
     fun getCurrentStations(): List<PayloadStation> {
-        return stations.toList()
+        return currentList.toList()
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < stations.size && toPosition < stations.size) {
-            val fromItem = stations.removeAt(fromPosition)
-            stations.add(toPosition, fromItem)
+        if (fromPosition < currentList.size && toPosition < currentList.size) {
+            val newList = currentList.toMutableList()
+            val fromItem = newList.removeAt(fromPosition)
+            newList.add(toPosition, fromItem)
 
-            stations.forEachIndexed { index, station ->
-                stations[index] = station.copy(displayOrder = index)
+            val reorderedList = newList.mapIndexed { index, station ->
+                station.copy(displayOrder = index)
             }
 
-            notifyItemMoved(fromPosition, toPosition)
+            submitList(reorderedList)
+        }
+    }
+
+    class StationDiffCallback : DiffUtil.ItemCallback<PayloadStation>() {
+        override fun areItemsTheSame(oldItem: PayloadStation, newItem: PayloadStation): Boolean {
+            return oldItem.stationId == newItem.stationId
+        }
+
+        override fun areContentsTheSame(oldItem: PayloadStation, newItem: PayloadStation): Boolean {
+            return oldItem == newItem
         }
     }
 

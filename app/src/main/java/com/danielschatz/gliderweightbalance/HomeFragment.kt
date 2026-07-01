@@ -2,24 +2,27 @@ package com.danielschatz.gliderweightbalance
 
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.view.*
+import android.util.TypedValue
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.doOnLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import com.danielschatz.gliderweightbalance.data.model.AircraftProfile
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.danielschatz.gliderweightbalance.adapter.CalculationsAdapter
 import com.danielschatz.gliderweightbalance.databinding.FragmentHomeBinding
 import java.util.Locale
 
 class HomeFragment : Fragment() {
 
-    private lateinit var navController: NavController
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
     private var defaultTextColor: ColorStateList? = null
+    private lateinit var calculationsAdapter: CalculationsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,8 +34,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = view.findNavController()
 
+        setupRecyclerView()
+        observeViewModel()
+        
         // Wir nehmen die Farbe eines Standard-Labels als Referenz
         defaultTextColor = binding.labelTotal.textColors
 
@@ -45,36 +50,48 @@ class HomeFragment : Fragment() {
                 sharedViewModel.setHeaderHeight(it.height)
             }
         }
+    }
 
-        sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { aircraftProfile ->
-            updateUiForSelectedProfile(aircraftProfile)
+    private fun setupRecyclerView() {
+        calculationsAdapter = CalculationsAdapter { stationId, newWeight, selectedPreset, amount ->
+            sharedViewModel.updateStationState(stationId, newWeight, selectedPreset, amount)
+        }
+
+        binding.recyclerViewMassInputs.apply {
+            adapter = calculationsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+            // Komplett deaktivieren um Flackern beim Flugzeugwechsel zu verhindern
+            itemAnimator = null
+        }
+    }
+
+    private fun observeViewModel() {
+        sharedViewModel.headerHeight.observe(viewLifecycleOwner) { height ->
+            binding.recyclerViewMassInputs.setPadding(
+                binding.recyclerViewMassInputs.paddingLeft,
+                height,
+                binding.recyclerViewMassInputs.paddingRight,
+                binding.recyclerViewMassInputs.paddingBottom
+            )
+        }
+
+        sharedViewModel.onScenarioApplied.observe(viewLifecycleOwner) {
+            calculationsAdapter.notifyItemRangeChanged(0, calculationsAdapter.itemCount, "SCENARIO_APPLIED")
+        }
+
+        sharedViewModel.selectedProfile.observe(viewLifecycleOwner) { profile ->
+            if (profile == null) {
+                binding.recyclerViewMassInputs.isVisible = false
+                binding.textViewNoAircraftSelected.isVisible = true
+                calculationsAdapter.submitList(emptyList())
+            } else {
+                binding.recyclerViewMassInputs.isVisible = true
+                binding.textViewNoAircraftSelected.isVisible = false
+                calculationsAdapter.updateData(profile.stations)
+            }
         }
 
         setupCalculationObservers()
-    }
-
-    private fun updateUiForSelectedProfile(aircraftProfile: AircraftProfile?) {
-        val currentFragment = childFragmentManager.findFragmentById(R.id.bottom_fragment_container)
-
-        if (aircraftProfile == null) {
-            // Wenn schon das "Kein Flugzeug"-Fragment da ist, nichts tun
-            if (currentFragment is NoSelectedAircraftFragment) return
-            
-            childFragmentManager.beginTransaction()
-                .setReorderingAllowed(true)
-                .replace(R.id.bottom_fragment_container, NoSelectedAircraftFragment())
-                .commit()
-        } else {
-            // WICHTIG: Wenn das ScrollingFragment bereits da ist, prüfen wir im Tag oder ViewModel,
-            // ob es das gleiche Flugzeug ist. Da das ScrollingFragment ohnehin auf das 
-            // SharedViewModel hört, müssen wir es NUR austauschen, wenn es noch gar nicht da ist.
-            if (currentFragment is ScrollingFragment) return
-            
-            childFragmentManager.beginTransaction()
-                .setReorderingAllowed(true)
-                .replace(R.id.bottom_fragment_container, ScrollingFragment())
-                .commit()
-        }
     }
 
     private fun setupCalculationObservers() {
@@ -261,9 +278,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    /**
-     * Zentralisierte Funktion zum Stylen der einzelnen Dashboard-Karten
-     */
     private fun updateCardVisuals(
         card: com.google.android.material.card.MaterialCardView,
         progressIndicator: View,
@@ -274,7 +288,6 @@ class HomeFragment : Fragment() {
         isError: Boolean,
         limitExists: Boolean
     ) {
-        // 1. Logik für Sichtbarkeit der ProgressBar
         if (isError || !limitExists || progressValue == null) {
             progressIndicator.visibility = View.INVISIBLE
         } else {
@@ -284,9 +297,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // 2. Styling basierend auf dem Zustand (Priorität: Error > OutsideLimits > OK)
         if (isError || isOutsideLimits || !limitExists) {
-            // FEHLER-STYLING (ROT)
             val colorRed = getThemeColor(com.google.android.material.R.attr.colorOnErrorContainer)
             val bgRed = getThemeColor(com.google.android.material.R.attr.colorErrorContainer)
 
@@ -312,7 +323,6 @@ class HomeFragment : Fragment() {
             statusCard.strokeWidth = 0
 
         } else {
-            // Karte zurücksetzen
             val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
             card.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
             card.strokeWidth = 0
@@ -338,7 +348,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun getThemeColor(attr: Int): Int {
-        val typedValue = android.util.TypedValue()
+        val typedValue = TypedValue()
         requireContext().theme.resolveAttribute(attr, typedValue, true)
         return typedValue.data
     }

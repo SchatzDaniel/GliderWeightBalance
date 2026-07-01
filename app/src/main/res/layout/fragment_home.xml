@@ -6,21 +6,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Der Fragment-Container füllt nun den ganzen Bildschirm aus (Z-Index unten) -->
-
-    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
-
-    <FrameLayout
-        android:id="@+id/bottom_fragment_container"
+    <!-- RecyclerView direkt im HomeFragment (Z-Index unten) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMassInputs"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="100dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_scrolling_station" />
 
+    <!-- Optional: Ein TextView, das anzeigt, wenn kein Flugzeug ausgewählt ist -->
+    <TextView
+        android:id="@+id/textViewNoAircraftSelected"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prompt_no_aircraft_selected"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
+
+    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
     <LinearLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
@@ -32,7 +47,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:id="@+id/dashboardLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"

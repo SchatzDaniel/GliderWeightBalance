@@ -74,16 +74,21 @@ class CalculationsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isNotEmpty() && payloads.any { it == "ONLY_VALUES" }) {
+        if (payloads.isNotEmpty()) {
             val item = getItem(position)
-            if (holder is SingleViewHolder && item is CalculationItem.SingleStation) {
-                holder.updateValuesOnly(item.swp)
-            } else if (holder is GroupViewHolder && item is CalculationItem.StationGroup) {
-                holder.updateValuesOnly(item.stations)
+            val forceUpdate = payloads.any { it == "SCENARIO_APPLIED" }
+            val onlyValues = payloads.any { it == "ONLY_VALUES" }
+
+            if (forceUpdate || onlyValues) {
+                if (holder is SingleViewHolder && item is CalculationItem.SingleStation) {
+                    holder.updateValuesOnly(item.swp, forceUpdate)
+                } else if (holder is GroupViewHolder && item is CalculationItem.StationGroup) {
+                    holder.updateValuesOnly(item.stations, forceUpdate)
+                }
+                return
             }
-        } else {
-            onBindViewHolder(holder, position)
         }
+        onBindViewHolder(holder, position)
     }
 
     inner class SingleViewHolder(private val binding: ItemScrollingStationBinding) :
@@ -92,7 +97,7 @@ class CalculationsAdapter(
         private var manualWatcher: TextWatcher? = null
         private var amountWatcher: TextWatcher? = null
 
-        fun updateValuesOnly(swp: StationWithPresets) {
+        fun updateValuesOnly(swp: StationWithPresets, force: Boolean = false) {
             val station = swp.station
             
             // Gewicht oben rechts
@@ -103,14 +108,14 @@ class CalculationsAdapter(
             } else {
                 String.format(Locale.getDefault(), "%.1f", value)
             }
-            if (etWeightDisplay.text.toString() != formatted && !etWeightDisplay.hasFocus()) {
+            if (etWeightDisplay.text.toString() != formatted && (force || !etWeightDisplay.hasFocus())) {
                 etWeightDisplay.setText(formatted)
             }
 
             // Menge
             if (station.hasAmountInput) {
                 val amountStr = station.amount.toString()
-                if (binding.etAmount.text.toString() != amountStr && !binding.etAmount.hasFocus()) {
+                if (binding.etAmount.text.toString() != amountStr && (force || !binding.etAmount.hasFocus())) {
                     binding.etAmount.setText(amountStr)
                 }
             }
@@ -139,8 +144,8 @@ class CalculationsAdapter(
             binding.etManualInput.removeTextChangedListener(manualWatcher)
             binding.etAmount.removeTextChangedListener(amountWatcher)
             
-            // Initial-Bindung
-            updateValuesOnly(swp)
+            // Initial-Bindung (hier immer erzwingen)
+            updateValuesOnly(swp, true)
 
             // Das kombinierte Eingabe-/Anzeigefeld oben rechts
             binding.layoutManualInput.visibility = View.VISIBLE
@@ -262,7 +267,7 @@ class CalculationsAdapter(
     inner class GroupViewHolder(private val binding: ItemScrollingGroupBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun updateValuesOnly(stations: List<StationWithPresets>) {
+        fun updateValuesOnly(stations: List<StationWithPresets>, force: Boolean = false) {
             // Wir loopen durch die existierenden Views im Grid und aktualisieren nur die EditTexts
             stations.forEachIndexed { index, swp ->
                 val view = binding.gridLayout.getChildAt(index) ?: return@forEachIndexed
@@ -271,7 +276,7 @@ class CalculationsAdapter(
                 val value = swp.station.defaultValue ?: 0.0
                 val formatted = if (value % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", value) else String.format(Locale.getDefault(), "%.1f", value)
                 
-                if (etInput.text.toString() != formatted && !etInput.hasFocus()) {
+                if (etInput.text.toString() != formatted && (force || !etInput.hasFocus())) {
                     etInput.setText(formatted)
                 }
             }
@@ -285,7 +290,7 @@ class CalculationsAdapter(
                     binding.gridLayout.addView(createSmallInputView(swp))
                 }
             } else {
-                updateValuesOnly(stations)
+                updateValuesOnly(stations, true)
             }
         }
 

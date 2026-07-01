@@ -29,7 +29,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import androidx.navigation.navOptions
 import com.danielschatz.gliderweightbalance.databinding.ActivityMainBinding
 import com.danielschatz.gliderweightbalance.updater.UpdateManager
 import com.danielschatz.gliderweightbalance.utils.PdfExporter
@@ -39,6 +38,7 @@ import androidx.preference.PreferenceManager
 import java.io.File
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
+import androidx.viewpager2.widget.ViewPager2
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +46,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private var currentDestinationId: Int? = null
     private val sharedViewModel: SharedViewModel by viewModels()
+    private var viewPager: ViewPager2? = null
+
+    fun setupViewPagerWithBottomNav(pager: ViewPager2?) {
+        this.viewPager = pager
+        
+        pager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val menuId = when (position) {
+                    0 -> R.id.aircraftFragment
+                    1 -> R.id.homeFragment
+                    else -> null
+                }
+                menuId?.let { 
+                    if (binding.bottomNavigation.selectedItemId != it) {
+                        binding.bottomNavigation.selectedItemId = it
+                    }
+                }
+                updateAppBarTitleWithSelectedProfile()
+            }
+        })
+    }
 
     companion object {
         const val PREFS_NAME = "AppPrefs"
@@ -81,8 +102,8 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Beide Fragmente als Top-Level definieren, um den Back-Pfeil in der Bottom-Nav zu verhindern
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment, R.id.aircraftFragment))
+        // MainPagerFragment als Top-Level definieren
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.mainPagerFragment))
 
         NavigationUI.setupWithNavController(
             binding.toolbar,
@@ -97,47 +118,23 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val destinationId = item.itemId
-            if (destinationId == currentDestinationId) return@setOnItemSelectedListener false
 
             if (destinationId == R.id.scenarioFragment) {
                 ScenarioBottomSheetFragment().show(supportFragmentManager, "ScenarioBottomSheet")
                 return@setOnItemSelectedListener false
             }
 
-            // Bestimme die Richtung (0: Flugzeuge, 1: Rechner)
-            val oldIndex = when (currentDestinationId) {
-                R.id.aircraftFragment -> 0
-                R.id.homeFragment -> 1
-                else -> 1
-            }
-            val newIndex = when (destinationId) {
-                R.id.aircraftFragment -> 0
-                R.id.homeFragment -> 1
-                else -> 1
+            // Wenn wir uns in einem Untermenü befinden (z.B. AddAircraft),
+            // kehren wir erst zum Pager zurück, bevor wir den Tab wechseln.
+            if (currentDestinationId != R.id.mainPagerFragment) {
+                navController.popBackStack(R.id.mainPagerFragment, false)
             }
 
-            val navOptions = navOptions {
-                anim {
-                    if (newIndex > oldIndex) {
-                        enter = R.anim.slide_in_right
-                        exit = R.anim.slide_out_left
-                        popEnter = R.anim.slide_in_left
-                        popExit = R.anim.slide_out_right
-                    } else {
-                        enter = R.anim.slide_in_left
-                        exit = R.anim.slide_out_right
-                        popEnter = R.anim.slide_in_right
-                        popExit = R.anim.slide_out_left
-                    }
-                }
-                launchSingleTop = true
-                restoreState = true
-                popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
-                }
+            // Jetzt sicher den Tab wechseln
+            when (destinationId) {
+                R.id.aircraftFragment -> viewPager?.currentItem = 0
+                R.id.homeFragment -> viewPager?.currentItem = 1
             }
-
-            navController.navigate(destinationId, null, navOptions)
             true
         }
 
@@ -148,18 +145,28 @@ class MainActivity : AppCompatActivity() {
             currentDestinationId = destination.id
             invalidateOptionsMenu()
 
-            val showBottomNav = destination.id in setOf(R.id.homeFragment, R.id.aircraftFragment)
-            binding.bottomNavigation.visibility = if (showBottomNav) android.view.View.VISIBLE else android.view.View.GONE
+            val isPagerActive = destination.id == R.id.mainPagerFragment
+            binding.bottomNavigation.visibility = if (isPagerActive) android.view.View.VISIBLE else android.view.View.GONE
 
-            if (destination.id == R.id.homeFragment) { 
-                updateAppBarTitleWithSelectedProfile()
+            if (isPagerActive) {
+                // Nur synchronisieren, wenn der ViewPager aktuell registriert ist.
+                // Ansonsten lassen wir die BottomNav ihren wiederhergestellten Zustand behalten.
+                viewPager?.let { pager ->
+                    val currentTab = pager.currentItem
+                    val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
+                    if (binding.bottomNavigation.selectedItemId != expectedId) {
+                        binding.bottomNavigation.selectedItemId = expectedId
+                    }
+                }
             }
+
+            updateAppBarTitleWithSelectedProfile()
         }
 
         // Hide bottom navigation when keyboard is shown
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val showBottomNav = currentDestinationId in setOf(R.id.homeFragment, R.id.aircraftFragment)
+            val showBottomNav = currentDestinationId == R.id.mainPagerFragment
             
             if (isKeyboardVisible) {
                 binding.bottomNavigation.visibility = android.view.View.GONE
@@ -170,9 +177,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         sharedViewModel.selectedProfile.observe(this) { 
-            if (currentDestinationId == R.id.homeFragment) {
-                updateAppBarTitleWithSelectedProfile()
-            }
+            updateAppBarTitleWithSelectedProfile()
         }
 
         checkAndShowDisclaimer()
@@ -203,11 +208,11 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.update_button) { _, _ ->
                 if (existingFile.exists()) {
                     UpdateManager.checkPermissionAndInstall(this, existingFile) {
-                        showPermissionExplanationDialog(apkFile = existingFile, manualUrl = apkUrl)
+                        showPermissionExplanationDialog(manualUrl = apkUrl)
                     }
                 } else {
-                    UpdateManager.downloadAndInstallApk(this, apkUrl, fileName) { apkFile ->
-                        showPermissionExplanationDialog(apkFile = apkFile, manualUrl = apkUrl)
+                    UpdateManager.downloadAndInstallApk(this, apkUrl, fileName) {
+                        showPermissionExplanationDialog(manualUrl = apkUrl)
                     }
                 }
             }
@@ -215,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showPermissionExplanationDialog(apkFile: File, manualUrl: String) {
+    private fun showPermissionExplanationDialog(manualUrl: String) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.update_permission_title)
             .setMessage(R.string.update_permission_msg)
@@ -261,11 +266,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAppBarTitleWithSelectedProfile() {
+        if (currentDestinationId != R.id.mainPagerFragment) return
+
         val profile = sharedViewModel.selectedProfile.value
-        val title = if (profile != null) {
-            "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
-        } else {
-            getString(R.string.no_aircraft_selected_title)
+        val title = when (viewPager?.currentItem) {
+            0 -> getString(R.string.title_activity_aircraft)
+            1 -> {
+                if (profile != null) {
+                    "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
+                } else {
+                    getString(R.string.no_aircraft_selected_title)
+                }
+            }
+            else -> getString(R.string.app_name)
         }
         binding.toolbar.title = title
     }
@@ -276,12 +289,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val showMenu = currentDestinationId == R.id.homeFragment
-        menu.findItem(R.id.aircraftFragment)?.isVisible = showMenu
+        val showMenu = currentDestinationId == R.id.mainPagerFragment
+        menu.findItem(R.id.aircraftFragment)?.isVisible = false
         menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
         menu.findItem(R.id.show_disclaimer)?.isVisible = showMenu
         menu.findItem(R.id.show_about)?.isVisible = showMenu
-        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu
+        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu && sharedViewModel.selectedProfile.value != null
         return super.onPrepareOptionsMenu(menu)
     }
 

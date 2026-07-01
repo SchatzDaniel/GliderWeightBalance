@@ -135,6 +135,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    // Ein spezielles Signal für den Adapter, dass nur Werte aktualisiert wurden
+    private val _onScenarioApplied = MutableLiveData<Unit>()
+    val onScenarioApplied: LiveData<Unit> = _onScenarioApplied
+
     fun applyScenarioEntries(entries: List<com.danielschatz.gliderweightbalance.data.model.ScenarioEntry>) {
         viewModelScope.launch(Dispatchers.IO) {
             // 1. In der Datenbank aktualisieren
@@ -147,24 +151,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 _selectedProfile.value?.let { profile ->
                     val currentMasses = _stationMasses.value?.toMutableMap() ?: mutableMapOf()
                     
-                    // Wir erstellen neue Instanzen der Stationen, damit DiffUtil den Unterschied erkennt
-                    val updatedStations = profile.stations.map { swp ->
-                        val entry = entries.find { it.stationId == swp.station.stationId }
-                        if (entry != null) {
-                            currentMasses[entry.stationId] = entry.value ?: 0.0
-                            val updatedStation = swp.station.copy(
-                                defaultValue = entry.value,
-                                selectedPresetLabel = entry.selectedPresetLabel,
-                                amount = entry.amount
-                            )
-                            swp.copy(station = updatedStation)
-                        } else {
-                            swp
+                    entries.forEach { entry ->
+                        currentMasses[entry.stationId] = entry.value ?: 0.0
+                        profile.stations.find { it.station.stationId == entry.stationId }?.let {
+                            it.station.defaultValue = entry.value
+                            it.station.selectedPresetLabel = entry.selectedPresetLabel
+                            it.station.amount = entry.amount
                         }
                     }
                     
                     _stationMasses.value = currentMasses
-                    _selectedProfile.value = profile.copy(stations = updatedStations)
+                    // Wir triggern das Profil UND das spezielle Event
+                    _selectedProfile.value = profile
+                    _onScenarioApplied.value = Unit
                 }
             }
         }
