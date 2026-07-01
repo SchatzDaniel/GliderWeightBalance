@@ -62,7 +62,7 @@ class ScenarioBottomSheetFragment : BottomSheetDialogFragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     val entries = scenarioViewModel.getEntriesForScenario(scenario.id)
                     sharedViewModel.applyScenarioEntries(entries)
-                    Toast.makeText(requireContext(), R.string.import_success, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.config_import_success, Toast.LENGTH_SHORT).show()
                     dismiss()
                 }
             },

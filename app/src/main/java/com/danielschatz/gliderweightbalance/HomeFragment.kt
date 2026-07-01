@@ -53,8 +53,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        calculationsAdapter = CalculationsAdapter { stationId, newWeight, selectedPreset, amount ->
-            sharedViewModel.updateStationState(stationId, newWeight, selectedPreset, amount)
+        calculationsAdapter = CalculationsAdapter { stationId, newWeight, selectedPreset, amount, isSlider ->
+            sharedViewModel.updateStationState(stationId, newWeight, selectedPreset, amount, isSlider)
         }
 
         binding.recyclerViewMassInputs.apply {
@@ -252,10 +252,11 @@ class HomeFragment : Fragment() {
                 )
                 
                 // Custom Progress Bar Update
-                (binding.progressCg as? com.danielschatz.gliderweightbalance.views.CgRangeProgressBar)?.setProgress(
+                binding.progressCg.setProgress(
                     (percentage / 100.0).toFloat(),
                     rangeStartPct,
-                    rangeEndPct
+                    rangeEndPct,
+                    sharedViewModel.shouldAnimate.value ?: true
                 )
             }
             is CalculationResult.Error -> {
@@ -273,7 +274,7 @@ class HomeFragment : Fragment() {
                     isError = true,
                     hasLimit
                 )
-                (binding.progressCg as? com.danielschatz.gliderweightbalance.views.CgRangeProgressBar)?.setProgress(0f, null, null)
+                binding.progressCg.setProgress(0f, null, null)
             }
         }
     }
@@ -288,12 +289,18 @@ class HomeFragment : Fragment() {
         isError: Boolean,
         limitExists: Boolean
     ) {
+        val animated = sharedViewModel.shouldAnimate.value ?: true
+
         if (isError || !limitExists || progressValue == null) {
             progressIndicator.visibility = View.INVISIBLE
         } else {
             progressIndicator.visibility = View.VISIBLE
             if (progressIndicator is com.google.android.material.progressindicator.LinearProgressIndicator) {
-                progressIndicator.progress = progressValue.coerceIn(0, 100)
+                if (animated) {
+                    progressIndicator.setProgress(progressValue.coerceIn(0, 100), true)
+                } else {
+                    progressIndicator.progress = progressValue.coerceIn(0, 100)
+                }
             }
         }
 

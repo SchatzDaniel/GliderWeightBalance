@@ -30,6 +30,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     // 2. Die Massen, die der Benutzer eingibt. Die Liste wird jetzt dynamisch
     //    aus dem ausgewählten Profil generiert.
     private val _stationMasses = MutableLiveData<Map<Int, Double>>() // Map<stationId, mass>
+    
+    // Gibt an, ob die aktuelle Änderung animiert werden soll (z.B. bei Slider = false)
+    private val _shouldAnimate = MutableLiveData<Boolean>(true)
+    val shouldAnimate: LiveData<Boolean> = _shouldAnimate
 
     // --- BERECHNUNGSERGEBNISSE (BLEIBEN GLEICH) ---
     private val _totalMass = MutableLiveData<CalculationResult>()
@@ -111,7 +115,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Speichert den exakten Zustand einer Station in der Datenbank.
      */
-    fun updateStationState(stationId: Int, mass: Double, presetLabel: String?, amount: Int) {
+    fun updateStationState(stationId: Int, mass: Double, presetLabel: String?, amount: Int, isSlider: Boolean = false) {
+        _shouldAnimate.value = !isSlider // Animation nur, wenn es KEIN Slider ist
+
         viewModelScope.launch(Dispatchers.IO) {
             // 1. In der Datenbank aktualisieren
             payloadStationDao.updateStationState(stationId, mass, presetLabel, amount)
@@ -140,6 +146,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     val onScenarioApplied: LiveData<Unit> = _onScenarioApplied
 
     fun applyScenarioEntries(entries: List<com.danielschatz.gliderweightbalance.data.model.ScenarioEntry>) {
+        _shouldAnimate.value = true // Konfigurationen immer animieren
         viewModelScope.launch(Dispatchers.IO) {
             // 1. In der Datenbank aktualisieren
             entries.forEach { entry ->

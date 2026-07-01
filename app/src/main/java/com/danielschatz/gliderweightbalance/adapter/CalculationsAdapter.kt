@@ -20,7 +20,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 class CalculationsAdapter(
-    private val onWeightChanged: (Int, Double, String?, Int) -> Unit
+    private val onWeightChanged: (Int, Double, String?, Int, Boolean) -> Unit
 ) : ListAdapter<CalculationItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
     companion object {
@@ -166,7 +166,7 @@ class CalculationsAdapter(
                             val sliderVal = weight.toFloat().coerceIn(0f, station.maxMass.toFloat())
                             binding.weightSlider.value = sliderVal
                         }
-                        onWeightChanged(station.stationId, weight, null, 1)
+                        onWeightChanged(station.stationId, weight, null, 1, false)
                     }
                 }
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
@@ -207,12 +207,12 @@ class CalculationsAdapter(
                             binding.etManualInput.setText(formatted)
                         }
                         
-                        onWeightChanged(station.stationId, total, selectedText, amount.toInt())
+                        onWeightChanged(station.stationId, total, selectedText, amount.toInt(), false)
                     } else if (selectedText == "Keine Auswahl" && (binding.spinnerPresets.hasFocus() || binding.etAmount.hasFocus())) {
                         if (binding.etManualInput.text.toString() != "0") {
                             binding.etManualInput.setText("0")
                         }
-                        onWeightChanged(station.stationId, 0.0, null, 1)
+                        onWeightChanged(station.stationId, 0.0, null, 1, false)
                     }
                 }
 
@@ -253,7 +253,7 @@ class CalculationsAdapter(
                             binding.etManualInput.setText(formatted)
                         }
                         
-                        onWeightChanged(station.stationId, weight, null, 1)
+                        onWeightChanged(station.stationId, weight, null, 1, true)
                     }
                 }
             } else {
@@ -352,7 +352,7 @@ class CalculationsAdapter(
                             tilInput.isErrorEnabled = false
                         }
 
-                        onWeightChanged(swp.station.stationId, weight, null, 1)
+                        onWeightChanged(swp.station.stationId, weight, null, 1, false)
                     }
                 }
                 override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
