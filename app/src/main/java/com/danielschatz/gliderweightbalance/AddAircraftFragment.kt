@@ -2,10 +2,13 @@ package com.danielschatz.gliderweightbalance
 
 import com.danielschatz.gliderweightbalance.adapter.PayloadStationsAdapter
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -34,6 +37,7 @@ class AddAircraftFragment : Fragment() {
     private var currentAircraftProfile: AircraftProfile? = null
 
     private lateinit var stationsAdapter: PayloadStationsAdapter
+    private var focusChangeListener: android.view.ViewTreeObserver.OnGlobalFocusChangeListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,6 +68,60 @@ class AddAircraftFragment : Fragment() {
         // Click Listener für den Speicher-Button einrichten
         binding.buttonSaveAircraft.setOnClickListener {
             saveOrUpdateAircraft()
+        }
+
+        setupKeyboardHandling()
+    }
+
+    private fun setupKeyboardHandling() {
+        // Fokus-Listener für "Weiter"-Taste und manuelle Klicks
+        focusChangeListener = android.view.ViewTreeObserver.OnGlobalFocusChangeListener { _, newFocus ->
+            if (newFocus != null && newFocus is android.widget.EditText) {
+                scrollToFocusedView(newFocus)
+            }
+        }
+        binding.root.viewTreeObserver.addOnGlobalFocusChangeListener(focusChangeListener)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            // Falls die Tastatur eingeblendet wird, zum aktuellen Feld scrollen
+            if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                _binding?.let { it.root.findFocus()?.let { view -> scrollToFocusedView(view) } }
+            }
+
+            insets
+        }
+    }
+
+    private fun scrollToFocusedView(view: View) {
+        val binding = _binding ?: return
+        binding.addAircraftScrollView.post {
+            val currentBinding = _binding ?: return@post
+            val rect = android.graphics.Rect()
+            view.getDrawingRect(rect)
+            currentBinding.addAircraftScrollView.offsetDescendantRectToMyCoords(view, rect)
+
+            val scrollY = currentBinding.addAircraftScrollView.scrollY
+            val scrollViewHeight = currentBinding.addAircraftScrollView.height
+            
+            // Der Platz, den der FAB einnimmt (entspricht dem Padding im XML)
+            val fabSpace = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                160f, 
+                resources.displayMetrics
+            ).toInt()
+
+            // Das Feld soll im Bereich zwischen Top und dem FAB sichtbar sein
+            val visibleBottom = scrollY + scrollViewHeight - fabSpace
+            val visibleTop = scrollY + 100 // Kleiner Puffer nach oben
+
+            if (rect.bottom > visibleBottom) {
+                // Zu weit unten -> Scrolle es knapp über den FAB
+                val targetScrollY = rect.bottom - (scrollViewHeight - fabSpace) + 24
+                currentBinding.addAircraftScrollView.smoothScrollTo(0, targetScrollY)
+            } else if (rect.top < visibleTop) {
+                // Zu weit oben -> Scrolle es ein Stück nach unten
+                currentBinding.addAircraftScrollView.smoothScrollTo(0, (rect.top - 100).coerceAtLeast(0))
+            }
         }
     }
 
@@ -205,6 +263,7 @@ class AddAircraftFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding?.root?.viewTreeObserver?.removeOnGlobalFocusChangeListener(focusChangeListener)
         _binding = null
     }
 }

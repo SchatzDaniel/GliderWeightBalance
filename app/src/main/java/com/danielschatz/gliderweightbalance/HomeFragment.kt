@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +25,7 @@ class HomeFragment : Fragment() {
     private val sharedViewModel: SharedViewModel by activityViewModels()
     private var defaultTextColor: ColorStateList? = null
     private lateinit var calculationsAdapter: CalculationsAdapter
+    private var focusChangeListener: android.view.ViewTreeObserver.OnGlobalFocusChangeListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,6 +51,59 @@ class HomeFragment : Fragment() {
                 sharedViewModel.setHeaderHeight(0) // Im Querformat liegen sie nebeneinander
             } else {
                 sharedViewModel.setHeaderHeight(it.height)
+            }
+        }
+
+        setupKeyboardHandling()
+    }
+
+    private fun setupKeyboardHandling() {
+        // Fokus-Listener für Feldwechsel (z.B. durch "Weiter")
+        focusChangeListener = android.view.ViewTreeObserver.OnGlobalFocusChangeListener { _, newFocus ->
+            if (newFocus is android.widget.EditText) {
+                scrollToFocusedView(newFocus)
+            }
+        }
+        binding.root.viewTreeObserver.addOnGlobalFocusChangeListener(focusChangeListener)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                _binding?.let { it.root.findFocus()?.let { view -> scrollToFocusedView(view) } }
+            }
+            insets
+        }
+    }
+
+    private fun scrollToFocusedView(view: View) {
+        val binding = _binding ?: return
+        binding.recyclerViewMassInputs.post {
+            val currentBinding = _binding ?: return@post
+            val rect = android.graphics.Rect()
+            view.getDrawingRect(rect)
+            
+            try {
+                currentBinding.recyclerViewMassInputs.offsetDescendantRectToMyCoords(view, rect)
+            } catch (_: Exception) {
+                return@post
+            }
+
+            val headerHeight = sharedViewModel.headerHeight.value ?: 0
+            val rvHeight = currentBinding.recyclerViewMassInputs.height
+            val paddingBottom = currentBinding.recyclerViewMassInputs.paddingBottom
+            
+            // Sichtbarer Bereich zwischen Header und oberhalb der Tastatur (Padding)
+            val visibleTop = headerHeight
+            val visibleBottom = rvHeight - paddingBottom
+
+            if (rect.bottom > visibleBottom) {
+                // Das Feld ist (teilweise) durch die Tastatur oder den unteren Rand verdeckt.
+                // Wir scrollen es so weit hoch, dass es knapp über dem unteren Rand liegt.
+                val scrollAmount = rect.bottom - visibleBottom + 24
+                currentBinding.recyclerViewMassInputs.smoothScrollBy(0, scrollAmount)
+            } else if (rect.top < visibleTop) {
+                // Das Feld ist hinter dem Header verschwunden.
+                val scrollAmount = rect.top - visibleTop - 24
+                currentBinding.recyclerViewMassInputs.smoothScrollBy(0, scrollAmount)
             }
         }
     }
@@ -362,6 +418,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding?.root?.viewTreeObserver?.removeOnGlobalFocusChangeListener(focusChangeListener)
         _binding = null
     }
 }

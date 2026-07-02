@@ -3,7 +3,6 @@ package com.danielschatz.gliderweightbalance
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -163,16 +162,34 @@ class MainActivity : AppCompatActivity() {
             updateAppBarTitleWithSelectedProfile()
         }
 
-        // Hide bottom navigation when keyboard is shown
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+        // Handle Window Insets properly
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val showBottomNav = currentDestinationId == R.id.mainPagerFragment
             
+            binding.appBarLayout.updatePadding(top = systemBars.top)
+            
+            // Das gesamte Activity-Layout nach oben schieben, wenn die Tastatur erscheint
+            view.updatePadding(bottom = imeInsets.bottom)
+            
+            val isPagerActive = currentDestinationId == R.id.mainPagerFragment
             if (isKeyboardVisible) {
                 binding.bottomNavigation.visibility = android.view.View.GONE
-            } else if (showBottomNav) {
+            } else if (isPagerActive) {
                 binding.bottomNavigation.visibility = android.view.View.VISIBLE
             }
+            
+            if (isPagerActive) {
+                viewPager?.let { pager ->
+                    val currentTab = pager.currentItem
+                    val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
+                    if (binding.bottomNavigation.selectedItemId != expectedId) {
+                        binding.bottomNavigation.selectedItemId = expectedId
+                    }
+                }
+            }
+
             insets
         }
 
@@ -402,9 +419,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHeaderColors() {
         val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-        window.statusBarColor = Color.TRANSPARENT
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isDarkMode
+        
+        // Da enableEdgeToEdge() verwendet wird, ist die StatusBar bereits transparent.
+        // Wir steuern nur noch die Helligkeit der Icons (hell/dunkel).
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = !isDarkMode
         binding.appBarLayout.setBackgroundColor(primaryColor)
     }
 

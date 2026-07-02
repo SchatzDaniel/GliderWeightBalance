@@ -147,6 +147,13 @@ class CalculationsAdapter(
             // Initial-Bindung (hier immer erzwingen)
             updateValuesOnly(swp, true)
 
+            // IME-Optionen und Fokus-Verhalten setzen
+            binding.etManualInput.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
+            binding.etManualInput.setSelectAllOnFocus(true)
+            
+            binding.etAmount.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
+            binding.etAmount.setSelectAllOnFocus(true)
+
             // Das kombinierte Eingabe-/Anzeigefeld oben rechts
             binding.layoutManualInput.visibility = View.VISIBLE
             binding.tvUnitSuffix.text = station.unit ?: "kg"
@@ -309,6 +316,9 @@ class CalculationsAdapter(
             val tvName = view.findViewById<TextView>(R.id.tvSmallStationName)
             val tilInput = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilSmallManualInput)
             val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
+
+            etInput.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_NEXT
+            etInput.setSelectAllOnFocus(true)
 
             tvName.text = swp.station.name
             
