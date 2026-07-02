@@ -110,6 +110,38 @@ class PayloadStationsAdapter(
             dialogBinding.cbIsNonLifting.isChecked = station.isNonLifting
             dialogBinding.cbIsConsumable.isChecked = station.isConsumable
 
+            // NEU: Koppelungs-Logik
+            var currentCouplingGroupId = station.couplingGroupId
+
+            val updateCouplingVisibility = {
+                val isConsumable = dialogBinding.cbIsConsumable.isChecked
+                dialogBinding.layoutCoupling.visibility = if (isConsumable) View.VISIBLE else View.GONE
+                val isCoupled = dialogBinding.cbIsCoupled.isChecked && isConsumable
+                dialogBinding.layoutCouplingSettings.visibility = if (isCoupled) View.VISIBLE else View.GONE
+            }
+
+            dialogBinding.cbIsCoupled.isChecked = station.couplingGroupId != 0
+            dialogBinding.dialogEditTextStationDumpTime.setText(station.dumpTime?.toString() ?: "")
+
+            updateCouplingVisibility()
+
+            dialogBinding.cbIsConsumable.setOnCheckedChangeListener { _, _ -> updateCouplingVisibility() }
+            dialogBinding.cbIsCoupled.setOnCheckedChangeListener { _, _ -> updateCouplingVisibility() }
+
+            dialogBinding.btnCouplingInfo.setOnClickListener {
+                MaterialAlertDialogBuilder(context)
+                    .setTitle(R.string.coupling_info_title)
+                    .setMessage(R.string.coupling_info_message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+
+            dialogBinding.btnManageCouplings.setOnClickListener {
+                showCouplingsDialog(context, station) { newGroupId ->
+                    currentCouplingGroupId = newGroupId
+                }
+            }
+
             // NEU: Feature-Checkboxen füllen
             dialogBinding.cbHasSlider.isChecked = station.hasSlider
             dialogBinding.cbHasPresets.isChecked = station.hasPresets
@@ -232,7 +264,9 @@ class PayloadStationsAdapter(
                             hasSlider = dialogBinding.cbHasSlider.isChecked,
                             hasPresets = dialogBinding.cbHasPresets.isChecked,
                             hasAmountInput = dialogBinding.cbHasAmountInput.isChecked,
-                            fluidType = newFluidType
+                            fluidType = newFluidType,
+                            dumpTime = dialogBinding.dialogEditTextStationDumpTime.text.toString().toDoubleOrNull(),
+                            couplingGroupId = if (dialogBinding.cbIsCoupled.isChecked) currentCouplingGroupId else 0
                         ).apply {
                             this.presets = station.presets
                         }
@@ -333,6 +367,115 @@ class PayloadStationsAdapter(
         override fun areContentsTheSame(oldItem: PayloadStation, newItem: PayloadStation): Boolean {
             return oldItem == newItem
         }
+    }
+
+    private fun showCouplingsDialog(context: Context, station: PayloadStation, onGroupIdUpdated: (Int) -> Unit) {
+        val currentStations = currentList.toMutableList()
+        // Wir brauchen eine Referenz, die wir innerhalb des Dialogs aktualisieren können
+        var editingStation = currentStations.find { it.stationId == station.stationId } ?: station
+        
+        fun getCoupledStations() = currentStations.filter { 
+            it.couplingGroupId != 0 && it.couplingGroupId == editingStation.couplingGroupId && it.stationId != editingStation.stationId
+        }
+
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_preset_manager, null)
+        val listContainer = dialogView.findViewById<LinearLayout>(R.id.presetListContainer)
+        val btnAdd = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnAddPreset)
+        
+        btnAdd.text = context.getString(R.string.btn_add_coupling)
+
+        fun refreshList() {
+            listContainer.removeAllViews()
+            val coupled = getCoupledStations()
+            coupled.forEach { other ->
+                val itemView = LayoutInflater.from(context).inflate(R.layout.item_preset_edit, listContainer, false)
+                val tvInfo = itemView.findViewById<android.widget.TextView>(R.id.tvPresetInfo)
+                val btnDel = itemView.findViewById<View>(R.id.btnDeletePreset)
+
+                tvInfo.text = other.name
+                btnDel.setOnClickListener {
+                    val idx = currentStations.indexOfFirst { it.stationId == other.stationId }
+                    if (idx != -1) {
+                        currentStations[idx] = currentStations[idx].copy(couplingGroupId = 0)
+                        
+                        val remaining = currentStations.filter { it.couplingGroupId != 0 && it.couplingGroupId == editingStation.couplingGroupId }
+                        if (remaining.size <= 1) {
+                            remaining.forEach { r ->
+                                val rIdx = currentStations.indexOfFirst { it.stationId == r.stationId }
+                                currentStations[rIdx] = currentStations[rIdx].copy(couplingGroupId = 0)
+                                if (r.stationId == editingStation.stationId) {
+                                    editingStation = currentStations[rIdx]
+                                }
+                            }
+                        }
+                        refreshList()
+                    }
+                }
+                listContainer.addView(itemView)
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            val available = currentStations.filter { 
+                it.isConsumable && 
+                it.stationId != editingStation.stationId && 
+                !(it.couplingGroupId != 0 && it.couplingGroupId == editingStation.couplingGroupId)
+            }
+            
+            if (available.isEmpty()) {
+                Toast.makeText(context, "Keine weiteren veränderbaren Stationen verfügbar.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val names = available.map { it.name }.toTypedArray()
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.title_select_station)
+                .setItems(names) { _, which ->
+                    val selected = available[which]
+                    
+                    val newGroupId = if (editingStation.couplingGroupId != 0) {
+                        editingStation.couplingGroupId
+                    } else {
+                        (currentStations.maxOfOrNull { it.couplingGroupId } ?: 0) + 1
+                    }
+
+                    // Alle Beteiligten aktualisieren
+                    val sIdx = currentStations.indexOfFirst { it.stationId == editingStation.stationId }
+                    if (sIdx != -1) {
+                        currentStations[sIdx] = currentStations[sIdx].copy(couplingGroupId = newGroupId)
+                        editingStation = currentStations[sIdx]
+                    }
+                    
+                    val oIdx = currentStations.indexOfFirst { it.stationId == selected.stationId }
+                    if (oIdx != -1) {
+                        currentStations[oIdx] = currentStations[oIdx].copy(couplingGroupId = newGroupId)
+                    }
+                    
+                    refreshList()
+                }
+                .show()
+        }
+
+        refreshList()
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(context.getString(R.string.title_manage_couplings))
+            .setView(dialogView)
+            .setPositiveButton("Fertig") { _, _ ->
+                var count = 0
+                currentStations.forEach { updated ->
+                    val original = currentList.find { it.stationId == updated.stationId }
+                    if (original != null && (original.couplingGroupId != updated.couplingGroupId)) {
+                        onStationUpdated(updated)
+                        if (updated.couplingGroupId != 0) count++
+                    }
+                }
+                onGroupIdUpdated(editingStation.couplingGroupId)
+                if (count > 0) {
+                    Toast.makeText(context, "$count Koppelungen aktualisiert", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .show()
     }
 
     private fun showPresetsListDialog(

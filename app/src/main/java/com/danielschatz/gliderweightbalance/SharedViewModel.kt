@@ -9,6 +9,8 @@ import com.danielschatz.gliderweightbalance.data.database.AppDatabase
 import com.danielschatz.gliderweightbalance.data.model.AircraftProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.sqrt
+import kotlin.math.pow
 
 /**
  * Repräsentiert das Ergebnis einer Berechnung.
@@ -199,11 +201,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             rawValue * density
         }
 
-        val mGes = profile.aircraft.emptyWeight + totalPayloadMass
+        val emptyWeight = profile.aircraft.emptyWeight!!
+        val mGes = emptyWeight + totalPayloadMass
         _totalMass.value = CalculationResult.Success(mGes)
 
         // --- 2. Schwerpunkt (CG) berechnen ---
-        if (profile.aircraft.emptyWeightArm == null) {
+        val emptyWeightArm = profile.aircraft.emptyWeightArm
+        if (emptyWeightArm == null) {
             _cg.value = CalculationResult.Error // Fehler, wenn Leermassen-Hebelarm fehlt
             _cgRange.value = null
         } else {
@@ -214,49 +218,101 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 val mass = rawValue * density
                 mass * station.arm
             }
-            val takeOffMoment = (profile.aircraft.emptyWeight * profile.aircraft.emptyWeightArm) + payloadMoment
+            val takeOffMoment = (emptyWeight * emptyWeightArm) + payloadMoment
             if (mGes > 0) {
                 _cg.value = CalculationResult.Success(takeOffMoment / mGes)
             } else {
                 _cg.value = CalculationResult.Success(0.0)
             }
 
-            // 2b. CG Range (Worst-Case) berechnen
+            // 2b. CG Range (Physikalische Simulation) berechnen
             val consumableStations = profile.stations.filter { it.station.isConsumable }
             
             if (consumableStations.isEmpty()) {
                 _cgRange.value = null
             } else {
-                // Wir berechnen alle Kombinationen von Voll/Leer für veränderbare Stationen
+                // 1. Gruppiere Stationen in "Ablass-Ventile"
+                // Jede Gruppe (ID > 0) ist ein Ventil. Jede einzelne Station (ID == 0) ist ein Ventil.
+                val coupledValves = consumableStations.filter { it.station.couplingGroupId != 0 }
+                    .groupBy { it.station.couplingGroupId }
+                    .values.toList()
+                
+                val independentValves = consumableStations.filter { it.station.couplingGroupId == 0 }
+                    .map { listOf(it) }
+                
+                val allValves = coupledValves + independentValves
+                
                 val results = mutableListOf<Double>()
-                val numCombinations = 1 shl consumableStations.size // 2^N
+                // Aktuellen Zustand als Startpunkt hinzufügen
+                if (mGes > 0) results.add(takeOffMoment / mGes)
 
-                for (i in 0 until numCombinations) {
-                    val baseMass = profile.aircraft.emptyWeight ?: 0.0
-                    val baseArm = profile.aircraft.emptyWeightArm ?: 0.0
-                    var comboMass = baseMass
-                    var comboMoment = baseMass * baseArm
-
-                    // Feste Zuladung hinzufügen
-                    profile.stations.filter { !it.station.isConsumable }.forEach { swp ->
-                        val m = (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
-                        comboMass += m
-                        comboMoment += m * swp.station.arm
+                // 2. Simuliere alle Kombinationen von geöffneten Ventilen
+                val numValveCombos = 1 shl allValves.size
+                
+                for (i in 1 until numValveCombos) {
+                    val activeValves = allValves.filterIndexed { index, _ -> (i shr index) and 1 == 1 }
+                    val activeStations = activeValves.flatten()
+                    
+                    // Vorbereiten der Startparameter für alle aktiven Tanks
+                    val stationSims = activeStations.mapNotNull { swp ->
+                        val currentMass = (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                        val maxMass = (swp.station.maxMass ?: 0.0) * getDensity(swp.station.fluidType)
+                        val dumpTime = swp.station.dumpTime ?: 0.0
+                        
+                        if (currentMass > 0 && dumpTime > 0 && maxMass > 0) {
+                            val tStart = dumpTime * (1.0 - sqrt(currentMass / maxMass))
+                            Triple(swp, tStart, dumpTime)
+                        } else null
                     }
 
-                    // Veränderbare Zuladung basierend auf Bitmaske hinzufügen
-                    consumableStations.forEachIndexed { index, swp ->
-                        // Wenn Bit gesetzt -> Aktueller Wert, sonst 0
-                        val m = if ((i shr index) and 1 == 1) {
-                            (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
-                        } else 0.0
-                        comboMass += m
-                        comboMoment += m * swp.station.arm
-                    }
+                    if (stationSims.isEmpty()) continue
 
-                    if (comboMass > 0) {
-                        results.add(comboMoment / comboMass)
+                    // Simulation über die Zeit (Sekundenschritte)
+                    val maxDuration = stationSims.maxOf { it.third - it.second }
+                    
+                    for (dt in 0..maxDuration.toInt() step 1) {
+                        var comboMass = emptyWeight
+                        var comboMoment = emptyWeight * emptyWeightArm
+
+                        // Unveränderbare Zuladung
+                        profile.stations.filter { !it.station.isConsumable }.forEach { swp ->
+                            val m = (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                            comboMass += m
+                            comboMoment += m * swp.station.arm
+                        }
+
+                        // Veränderbare Zuladung (nicht aktive Ventile bleiben voll)
+                        consumableStations.forEach { swp ->
+                            val sim = stationSims.find { it.first.station.stationId == swp.station.stationId }
+                            val m = if (sim != null) {
+                                // Berechne Restmasse nach Torricelli
+                                val t = (sim.second + dt).coerceAtMost(sim.third)
+                                val maxM = (swp.station.maxMass ?: 0.0) * getDensity(swp.station.fluidType)
+                                maxM * (1.0 - t / sim.third).pow(2.0)
+                            } else {
+                                // Ventil zu -> aktuelle Masse bleibt
+                                (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                            }
+                            comboMass += m
+                            comboMoment += m * swp.station.arm
+                        }
+
+                        if (comboMass > 0) {
+                            results.add(comboMoment / comboMass)
+                        }
                     }
+                    
+                    // Endzustand (alle aktiven Tanks leer) explizit hinzufügen
+                    var finalMass = emptyWeight
+                    var finalMoment = emptyWeight * emptyWeightArm
+                    profile.stations.forEach { swp ->
+                        if (!swp.station.isConsumable || !activeStations.contains(swp)) {
+                            val m = (masses[swp.station.stationId] ?: 0.0) * getDensity(swp.station.fluidType)
+                            finalMass += m
+                            finalMoment += m * swp.station.arm
+                        }
+                    }
+                    if (finalMass > 0) results.add(finalMoment / finalMass)
                 }
                 
                 if (results.isNotEmpty()) {

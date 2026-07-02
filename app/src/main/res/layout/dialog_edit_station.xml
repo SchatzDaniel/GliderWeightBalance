@@ -131,6 +131,64 @@
             app:iconSize="24dp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/layoutCoupling"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/cbIsCoupled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/option_is_coupled" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCouplingInfo"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:icon="@drawable/ic_help_outline"
+            app:iconSize="24dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutCouplingSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dialogStationDumpTimeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/dump_time_hint"
+            app:suffixText="@string/seconds">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/dialogEditTextStationDumpTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnManageCouplings"
+            style="@style/Widget.Material3.Button.TextButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/label_button_manage_couplings"
+            app:icon="@drawable/ic_edit"
+            app:iconSize="18dp" />
+    </LinearLayout>
+
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/cbHasSlider"
         android:layout_width="match_parent"

@@ -19,7 +19,7 @@ import com.danielschatz.gliderweightbalance.data.model.ScenarioEntry
 
 @Database(
     entities = [Aircraft::class, PayloadStation::class, Preset::class, Scenario::class, ScenarioEntry::class],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "aircraft_database"
                 )
                     .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5,
-                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                        MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                     .build()
                 INSTANCE = instance
                 instance
@@ -163,6 +163,13 @@ abstract class AppDatabase : RoomDatabase() {
                 """.trimIndent())
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_scenario_entries_scenarioId ON scenario_entries (scenarioId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_scenario_entries_stationId ON scenario_entries (stationId)")
+            }
+        }
+
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN dumpTime REAL")
+                db.execSQL("ALTER TABLE payload_stations ADD COLUMN couplingGroupId INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

@@ -54,6 +54,15 @@
     <string name="Move">Verschieben</string>
     <string name="option_is_non_lifting">Zählt zu nicht-tragenden Teilen</string>
     <string name="option_is_consumable">Veränderbar im Flug (z.B. Wasser, Benzin)</string>
+    <string name="option_is_coupled">Station koppeln</string>
+    <string name="coupling_info_title">Gekoppelte Ventile</string>
+    <string name="coupling_info_message">Verwende Koppelungen, um Tanks zu gruppieren, die über ein gemeinsames Ventil abgelassen werden (z.B. Flächen- und Hecktank).\n\nDie App berechnet dann den physikalisch korrekten Schwerpunktverlauf während des Entleerens dieser Gruppe, anstatt alle unmöglichen Kombinationen zu prüfen.</string>
+    <string name="dump_time_hint">Ablasszeit bei vollem Tank</string>
+    <string name="seconds">Sekunden</string>
+    <string name="label_button_manage_couplings">Koppelungen verwalten</string>
+    <string name="title_manage_couplings">Gekoppelte Stationen</string>
+    <string name="btn_add_coupling">Koppelung hinzufügen</string>
+    <string name="title_select_station">Station wählen</string>
     <string name="consumable_info_title">Veränderbare Massen</string>
     <string name="consumable_info_message">Stationen, die als \"veränderbar\" markiert sind, werden für die Worst-Case-Berechnung herangezogen.\n\nDie App berechnet automatisch die Schwerpunktlage für alle Zustände (z.B. Wasser voll vs. Wasser abgelassen), um sicherzustellen, dass der Schwerpunkt zu jedem Zeitpunkt des Fluges innerhalb der Limits bleibt.</string>
     <string name="new_aircraft">Neues Flugzeug</string>
