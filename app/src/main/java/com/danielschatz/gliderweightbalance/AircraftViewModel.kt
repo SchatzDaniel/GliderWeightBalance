@@ -50,11 +50,11 @@ class AircraftViewModel(application: Application) : AndroidViewModel(application
 
     /**
      * SPEICHERT oder aktualisiert ein komplettes Profil.
-     * Dies ist eine "fire-and-forget" Aktion, sie benötigt keinen Rückgabewert für die UI.
      */
-    fun saveOrUpdateProfile(profile: AircraftProfile) {
+    fun saveOrUpdateProfile(profile: AircraftProfile, onComplete: (Int) -> Unit) {
         viewModelScope.launch {
-            repository.saveProfile(profile)
+            val id = repository.saveProfile(profile)
+            onComplete(id)
         }
     }
 

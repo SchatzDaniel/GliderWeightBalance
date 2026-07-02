@@ -20,7 +20,7 @@ class AircraftRepository(
     fun getProfileById(id: Int): Flow<AircraftProfile?> =
         profileDao.getProfileById(id)
 
-    suspend fun saveProfile(profile: AircraftProfile) {
+    suspend fun saveProfile(profile: AircraftProfile): Int {
         val aircraft = profile.aircraft
 
         // 1. Aircraft speichern und ID erhalten
@@ -28,28 +28,43 @@ class AircraftRepository(
             aircraftDao.insert(aircraft).toInt()
         } else {
             aircraftDao.update(aircraft)
-            // Bei einem Update löschen wir die alten Stationen (und damit per Cascade die Presets),
-            // um sie dann sauber neu einzufügen (einfachste Strategie für konsistente IDs)
-            stationDao.deleteForAircraft(aircraft.id)
             aircraft.id
         }
 
-        // 2. Stationen und deren Presets speichern
+        // 2. Bestehende Stationen aus der DB holen
+        val currentStations = stationDao.getStationsForAircraftSync(aircraftId)
+        val incomingStationIds = profile.stations.map { it.station.stationId }.filter { it > 0 }
+
+        // 3. Stationen löschen, die in der neuen Liste nicht mehr enthalten sind
+        currentStations.forEach { existingStation ->
+            if (existingStation.stationId !in incomingStationIds) {
+                stationDao.delete(existingStation)
+            }
+        }
+
+        // 4. Eingehende Stationen verarbeiten (Update oder Insert)
         profile.stations.forEach { stationWithPresets ->
-            // Station für dieses Flugzeug vorbereiten (ID auf 0 für Neu-Insert)
-            val stationToInsert = stationWithPresets.station.copy(
-                stationId = 0,
-                aircraftOwnerId = aircraftId
-            )
+            val station = stationWithPresets.station
+            
+            val finalStationId = if (station.stationId <= 0) {
+                // Neue Station einfügen
+                stationDao.insert(station.copy(
+                    stationId = 0,
+                    aircraftOwnerId = aircraftId
+                )).toInt()
+            } else {
+                // Bestehende Station aktualisieren
+                stationDao.update(station.copy(aircraftOwnerId = aircraftId))
+                station.stationId
+            }
 
-            // Station einfügen und die neue stationId erhalten
-            val newStationId = stationDao.insert(stationToInsert).toInt()
-
-            // 3. Presets dieser Station speichern
+            // 5. Presets für diese Station synchronisieren
+            // Da ScenarioEntry nur auf stationId linkt, können wir Presets neu anlegen
+            presetDao.deleteForStation(finalStationId)
             val presetsToInsert = stationWithPresets.presets.map { preset ->
                 preset.copy(
-                    presetId = 0, // Neu anlegen
-                    parentStationId = newStationId // Verknüpfung zur neuen Station
+                    presetId = 0,
+                    parentStationId = finalStationId
                 )
             }
 
@@ -57,6 +72,7 @@ class AircraftRepository(
                 presetDao.insertAll(presetsToInsert)
             }
         }
+        return aircraftId
     }
 
     suspend fun deleteProfile(profile: AircraftProfile) {

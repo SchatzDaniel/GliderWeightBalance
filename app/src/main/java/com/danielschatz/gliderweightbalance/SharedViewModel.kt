@@ -29,8 +29,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedProfile = MediatorLiveData<AircraftProfile?>()
     val selectedProfile: LiveData<AircraftProfile?> = _selectedProfile
 
-    // 2. Die Massen, die der Benutzer eingibt. Die Liste wird jetzt dynamisch
-    //    aus dem ausgewählten Profil generiert.
+    // 2. Die Massen, die der Benutzer eingibt.
     private val _stationMasses = MutableLiveData<Map<Int, Double>>() // Map<stationId, mass>
     
     // Gibt an, ob die aktuelle Änderung animiert werden soll (z.B. bei Slider = false)
@@ -97,20 +96,54 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
      * Wird vom AircraftFragment aufgerufen, wenn der Benutzer ein Flugzeug auswählt.
      */
     fun selectProfile(profile: AircraftProfile?) {
-        _selectedProfile.value = profile
-        // Speichere die ID für den nächsten App-Start
-        prefs.edit { putInt("last_selected_aircraft_id", profile?.aircraft?.id ?: -1) }
-        // Setze die Benutzereingaben zurück, da ein neues Flugzeug andere Stationen hat.
-
-        if (profile != null) {
-            // Erstelle eine Map aus allen Stationen, die einen Standardwert hinterlegt haben
-            val initialMasses = profile.stations.asSequence()
-                .filter { it.station.defaultValue != null }
-                .associateBy({ it.station.stationId }, { it.station.defaultValue ?: 0.0 })
-
-            _stationMasses.value = initialMasses
-        } else {
+        if (profile == null) {
+            _selectedProfile.value = null
+            prefs.edit { putInt("last_selected_aircraft_id", -1) }
             _stationMasses.value = emptyMap()
+            return
+        }
+        
+        // ID speichern
+        prefs.edit { putInt("last_selected_aircraft_id", profile.aircraft.id) }
+
+        // Wir laden das Profil REACTIVE aus der Datenbank.
+        // Falls das übergebene Profil neu gespeichert wurde (ID=0), 
+        // wird es hier ignoriert und wir warten auf den echten DB-Eintrag.
+        if (profile.aircraft.id > 0) {
+            val source = aircraftProfileDao.getProfileById(profile.aircraft.id).asLiveData()
+            _selectedProfile.addSource(source) { updatedProfile ->
+                if (updatedProfile != null) {
+                    _selectedProfile.value = updatedProfile
+                    
+                    // Massen nur initialisieren, wenn sie noch nicht da sind oder das Flugzeug wechselt
+                    val initialMasses = updatedProfile.stations.asSequence()
+                        .filter { it.station.defaultValue != null }
+                        .associateBy({ it.station.stationId }, { it.station.defaultValue ?: 0.0 })
+                    _stationMasses.value = initialMasses
+                }
+                _selectedProfile.removeSource(source)
+            }
+        } else {
+            // Fallback für temporäre Profile (sollte im Normalfall nicht passieren)
+            _selectedProfile.value = profile
+        }
+    }
+
+    /**
+     * Selektiert ein Profil anhand seiner ID.
+     */
+    fun selectProfileById(id: Int) {
+        if (id == -1 || id == R.integer.default_aircraft_id) {
+            selectProfile(null)
+            return
+        }
+
+        val source = aircraftProfileDao.getProfileById(id).asLiveData()
+        _selectedProfile.addSource(source) { profile ->
+            if (profile != null) {
+                selectProfile(profile)
+            }
+            _selectedProfile.removeSource(source)
         }
     }
 

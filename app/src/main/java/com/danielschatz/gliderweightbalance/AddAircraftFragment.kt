@@ -248,17 +248,19 @@ class AddAircraftFragment : Fragment() {
         )
 
         // --- Schritt 4: Speichern oder Aktualisieren über das ViewModel ---
-        aircraftViewModel.saveOrUpdateProfile(profileToSave)
-        sharedViewModel.selectProfile(profileToSave)
+        aircraftViewModel.saveOrUpdateProfile(profileToSave) { newId ->
+            sharedViewModel.selectProfileById(newId)
 
-        // --- Schritt 5: Feedback und Navigation ---
-        if (currentAircraftProfile == null) {
-            Toast.makeText(requireContext(), "Flugzeug erfolgreich angelegt!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(requireContext(), "Flugzeug erfolgreich aktualisiert!", Toast.LENGTH_SHORT).show()
+            // --- Schritt 5: Feedback und Navigation ---
+            activity?.runOnUiThread {
+                if (currentAircraftProfile == null) {
+                    Toast.makeText(requireContext(), "Flugzeug erfolgreich angelegt!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Flugzeug erfolgreich aktualisiert!", Toast.LENGTH_SHORT).show()
+                }
+                findNavController().navigateUp()
+            }
         }
-
-        findNavController().navigateUp()
     }
 
     override fun onDestroyView() {
