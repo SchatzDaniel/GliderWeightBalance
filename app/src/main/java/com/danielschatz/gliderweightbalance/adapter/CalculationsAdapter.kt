@@ -99,7 +99,11 @@ class CalculationsAdapter(
 
         fun updateValuesOnly(swp: StationWithPresets, force: Boolean = false) {
             val station = swp.station
+            val currentMass = station.defaultValue ?: 0.0
             
+            // Visuellen Status sofort aktualisieren
+            refreshOverloadVisuals(currentMass, station.maxMass)
+
             // Gewicht oben rechts
             val etWeightDisplay = binding.etManualInput
             val value = station.defaultValue ?: 0.0
@@ -136,6 +140,19 @@ class CalculationsAdapter(
             }
         }
 
+        private fun refreshOverloadVisuals(currentMass: Double, maxMass: Double?) {
+            val max = maxMass ?: 0.0
+            val isOverloaded = max > 0 && currentMass > max + 0.001
+
+            if (isOverloaded) {
+                val errorColor = itemView.context.getColor(com.google.android.material.R.color.design_default_color_error)
+                binding.root.setStrokeColor(android.content.res.ColorStateList.valueOf(errorColor))
+                binding.root.strokeWidth = 8
+            } else {
+                binding.root.strokeWidth = 0
+            }
+        }
+
         fun bind(swp: StationWithPresets) {
             val station = swp.station
             binding.tvStationName.text = station.name
@@ -163,6 +180,10 @@ class CalculationsAdapter(
                 override fun afterTextChanged(s: Editable?) {
                     if (binding.etManualInput.hasFocus()) {
                         val weight = s.toString().replace(",", ".").toDoubleOrNull() ?: 0.0
+                        
+                        // Sofort Rahmen aktualisieren
+                        refreshOverloadVisuals(weight, station.maxMass)
+
                         if (station.hasPresets) {
                             val noSelectionText = itemView.context.getString(R.string.option_no_selection)
                             if (binding.spinnerPresets.text.toString() != noSelectionText) {
@@ -208,6 +229,9 @@ class CalculationsAdapter(
                         val amount = if (station.hasAmountInput) amountText.toDoubleOrNull() ?: 0.0 else 1.0
                         val total = selectedPreset.weight * amount
                         
+                        // Sofort Rahmen aktualisieren
+                        refreshOverloadVisuals(total, station.maxMass)
+
                         // Text oben rechts nur setzen wenn nötig
                         val formatted = if (total % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", total) else String.format(Locale.getDefault(), "%.1f", total)
                         if (binding.etManualInput.text.toString() != formatted) {
@@ -255,6 +279,9 @@ class CalculationsAdapter(
                         slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                         val weight = value.toDouble()
                         
+                        // Sofort Rahmen aktualisieren
+                        refreshOverloadVisuals(weight, station.maxMass)
+
                         val formatted = if (weight % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", weight) else String.format(Locale.getDefault(), "%.1f", weight)
                         if (binding.etManualInput.text.toString() != formatted) {
                             binding.etManualInput.setText(formatted)
@@ -279,12 +306,23 @@ class CalculationsAdapter(
             stations.forEachIndexed { index, swp ->
                 val view = binding.gridLayout.getChildAt(index) ?: return@forEachIndexed
                 val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
+                val tilInput = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilSmallManualInput)
                 
                 val value = swp.station.defaultValue ?: 0.0
                 val formatted = if (value % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", value) else String.format(Locale.getDefault(), "%.1f", value)
                 
                 if (etInput.text.toString() != formatted && (force || !etInput.hasFocus())) {
                     etInput.setText(formatted)
+                }
+
+                // Überlastung visuell prüfen (Mit Epsilon-Toleranz)
+                val maxMass = swp.station.maxMass ?: 0.0
+                if (maxMass > 0 && value > maxMass + 0.001) {
+                    tilInput.isErrorEnabled = true
+                    tilInput.error = " " // Sichtbar machen
+                } else {
+                    tilInput.error = null
+                    tilInput.isErrorEnabled = false
                 }
             }
         }
@@ -353,8 +391,8 @@ class CalculationsAdapter(
                         val inputStr = s.toString().replace(",", ".")
                         val weight = inputStr.toDoubleOrNull() ?: 0.0
                         
-                        // Validierung
-                        if (maxMass > 0 && weight > maxMass) {
+                        // Validierung (Mit Epsilon-Toleranz)
+                        if (maxMass > 0 && weight > maxMass + 0.001) {
                             tilInput.isErrorEnabled = true
                             tilInput.error = hintText
                         } else {

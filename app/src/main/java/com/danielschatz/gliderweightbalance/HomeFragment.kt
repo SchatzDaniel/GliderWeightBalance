@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MediatorLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.danielschatz.gliderweightbalance.adapter.CalculationsAdapter
 import com.danielschatz.gliderweightbalance.databinding.FragmentHomeBinding
@@ -156,8 +157,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupCalculationObservers() {
-        // 1. Gesamtgewicht Observer
-        sharedViewModel.totalMass.observe(viewLifecycleOwner) { result ->
+        // Mediator, um Gesamtgewicht UND Stations-Überlastung gleichzeitig zu überwachen
+        val totalMassStatusMediator = MediatorLiveData<Pair<CalculationResult?, Boolean>>()
+        totalMassStatusMediator.addSource(sharedViewModel.totalMass) { totalMassStatusMediator.value = it to (sharedViewModel.isAnyStationOverloaded.value ?: false) }
+        totalMassStatusMediator.addSource(sharedViewModel.isAnyStationOverloaded) { totalMassStatusMediator.value = (sharedViewModel.totalMass.value) to it }
+
+        totalMassStatusMediator.observe(viewLifecycleOwner) { (result, isStationOverLimit) ->
+            if (result == null) return@observe
+            
             val aircraft = sharedViewModel.selectedProfile.value?.aircraft
             val maxMass = aircraft?.maxTotalMass ?: 0.0
             val hasLimit = aircraft?.maxTotalMass != null
@@ -168,7 +175,6 @@ class HomeFragment : Fragment() {
                     val value = result.value
                     binding.twGesamtgewichtOutput.text = String.format(Locale.getDefault(), "%.1f kg", value)
 
-                    // Flächenbelastung berechnen und anzeigen
                     if (wingArea > 0) {
                         val loading = value / wingArea
                         binding.twWingLoading.text = getString(R.string.wing_loading_format, loading)
@@ -177,8 +183,7 @@ class HomeFragment : Fragment() {
                         binding.twWingLoading.visibility = View.GONE
                     }
 
-                    // Progress & Validierung
-                    val isOutsideLimits = maxMass > 0.0 && value > maxMass
+                    val isOutsideMTOW = maxMass > 0.0 && value > maxMass
                     val progress = if (maxMass > 0) (value / maxMass * 100).toInt() else 0
 
                     updateCardVisuals(
@@ -187,25 +192,25 @@ class HomeFragment : Fragment() {
                         binding.statusTotal,
                         binding.cardStatusTotal,
                         progress,
-                        isOutsideLimits,
+                        isOutsideLimits = isOutsideMTOW,
                         isError = false,
-                        hasLimit
+                        limitExists = hasLimit,
+                        isStationOverLimit = isStationOverLimit
                     )
                 }
                 is CalculationResult.Error -> {
                     binding.twGesamtgewichtOutput.text = "---"
                     binding.twWingLoading.visibility = View.GONE
-                    binding.statusTotal.text = getString(R.string.status_error)
-
                     updateCardVisuals(
                         binding.cardTotalMass,
                         binding.progressTotal,
                         binding.statusTotal,
                         binding.cardStatusTotal,
-                        progressValue = null,
-                        isOutsideLimits = false,
+                        null,
+                        false,
                         isError = true,
-                        hasLimit
+                        hasLimit,
+                        isStationOverLimit = false
                     )
                 }
             }
@@ -348,7 +353,8 @@ class HomeFragment : Fragment() {
         progressValue: Int?,
         isOutsideLimits: Boolean,
         isError: Boolean,
-        limitExists: Boolean
+        limitExists: Boolean,
+        isStationOverLimit: Boolean = false
     ) {
         val animated = sharedViewModel.shouldAnimate.value ?: true
 
@@ -365,7 +371,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        if (isError || isOutsideLimits || !limitExists) {
+        if (isError || isOutsideLimits || !limitExists || isStationOverLimit) {
             val colorRed = getThemeColor(com.google.android.material.R.attr.colorOnErrorContainer)
             val bgRed = getThemeColor(com.google.android.material.R.attr.colorErrorContainer)
 
@@ -382,8 +388,17 @@ class HomeFragment : Fragment() {
 
             statusLabel.text = when {
                 isError -> getString(R.string.status_error)
+                isStationOverLimit -> {
+                    statusLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                    getString(R.string.status_station_overload)
+                }
                 !limitExists -> getString(R.string.status_limit_missing)
                 else -> getString(R.string.status_out_of_limits)
+            }
+
+            if (!isStationOverLimit) {
+                val defaultSize = if (resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) 11f else 14f
+                statusLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, defaultSize)
             }
 
             statusLabel.setTextColor(getThemeColor(com.google.android.material.R.attr.colorOnError))

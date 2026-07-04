@@ -182,4 +182,5 @@
     <string name="duplicate">Duplizieren</string>
     <string name="duplicate_prefix">Kopie von %1$s</string>
     <string name="duplicate_success">Flugzeug wurde dupliziert!</string>
+    <string name="status_station_overload">Station\nüberladen!</string>
 </resources>

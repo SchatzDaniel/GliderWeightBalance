@@ -50,6 +50,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val _nonLiftingMass = MutableLiveData<CalculationResult>()
     val nonLiftingMass: LiveData<CalculationResult > = _nonLiftingMass
 
+    // Meldet, ob mindestens eine einzelne Station überladen ist
+    private val _isAnyStationOverloaded = MutableLiveData<Boolean>(false)
+    val isAnyStationOverloaded: LiveData<Boolean> = _isAnyStationOverloaded
+
     // Hält die aktuelle Höhe des Dashboards für das ScrollingFragment bereit
     private val _headerHeight = MutableLiveData<Int>()
     val headerHeight: LiveData<Int> = _headerHeight
@@ -227,12 +231,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         // --- 1. TotalMass berechnen ---
-        // Wir müssen hier die Dichte berücksichtigen, falls eine Station in Litern angegeben ist.
         val totalPayloadMass = profile.stations.sumOf { swp ->
             val rawValue = masses[swp.station.stationId] ?: 0.0
             val density = getDensity(swp.station.fluidType)
             rawValue * density
         }
+
+        // Prüfung: Ist IRGENDEINE Station für sich genommen überladen? (Mit Epsilon-Toleranz)
+        val stationOverload = profile.stations.any { swp ->
+            val rawValue = masses[swp.station.stationId] ?: 0.0
+            val max = swp.station.maxMass ?: 0.0
+            max > 0 && rawValue > max + 0.001
+        }
+        _isAnyStationOverloaded.value = stationOverload
 
         val emptyWeight = profile.aircraft.emptyWeight!!
         val mGes = emptyWeight + totalPayloadMass
