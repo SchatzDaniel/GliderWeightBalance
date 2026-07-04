@@ -38,6 +38,9 @@ import java.io.File
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.navigationrail.NavigationRailView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     private var currentDestinationId: Int? = null
     private val sharedViewModel: SharedViewModel by viewModels()
     private var viewPager: ViewPager2? = null
+
+    private val navBar: NavigationBarView
+        get() = (findViewById<NavigationBarView>(R.id.bottomNavigation) ?: findViewById<NavigationBarView>(R.id.navigationRail))!!
 
     fun setupViewPagerWithBottomNav(pager: ViewPager2?) {
         this.viewPager = pager
@@ -58,8 +64,8 @@ class MainActivity : AppCompatActivity() {
                     else -> null
                 }
                 menuId?.let { 
-                    if (binding.bottomNavigation.selectedItemId != it) {
-                        binding.bottomNavigation.selectedItemId = it
+                    if (navBar.selectedItemId != it) {
+                        navBar.selectedItemId = it
                     }
                 }
                 updateAppBarTitleWithSelectedProfile()
@@ -97,6 +103,15 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         updateHeaderColors()
 
+        // Insets für NavigationRail (Querformat)
+        if (navBar is NavigationRailView) {
+            ViewCompat.setOnApplyWindowInsetsListener(navBar) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.updatePadding(top = insets.top, bottom = insets.bottom)
+                windowInsets
+            }
+        }
+
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -111,11 +126,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         NavigationUI.setupWithNavController(
-            binding.bottomNavigation,
+            navBar,
             navController
         )
 
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
+        navBar.setOnItemSelectedListener { item ->
             val destinationId = item.itemId
 
             if (destinationId == R.id.scenarioFragment) {
@@ -145,7 +160,7 @@ class MainActivity : AppCompatActivity() {
             invalidateOptionsMenu()
 
             val isPagerActive = destination.id == R.id.mainPagerFragment
-            binding.bottomNavigation.visibility = if (isPagerActive) android.view.View.VISIBLE else android.view.View.GONE
+            navBar.visibility = if (isPagerActive) android.view.View.VISIBLE else android.view.View.GONE
 
             if (isPagerActive) {
                 // Nur synchronisieren, wenn der ViewPager aktuell registriert ist.
@@ -153,8 +168,8 @@ class MainActivity : AppCompatActivity() {
                 viewPager?.let { pager ->
                     val currentTab = pager.currentItem
                     val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
-                    if (binding.bottomNavigation.selectedItemId != expectedId) {
-                        binding.bottomNavigation.selectedItemId = expectedId
+                    if (navBar.selectedItemId != expectedId) {
+                        navBar.selectedItemId = expectedId
                     }
                 }
             }
@@ -174,18 +189,18 @@ class MainActivity : AppCompatActivity() {
             view.updatePadding(bottom = imeInsets.bottom)
             
             val isPagerActive = currentDestinationId == R.id.mainPagerFragment
-            if (isKeyboardVisible) {
-                binding.bottomNavigation.visibility = android.view.View.GONE
+            if (isKeyboardVisible && navBar is BottomNavigationView) {
+                navBar.visibility = android.view.View.GONE
             } else if (isPagerActive) {
-                binding.bottomNavigation.visibility = android.view.View.VISIBLE
+                navBar.visibility = android.view.View.VISIBLE
             }
             
             if (isPagerActive) {
                 viewPager?.let { pager ->
                     val currentTab = pager.currentItem
                     val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
-                    if (binding.bottomNavigation.selectedItemId != expectedId) {
-                        binding.bottomNavigation.selectedItemId = expectedId
+                    if (navBar.selectedItemId != expectedId) {
+                        navBar.selectedItemId = expectedId
                     }
                 }
             }

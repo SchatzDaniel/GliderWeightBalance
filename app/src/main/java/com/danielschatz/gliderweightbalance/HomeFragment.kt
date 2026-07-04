@@ -123,9 +123,14 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         sharedViewModel.headerHeight.observe(viewLifecycleOwner) { height ->
+            // Wir addieren 8dp Extra-Padding zum Header, damit das erste Item nicht klebt
+            val extraOffset = if (height > 0) {
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
+            } else 0
+            
             binding.recyclerViewMassInputs.setPadding(
                 binding.recyclerViewMassInputs.paddingLeft,
-                height,
+                height + extraOffset,
                 binding.recyclerViewMassInputs.paddingRight,
                 binding.recyclerViewMassInputs.paddingBottom
             )
