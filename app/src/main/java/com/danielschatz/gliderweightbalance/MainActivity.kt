@@ -438,7 +438,8 @@ class MainActivity : AppCompatActivity() {
         
         // Da enableEdgeToEdge() verwendet wird, ist die StatusBar bereits transparent.
         // Wir steuern nur noch die Helligkeit der Icons (hell/dunkel).
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = !isDarkMode
+        // Bei diesem Theme: Light Mode = dunkler Header (weiße Icons), Dark Mode = heller Header (schwarze Icons).
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isDarkMode
         binding.appBarLayout.setBackgroundColor(primaryColor)
     }
 
