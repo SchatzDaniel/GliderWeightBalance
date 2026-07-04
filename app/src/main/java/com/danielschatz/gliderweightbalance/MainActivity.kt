@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 updateAppBarTitleWithSelectedProfile()
+                invalidateOptionsMenu()
             }
         })
     }
@@ -210,6 +211,7 @@ class MainActivity : AppCompatActivity() {
 
         sharedViewModel.selectedProfile.observe(this) { 
             updateAppBarTitleWithSelectedProfile()
+            invalidateOptionsMenu()
         }
 
         checkAndShowDisclaimer()
@@ -322,11 +324,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val showMenu = currentDestinationId == R.id.mainPagerFragment
+        val isHomeActive = viewPager?.currentItem == 1
+        
         menu.findItem(R.id.aircraftFragment)?.isVisible = false
         menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
         menu.findItem(R.id.show_disclaimer)?.isVisible = showMenu
         menu.findItem(R.id.show_about)?.isVisible = showMenu
-        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu && sharedViewModel.selectedProfile.value != null
+        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu && isHomeActive && sharedViewModel.selectedProfile.value != null
+
         return super.onPrepareOptionsMenu(menu)
     }
 
