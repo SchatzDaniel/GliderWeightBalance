@@ -44,6 +44,7 @@ class HomeFragment : Fragment() {
     private var focusChangeListener: android.view.ViewTreeObserver.OnGlobalFocusChangeListener? = null
 
     private var simulationJob: Job? = null
+    private var isHintSnackbarShowing = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -522,7 +523,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun showSimulationHintOnce() {
-        if (!isAdded) return
+        if (!isAdded || isHintSnackbarShowing) return
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         
         // DEBUGGING: Aktiviere die nächste Zeile, um den Hinweis bei jedem App-Start zu sehen:
@@ -534,6 +535,7 @@ class HomeFragment : Fragment() {
             val rootView = activity?.findViewById<View>(android.R.id.content) ?: binding.root
             val bottomNav = activity?.findViewById<View>(R.id.bottomNavigation)
             
+            isHintSnackbarShowing = true
             Snackbar.make(rootView, R.string.hint_simulation_available, Snackbar.LENGTH_INDEFINITE)
                 .apply {
                     if (bottomNav?.visibility == View.VISIBLE) {
@@ -541,8 +543,16 @@ class HomeFragment : Fragment() {
                     }
                 }
                 .setAction(android.R.string.ok) {
-                    prefs.edit().putBoolean("hint_simulation_shown", true).apply()
+                    PreferenceManager.getDefaultSharedPreferences(requireContext()).edit().putBoolean("hint_simulation_shown", true).apply()
+                    isHintSnackbarShowing = false
                 }
+                .addCallback(object : Snackbar.Callback() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        if (event != DISMISS_EVENT_ACTION) {
+                            isHintSnackbarShowing = false
+                        }
+                    }
+                })
                 .show()
         }
     }
