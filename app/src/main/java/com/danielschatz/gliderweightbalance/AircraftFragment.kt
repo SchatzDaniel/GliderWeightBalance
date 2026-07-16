@@ -71,7 +71,7 @@ class AircraftFragment : Fragment() {
         }
 
         binding.fabAddAircraft.setOnClickListener {
-            val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment()
+            val action = MainPagerFragmentDirections.actionMainPagerFragmentToAddAircraftFragment()
             findNavController().navigate(action)
         }
     }
@@ -80,14 +80,14 @@ class AircraftFragment : Fragment() {
         aircraftAdapter = AircraftAdapter(
             onItemClicked = { aircraftProfile ->
                 sharedViewModel.selectProfile(aircraftProfile)
-                findNavController().navigateUp()
+                (parentFragment as? MainPagerFragment)?.switchToHome()
             },
             onEditClicked = { aircraftProfile ->
-                val action = AircraftFragmentDirections.actionAircraftFragmentToAddAircraftFragment(aircraftProfile.aircraft.id)
+                val action = MainPagerFragmentDirections.actionMainPagerFragmentToAddAircraftFragment(aircraftProfile.aircraft.id)
                 findNavController().navigate(action)
             },
             onItemLongClicked = { aircraftProfile ->
-                showDeleteConfirmationDialog(aircraftProfile)
+                showItemOptionsDialog(aircraftProfile)
             },
             onExportClicked = { aircraftProfile ->
                 showExportOptionsDialog(aircraftProfile)
@@ -97,6 +97,48 @@ class AircraftFragment : Fragment() {
         binding.recyclerViewAircraft.apply {
             adapter = aircraftAdapter
             layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+
+    private fun showItemOptionsDialog(aircraftProfile: AircraftProfile) {
+        val options = arrayOf(
+            getString(R.string.duplicate),
+            getString(R.string.delete)
+        )
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(aircraftProfile.aircraft.registration)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> duplicateAircraft(aircraftProfile)
+                    1 -> showDeleteConfirmationDialog(aircraftProfile)
+                }
+            }
+            .show()
+    }
+
+    private fun duplicateAircraft(profile: AircraftProfile) {
+        val newRegistration = getString(R.string.duplicate_prefix, profile.aircraft.registration)
+        
+        // Tiefe Kopie erstellen und IDs auf 0 setzen
+        val duplicatedProfile = profile.copy(
+            aircraft = profile.aircraft.copy(
+                id = 0,
+                registration = newRegistration
+            ),
+            stations = profile.stations.map { swp ->
+                swp.copy(
+                    station = swp.station.copy(
+                        stationId = 0,
+                        aircraftOwnerId = 0
+                    ),
+                    presets = swp.presets.map { it.copy(presetId = 0, parentStationId = 0) }
+                )
+            }
+        )
+        
+        viewModel.saveOrUpdateProfile(duplicatedProfile) {
+            Toast.makeText(requireContext(), R.string.duplicate_success, Toast.LENGTH_SHORT).show()
         }
     }
 

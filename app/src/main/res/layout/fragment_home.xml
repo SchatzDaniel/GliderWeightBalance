@@ -6,21 +6,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Der Fragment-Container füllt nun den ganzen Bildschirm aus (Z-Index unten) -->
-
-    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
-
-    <FrameLayout
-        android:id="@+id/bottom_fragment_container"
+    <!-- RecyclerView direkt im HomeFragment (Z-Index unten) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewMassInputs"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="100dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_scrolling_station" />
 
+    <!-- Optional: Ein TextView, das anzeigt, wenn kein Flugzeug ausgewählt ist -->
+    <TextView
+        android:id="@+id/textViewNoAircraftSelected"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prompt_no_aircraft_selected"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
+
+    <!-- Das Dashboard schwebt darüber (Z-Index oben) -->
     <LinearLayout
         android:id="@+id/headerContainer"
         android:layout_width="match_parent"
@@ -32,11 +47,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:id="@+id/dashboardLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="4dp"
+            android:paddingTop="0dp"
             android:paddingBottom="4dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
@@ -50,7 +64,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:padding="16dp"
@@ -89,27 +106,45 @@
                         app:layout_constraintTop_toTopOf="@id/twSchwerpunktlageErgebnis"
                         tools:text="(25.4%)" />
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardStatusCg"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="4dp"
-                        app:cardElevation="0dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#4CAF50">
-                        <TextView
-                            android:id="@+id/statusCg"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:id="@+id/ivSimulationHint"
+                            android:layout_width="23dp"
+                            android:layout_height="23dp"
+                            android:layout_marginEnd="8dp"
+                            android:src="@drawable/ic_chart"
+                            android:alpha="0.6"
+                            android:visibility="gone"
+                            app:tint="?attr/colorOnSurfaceVariant"
+                            tools:visibility="visible" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardStatusCg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="2dp"
-                            android:text="@string/status_ok"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="#4CAF50" />
-                    </com.google.android.material.card.MaterialCardView>
+                            app:cardCornerRadius="4dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="#4CAF50">
+                            <TextView
+                                android:id="@+id/statusCg"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp"
+                                android:text="@string/status_ok"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#4CAF50" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
 
                     <com.danielschatz.gliderweightbalance.views.CgRangeProgressBar
                         android:id="@+id/progressCg"
@@ -123,8 +158,12 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- NEU: Simulation Bereich -->
+            <include layout="@layout/layout_cg_simulation" />
+
             <!-- Container für die zwei unteren Karten (Nebeneinander) -->
             <LinearLayout
+                android:id="@+id/lowerCardsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

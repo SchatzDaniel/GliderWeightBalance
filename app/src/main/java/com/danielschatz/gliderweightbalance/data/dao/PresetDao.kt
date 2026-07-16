@@ -19,6 +19,9 @@ interface PresetDao {
     @Delete
     suspend fun deletePreset(preset: Preset)
 
+    @Query("DELETE FROM station_presets WHERE parentStationId = :stationId")
+    suspend fun deleteForStation(stationId: Int)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(presets: List<Preset>)
 }

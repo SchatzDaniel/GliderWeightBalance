@@ -23,8 +23,17 @@ class AircraftAdapter(
 ) : ListAdapter<AircraftProfile, AircraftAdapter.AircraftViewHolder>(DiffCallback) { // ViewHolder-Klasse richtig referenziert
 
     fun setSelectedAircraftId(id: Int?) {
+        if (selectedAircraftId == id) return
+        val oldId = selectedAircraftId
         selectedAircraftId = id
-        notifyDataSetChanged()
+
+        // Benachrichtige nur die betroffenen Items für effizientes Update
+        for (i in 0 until itemCount) {
+            val item = getItem(i)
+            if (item.aircraft.id == oldId || item.aircraft.id == id) {
+                notifyItemChanged(i, "SELECTION_CHANGED")
+            }
+        }
     }
 
     /**
@@ -61,6 +70,14 @@ class AircraftAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: AircraftViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.contains("SELECTION_CHANGED")) {
+            holder.updateSelection(getItem(position))
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     /**
      * Der ViewHolder, der die UI-Elemente für eine einzelne Flugzeug-Karte hält.
      * Er ist jetzt eine "inner class", um direkten Zugriff auf Adapter-Eigenschaften zu haben, falls nötig.
@@ -69,16 +86,21 @@ class AircraftAdapter(
         val binding: ItemAircraftCardBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        // Aktualisiert nur die visuelle Hervorhebung
+        fun updateSelection(profile: AircraftProfile) {
+            binding.aircraftCard.strokeWidth = if (profile.aircraft.id == selectedAircraftId) {
+                itemView.context.resources.getDimensionPixelSize(R.dimen.selected_card_stroke_width)
+            } else {
+                0
+            }
+        }
+
         // Die bind-Methode erwartet jetzt ein AircraftProfile
         fun bind(profile: AircraftProfile) {
             val aircraft = profile.aircraft // Extrahiere das reine Flugzeug-Objekt für die Stammdaten
 
             // Hervorhebung wenn ausgewählt
-            binding.aircraftCard.strokeWidth = if (aircraft.id == selectedAircraftId) {
-                itemView.context.resources.getDimensionPixelSize(R.dimen.selected_card_stroke_width)
-            } else {
-                0
-            }
+            updateSelection(profile)
 
             binding.tvAircraftName.text = buildString {
                 append(aircraft.registration)

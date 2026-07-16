@@ -1,11 +1,13 @@
 package com.danielschatz.gliderweightbalance.views
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.core.content.ContextCompat
 import com.danielschatz.gliderweightbalance.R
 
@@ -13,9 +15,11 @@ class CgRangeProgressBar @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var currentProgress: Float = 0f // 0.0 to 1.0
-    private var rangeStart: Float? = null // 0.0 to 1.0
-    private var rangeEnd: Float? = null // 0.0 to 1.0
+    private var currentProgress: Float = 0f
+    private var rangeStart: Float? = null
+    private var rangeEnd: Float? = null
+
+    private var animator: ValueAnimator? = null
 
     private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -41,11 +45,43 @@ class CgRangeProgressBar @JvmOverloads constructor(
         dotOutlinePaint.color = surfaceVariant
     }
 
-    fun setProgress(progress: Float, start: Float? = null, end: Float? = null) {
-        this.currentProgress = progress.coerceIn(0f, 1f)
-        this.rangeStart = start?.coerceIn(0f, 1f)
-        this.rangeEnd = end?.coerceIn(0f, 1f)
-        invalidate()
+    fun setProgress(progress: Float, start: Float? = null, end: Float? = null, animated: Boolean = true) {
+        val targetProgress = progress.coerceIn(0f, 1f)
+        val targetStart = start?.coerceIn(0f, 1f)
+        val targetEnd = end?.coerceIn(0f, 1f)
+
+        if (!animated) {
+            this.currentProgress = targetProgress
+            this.rangeStart = targetStart
+            this.rangeEnd = targetEnd
+            invalidate()
+            return
+        }
+
+        animator?.cancel()
+
+        val startProgress = this.currentProgress
+        val startRangeS = this.rangeStart ?: targetStart ?: 0f
+        val startRangeE = this.rangeEnd ?: targetEnd ?: 0f
+
+        animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 400
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { anim ->
+                val fraction = anim.animatedValue as Float
+                currentProgress = startProgress + (targetProgress - startProgress) * fraction
+                
+                if (targetStart != null) {
+                    rangeStart = startRangeS + (targetStart - startRangeS) * fraction
+                }
+                if (targetEnd != null) {
+                    rangeEnd = startRangeE + (targetEnd - startRangeE) * fraction
+                }
+                
+                invalidate()
+            }
+            start()
+        }
     }
 
     fun setIndicatorColor(color: Int) {

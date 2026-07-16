@@ -79,10 +79,12 @@
             android:id="@+id/layoutPresetControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:orientation="horizontal"
             android:layout_marginTop="12dp"
             android:gravity="center_vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layoutAmount"
@@ -103,13 +105,15 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/hint_choose_preset">
+                android:layout_weight="1">
                 <AutoCompleteTextView
                     android:id="@+id/spinnerPresets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:hint="@string/hint_choose_preset"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -120,6 +124,7 @@
             android:layout_marginTop="12dp"
             android:paddingVertical="12dp"
             android:visibility="gone"
+            tools:visibility="visible"
             app:thumbRadius="12dp"
             app:thumbElevation="4dp"
             app:thumbColor="?attr/colorPrimary"
