@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/aircraftFragment"
+        android:icon="@drawable/ic_action_aircraft"
+        android:title="@string/title_activity_aircraft" />
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_calculator"
+        android:title="@string/nav_calculator" />
+    <item
+        android:id="@+id/scenarioFragment"
+        android:icon="@drawable/ic_scenarios"
+        android:title="@string/title_scenarios" />
+</menu>

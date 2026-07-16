@@ -3,8 +3,6 @@ package com.danielschatz.gliderweightbalance
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -39,6 +37,10 @@ import androidx.preference.PreferenceManager
 import java.io.File
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.navigationrail.NavigationRailView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +48,31 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private var currentDestinationId: Int? = null
     private val sharedViewModel: SharedViewModel by viewModels()
+    private var viewPager: ViewPager2? = null
+
+    private val navBar: NavigationBarView
+        get() = (findViewById<NavigationBarView>(R.id.bottomNavigation) ?: findViewById<NavigationBarView>(R.id.navigationRail))!!
+
+    fun setupViewPagerWithBottomNav(pager: ViewPager2?) {
+        this.viewPager = pager
+        
+        pager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val menuId = when (position) {
+                    0 -> R.id.aircraftFragment
+                    1 -> R.id.homeFragment
+                    else -> null
+                }
+                menuId?.let { 
+                    if (navBar.selectedItemId != it) {
+                        navBar.selectedItemId = it
+                    }
+                }
+                updateAppBarTitleWithSelectedProfile()
+                invalidateOptionsMenu()
+            }
+        })
+    }
 
     companion object {
         const val PREFS_NAME = "AppPrefs"
@@ -77,11 +104,21 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         updateHeaderColors()
 
+        // Insets für NavigationRail (Querformat)
+        if (navBar is NavigationRailView) {
+            ViewCompat.setOnApplyWindowInsetsListener(navBar) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                view.updatePadding(top = insets.top, bottom = insets.bottom)
+                windowInsets
+            }
+        }
+
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment))
+        // MainPagerFragment als Top-Level definieren
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.mainPagerFragment))
 
         NavigationUI.setupWithNavController(
             binding.toolbar,
@@ -89,21 +126,92 @@ class MainActivity : AppCompatActivity() {
             appBarConfiguration
         )
 
+        NavigationUI.setupWithNavController(
+            navBar,
+            navController
+        )
+
+        navBar.setOnItemSelectedListener { item ->
+            val destinationId = item.itemId
+
+            if (destinationId == R.id.scenarioFragment) {
+                ScenarioBottomSheetFragment().show(supportFragmentManager, "ScenarioBottomSheet")
+                return@setOnItemSelectedListener false
+            }
+
+            // Wenn wir uns in einem Untermenü befinden (z.B. AddAircraft),
+            // kehren wir erst zum Pager zurück, bevor wir den Tab wechseln.
+            if (currentDestinationId != R.id.mainPagerFragment) {
+                navController.popBackStack(R.id.mainPagerFragment, false)
+            }
+
+            // Jetzt sicher den Tab wechseln
+            when (destinationId) {
+                R.id.aircraftFragment -> viewPager?.currentItem = 0
+                R.id.homeFragment -> viewPager?.currentItem = 1
+            }
+            true
+        }
+
         UpdateManager.scheduleUpdateCheck(this)
         requestNotificationPermission()
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             currentDestinationId = destination.id
             invalidateOptionsMenu()
-            if (destination.id == R.id.homeFragment) { 
-                updateAppBarTitleWithSelectedProfile()
+
+            val isPagerActive = destination.id == R.id.mainPagerFragment
+            navBar.visibility = if (isPagerActive) android.view.View.VISIBLE else android.view.View.GONE
+
+            if (isPagerActive) {
+                // Nur synchronisieren, wenn der ViewPager aktuell registriert ist.
+                // Ansonsten lassen wir die BottomNav ihren wiederhergestellten Zustand behalten.
+                viewPager?.let { pager ->
+                    val currentTab = pager.currentItem
+                    val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
+                    if (navBar.selectedItemId != expectedId) {
+                        navBar.selectedItemId = expectedId
+                    }
+                }
             }
+
+            updateAppBarTitleWithSelectedProfile()
+        }
+
+        // Handle Window Insets properly
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            
+            binding.appBarLayout.updatePadding(top = systemBars.top)
+            
+            // Das gesamte Activity-Layout nach oben schieben, wenn die Tastatur erscheint
+            view.updatePadding(bottom = imeInsets.bottom)
+            
+            val isPagerActive = currentDestinationId == R.id.mainPagerFragment
+            if (isKeyboardVisible && navBar is BottomNavigationView) {
+                navBar.visibility = android.view.View.GONE
+            } else if (isPagerActive) {
+                navBar.visibility = android.view.View.VISIBLE
+            }
+            
+            if (isPagerActive) {
+                viewPager?.let { pager ->
+                    val currentTab = pager.currentItem
+                    val expectedId = if (currentTab == 0) R.id.aircraftFragment else R.id.homeFragment
+                    if (navBar.selectedItemId != expectedId) {
+                        navBar.selectedItemId = expectedId
+                    }
+                }
+            }
+
+            insets
         }
 
         sharedViewModel.selectedProfile.observe(this) { 
-            if (currentDestinationId == R.id.homeFragment) {
-                updateAppBarTitleWithSelectedProfile()
-            }
+            updateAppBarTitleWithSelectedProfile()
+            invalidateOptionsMenu()
         }
 
         checkAndShowDisclaimer()
@@ -134,11 +242,11 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.update_button) { _, _ ->
                 if (existingFile.exists()) {
                     UpdateManager.checkPermissionAndInstall(this, existingFile) {
-                        showPermissionExplanationDialog(apkFile = existingFile, manualUrl = apkUrl)
+                        showPermissionExplanationDialog(manualUrl = apkUrl)
                     }
                 } else {
-                    UpdateManager.downloadAndInstallApk(this, apkUrl, fileName) { apkFile ->
-                        showPermissionExplanationDialog(apkFile = apkFile, manualUrl = apkUrl)
+                    UpdateManager.downloadAndInstallApk(this, apkUrl, fileName) {
+                        showPermissionExplanationDialog(manualUrl = apkUrl)
                     }
                 }
             }
@@ -146,7 +254,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showPermissionExplanationDialog(apkFile: File, manualUrl: String) {
+    private fun showPermissionExplanationDialog(manualUrl: String) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.update_permission_title)
             .setMessage(R.string.update_permission_msg)
@@ -192,11 +300,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAppBarTitleWithSelectedProfile() {
+        if (currentDestinationId != R.id.mainPagerFragment) return
+
         val profile = sharedViewModel.selectedProfile.value
-        val title = if (profile != null) {
-            "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
-        } else {
-            getString(R.string.no_aircraft_selected_title)
+        val title = when (viewPager?.currentItem) {
+            0 -> getString(R.string.title_activity_aircraft)
+            1 -> {
+                if (profile != null) {
+                    "${profile.aircraft.registration} (${profile.aircraft.aircraftType})"
+                } else {
+                    getString(R.string.no_aircraft_selected_title)
+                }
+            }
+            else -> getString(R.string.app_name)
         }
         binding.toolbar.title = title
     }
@@ -207,12 +323,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val showMenu = currentDestinationId == R.id.homeFragment
-        menu.findItem(R.id.aircraftFragment)?.isVisible = showMenu
+        val showMenu = currentDestinationId == R.id.mainPagerFragment
+        val isHomeActive = viewPager?.currentItem == 1
+        
+        menu.findItem(R.id.aircraftFragment)?.isVisible = false
         menu.findItem(R.id.settingsFragment)?.isVisible = showMenu
         menu.findItem(R.id.show_disclaimer)?.isVisible = showMenu
         menu.findItem(R.id.show_about)?.isVisible = showMenu
-        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu
+        menu.findItem(R.id.action_export_pdf)?.isVisible = showMenu && isHomeActive && sharedViewModel.selectedProfile.value != null
+
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -320,8 +439,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHeaderColors() {
         val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary)
-        window.statusBarColor = Color.TRANSPARENT
         val isDarkMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        
+        // Da enableEdgeToEdge() verwendet wird, ist die StatusBar bereits transparent.
+        // Wir steuern nur noch die Helligkeit der Icons (hell/dunkel).
+        // Bei diesem Theme: Light Mode = dunkler Header (weiße Icons), Dark Mode = heller Header (schwarze Icons).
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = isDarkMode
         binding.appBarLayout.setBackgroundColor(primaryColor)
     }

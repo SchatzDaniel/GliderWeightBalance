@@ -14,7 +14,6 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.work.CoroutineWorker
 import androidx.work.Data
-import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.danielschatz.gliderweightbalance.R
 import com.google.gson.Gson

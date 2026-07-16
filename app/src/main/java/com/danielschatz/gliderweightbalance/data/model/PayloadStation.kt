@@ -22,6 +22,8 @@ data class PayloadStation(
     var amount: Int = 1,
     val fluidType: String? = null,
     val isConsumable: Boolean = false,
+    val dumpTime: Double? = null,
+    val couplingGroupId: Int = 0,
 
     @Ignore // Dieses Feld wird nicht in der Tabelle gespeichert, nur im Code genutzt
     var presets: List<Preset> = emptyList()
@@ -43,10 +45,13 @@ data class PayloadStation(
         selectedPresetLabel: String?,
         amount: Int,
         fluidType: String?,
-        isConsumable: Boolean
+        isConsumable: Boolean,
+        dumpTime: Double?,
+        couplingGroupId: Int
     ) : this(
         stationId, aircraftOwnerId, name, arm, maxMass, unit,
         displayOrder, isNonLifting, defaultValue, hasSlider,
-        hasPresets, hasAmountInput, selectedPresetLabel, amount, fluidType, isConsumable, emptyList()
+        hasPresets, hasAmountInput, selectedPresetLabel, amount, fluidType, isConsumable, 
+        dumpTime, couplingGroupId, emptyList()
     )
 }

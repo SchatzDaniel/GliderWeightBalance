@@ -13,6 +13,12 @@ interface PayloadStationDao {
     @Query("SELECT * FROM payload_stations WHERE stationId = :stationId LIMIT 1")
     suspend fun getStationById(stationId: Int): PayloadStation?
 
+    @Query("SELECT * FROM payload_stations WHERE aircraftOwnerId = :aircraftId")
+    suspend fun getStationsForAircraftSync(aircraftId: Int): List<PayloadStation>
+
+    @Delete
+    suspend fun delete(station: PayloadStation)
+
     @Update
     suspend fun update(station: PayloadStation)
 
