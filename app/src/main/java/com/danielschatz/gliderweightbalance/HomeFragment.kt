@@ -28,6 +28,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import com.google.android.material.snackbar.Snackbar
+import androidx.preference.PreferenceManager
 import android.widget.LinearLayout
 import java.util.Locale
 
@@ -463,8 +465,17 @@ class HomeFragment : Fragment() {
             updateCgUi()
         }
 
-        sharedViewModel.cgRange.observe(viewLifecycleOwner) {
+        sharedViewModel.cgRange.observe(viewLifecycleOwner) { range ->
             updateCgUi()
+            
+            // Simulation-Icon anzeigen, wenn eine Verlagerung berechnet wurde
+            val hasMigration = range != null && (range.second - range.first) > 0.1
+            binding.root.findViewById<android.widget.ImageView>(R.id.ivSimulationHint)?.isVisible = hasMigration
+            
+            // Snackbar beim ersten Mal anzeigen
+            if (hasMigration) {
+                showSimulationHintOnce()
+            }
         }
 
         sharedViewModel.nonLiftingMass.observe(viewLifecycleOwner) { result ->
@@ -507,6 +518,32 @@ class HomeFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    private fun showSimulationHintOnce() {
+        if (!isAdded) return
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        
+        // DEBUGGING: Aktiviere die nächste Zeile, um den Hinweis bei jedem App-Start zu sehen:
+        // prefs.edit().putBoolean("hint_simulation_shown", false).apply()
+
+        val hasShown = prefs.getBoolean("hint_simulation_shown", false)
+        
+        if (!hasShown) {
+            val rootView = activity?.findViewById<View>(android.R.id.content) ?: binding.root
+            val bottomNav = activity?.findViewById<View>(R.id.bottomNavigation)
+            
+            Snackbar.make(rootView, R.string.hint_simulation_available, Snackbar.LENGTH_INDEFINITE)
+                .apply {
+                    if (bottomNav?.visibility == View.VISIBLE) {
+                        anchorView = bottomNav
+                    }
+                }
+                .setAction(android.R.string.ok) {
+                    prefs.edit().putBoolean("hint_simulation_shown", true).apply()
+                }
+                .show()
         }
     }
 

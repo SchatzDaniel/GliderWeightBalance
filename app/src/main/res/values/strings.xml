@@ -190,4 +190,5 @@
     <string name="extreme_state_aft">Max. Schwanzlage</string>
     <string name="dialog_apply_simulation_title">Werte übernehmen?</string>
     <string name="dialog_apply_simulation_message">Möchtest du die aktuell simulierten Gewichte als neuen Beladungszustand übernehmen?</string>
+    <string name="hint_simulation_available">Tippe auf die Schwerpunktkarte für Details zum Flugverlauf.</string>
 </resources>
