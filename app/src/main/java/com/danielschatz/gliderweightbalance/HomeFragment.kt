@@ -6,7 +6,6 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,6 +15,20 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.danielschatz.gliderweightbalance.adapter.CalculationsAdapter
 import com.danielschatz.gliderweightbalance.databinding.FragmentHomeBinding
+import com.danielschatz.gliderweightbalance.views.EnvelopeView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.slider.Slider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.transition.TransitionManager
+import android.transition.TransitionSet
+import android.transition.Fade
+import android.transition.ChangeBounds
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import android.widget.LinearLayout
 import java.util.Locale
 
 class HomeFragment : Fragment() {
@@ -27,6 +40,8 @@ class HomeFragment : Fragment() {
     private var defaultTextColor: ColorStateList? = null
     private lateinit var calculationsAdapter: CalculationsAdapter
     private var focusChangeListener: android.view.ViewTreeObserver.OnGlobalFocusChangeListener? = null
+
+    private var simulationJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,25 +56,246 @@ class HomeFragment : Fragment() {
 
         setupRecyclerView()
         observeViewModel()
+        setupSimulationControls()
+        setupExtremeScenarioControls()
         
-        // Wir nehmen die Farbe eines Standard-Labels als Referenz
         defaultTextColor = binding.labelTotal.textColors
 
-        // Messe die Höhe/Breite des Dashboards und teile sie dem ViewModel mit
-        binding.headerContainer.doOnLayout {
+        binding.headerContainer.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
             val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-            if (isLandscape) {
-                sharedViewModel.setHeaderHeight(0) // Im Querformat liegen sie nebeneinander
-            } else {
-                sharedViewModel.setHeaderHeight(it.height)
+            val height = if (isLandscape) 0 else v.height
+            if (sharedViewModel.headerHeight.value != height) {
+                sharedViewModel.setHeaderHeight(height)
             }
         }
 
         setupKeyboardHandling()
+
+        binding.cardCg.setOnClickListener {
+            toggleSimulationMode()
+        }
+    }
+
+    private fun setupExtremeScenarioControls() {
+        val container = binding.root.findViewById<LinearLayout>(R.id.containerExtremeScenarios) ?: return
+        
+        sharedViewModel.extremeStates.observe(viewLifecycleOwner) { states ->
+            if (states == null) return@observe
+            
+            container.removeAllViews()
+            states.forEach { state ->
+                val cardBinding = com.danielschatz.gliderweightbalance.databinding.ItemExtremeScenarioCardBinding.inflate(
+                    LayoutInflater.from(requireContext()), container, false
+                )
+                
+                cardBinding.tvScenarioTitle.text = when (state.type) {
+                    ExtremeState.Type.FORWARD -> "Max. Kopflage"
+                    ExtremeState.Type.TAKE_OFF -> "Abflugzustand"
+                    ExtremeState.Type.AFT -> "Max. Schwanzlage"
+                }
+                
+                cardBinding.tvScenarioCg.text = String.format(Locale.getDefault(), "%.1f mm", state.cgLocation)
+                
+                // Details: Nur veränderbare Tanks anzeigen
+                val profile = sharedViewModel.selectedProfile.value
+                val details = state.stationMasses.mapNotNull { (id, mass) ->
+                    val station = profile?.stations?.find { it.station.stationId == id }?.station
+                    if (station?.isConsumable == true) {
+                        "${station.name}: ${String.format(Locale.getDefault(), "%.1f", mass)}${station.unit ?: "kg"}"
+                    } else null
+                }.joinToString(" | ")
+                
+                cardBinding.tvScenarioDetails.text = details
+                
+                // Selektions-Status (Outline)
+                sharedViewModel.currentSimulationState.observe(viewLifecycleOwner) { simState ->
+                    val isSelected = simState?.cgLocation == state.cgLocation && simState?.totalMass == state.totalMass
+                    cardBinding.cardScenario.strokeWidth = if (isSelected) {
+                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3f, resources.displayMetrics).toInt()
+                    } else 0
+                }
+
+                cardBinding.cardScenario.setOnClickListener {
+                    sharedViewModel.selectExtremeState(state)
+                    calculationsAdapter.setSimulationValues(state.stationMasses)
+                }
+                
+                container.addView(cardBinding.root)
+            }
+        }
+    }
+
+    private fun setupSimulationControls() {
+        val simContainer = binding.root.findViewById<View>(R.id.simulationContainer)
+        val slider = simContainer.findViewById<Slider>(R.id.simulationSlider)
+        val btnPlay = simContainer.findViewById<MaterialButton>(R.id.btnPlaySimulation)
+        val btnApply = simContainer.findViewById<MaterialButton>(R.id.btnApplySimulation)
+        val tvTime = simContainer.findViewById<android.widget.TextView>(R.id.tvSimulationTime)
+
+        slider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                sharedViewModel.setSimulationTime(value.toDouble())
+            }
+        }
+
+        btnPlay.setOnClickListener {
+            if (simulationJob?.isActive == true) {
+                stopSimulation()
+            } else {
+                startSimulation(slider)
+            }
+        }
+
+        // Falls noch nicht registriert, UI Button initial setzen
+        btnApply.setIconResource(R.drawable.ic_refresh)
+
+        btnApply.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Werte übernehmen?")
+                .setMessage("Möchtest du die aktuell simulierten Gewichte als neuen Beladungszustand übernehmen?")
+                .setPositiveButton("Übernehmen") { dialog, _ ->
+                    sharedViewModel.applySimulationToState()
+                    toggleSimulationMode() // Diagramm schließen
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Abbrechen", null)
+                .show()
+        }
+
+        sharedViewModel.currentSimulationState.observe(viewLifecycleOwner) { state ->
+            if (state != null) {
+                slider.stepSize = 0f // Kontinuierlicher Slider
+                slider.valueTo = state.maxDuration.toFloat().coerceAtLeast(1f)
+                
+                // Slider nur nachziehen, wenn der Nutzer ihn NICHT gerade selbst bewegt
+                if (!slider.isFocused) {
+                    slider.value = state.timeSeconds.toFloat()
+                }
+                
+                val minutes = state.timeSeconds.toInt() / 60
+                val seconds = state.timeSeconds.toInt() % 60
+                tvTime.text = String.format(Locale.getDefault(), "%d:%02d", minutes, seconds)
+                
+                // Envelope View aktualisieren
+                val envelopeView = binding.root.findViewById<EnvelopeView>(R.id.envelopeView)
+                envelopeView.setSimulationPath(sharedViewModel.simulationPath.value ?: emptyList(), state.cgLocation to state.totalMass)
+                
+                // Falls Simulation aktiv, Liste updaten
+                if (sharedViewModel.isSimulationActive.value == true) {
+                    calculationsAdapter.setSimulationValues(state.stationMasses)
+                }
+            }
+        }
+    }
+
+    private fun startSimulation(slider: Slider) {
+        val btnPlay = binding.root.findViewById<MaterialButton>(R.id.btnPlaySimulation)
+        btnPlay.setIconResource(R.drawable.ic_pause)
+        
+        simulationJob = viewLifecycleOwner.lifecycleScope.launch {
+            var currentTime = sharedViewModel.simulationTime.value ?: 0.0
+            val maxTime = slider.valueTo.toDouble()
+            
+            if (currentTime >= maxTime) currentTime = 0.0
+
+            while (isActive && currentTime < maxTime) {
+                currentTime += 1.0 // Echtzeit: 1 Sekunde pro Update
+                sharedViewModel.setSimulationTime(currentTime)
+                delay(1000) // Update jede Sekunde
+            }
+            stopSimulation()
+        }
+    }
+
+    private fun stopSimulation() {
+        simulationJob?.cancel()
+        val btnPlay = binding.root.findViewById<MaterialButton>(R.id.btnPlaySimulation)
+        btnPlay.setIconResource(R.drawable.ic_play)
+    }
+
+    private fun toggleSimulationMode() {
+        val isActive = sharedViewModel.isSimulationActive.value ?: false
+        val newActive = !isActive
+        
+        val simContainer = binding.root.findViewById<View>(R.id.simulationContainer)
+        val lowerCards = binding.root.findViewById<View>(R.id.lowerCardsContainer)
+        
+        val layoutSingle = binding.root.findViewById<View>(R.id.layoutSimSingleGroup)
+        val layoutMulti = binding.root.findViewById<View>(R.id.layoutSimMultiGroup)
+        
+        val numGroups = sharedViewModel.numOperationalGroups.value ?: 0
+        val useSingleMode = numGroups <= 1
+        val wasVisible = simContainer.isVisible
+
+        // 1. Vorbereiten der Simulation
+        sharedViewModel.setSimulationActive(newActive)
+        calculationsAdapter.setSimulationMode(newActive)
+        
+        // 2. Ziel-Höhe berechnen
+        layoutSingle.isVisible = useSingleMode
+        layoutMulti.isVisible = !useSingleMode
+        simContainer.isVisible = newActive
+        lowerCards.isVisible = !newActive
+        
+        binding.headerContainer.measure(
+            View.MeasureSpec.makeMeasureSpec(binding.headerContainer.width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val targetHeight = binding.headerContainer.measuredHeight
+        
+        // Sichtbarkeit für die Transition kurz zurücksetzen
+        simContainer.isVisible = wasVisible
+        lowerCards.isVisible = !wasVisible
+
+        // 3. Sequenzielle Transition definieren
+        val transition = TransitionSet().apply {
+            ordering = TransitionSet.ORDERING_SEQUENTIAL
+            
+            // Schritt A: Altes ausfaden + Größe anpassen (Gleichzeitig)
+            addTransition(TransitionSet().apply {
+                ordering = TransitionSet.ORDERING_TOGETHER
+                addTransition(Fade(Fade.OUT).setDuration(150))
+                addTransition(ChangeBounds().setDuration(300))
+            })
+            
+            // Schritt B: Neues einfaden
+            addTransition(Fade(Fade.IN).setDuration(200))
+        }
+
+        TransitionManager.beginDelayedTransition(binding.root as ViewGroup, transition)
+        
+        // 4. Jetzt die tatsächlichen Änderungen durchführen
+        simContainer.isVisible = newActive
+        lowerCards.isVisible = !newActive
+
+        val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        sharedViewModel.setHeaderHeight(if (isLandscape) 0 else targetHeight)
+
+        if (newActive) {
+            val aircraft = sharedViewModel.selectedProfile.value?.aircraft ?: return
+            
+            val envelopeView = binding.root.findViewById<EnvelopeView>(R.id.envelopeView)
+            envelopeView.setData(
+                minCg = aircraft.minCg ?: 0.0,
+                maxCg = aircraft.maxCg ?: 0.0,
+                emptyMass = aircraft.emptyWeight ?: 0.0,
+                maxMass = aircraft.maxTotalMass ?: 0.0
+            )
+
+            // Farbe der Envelope-Karte explizit an die anderen Dashboard-Karten angleichen
+            binding.root.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardEnvelope)?.let { card ->
+                val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface)
+                card.setCardBackgroundColor(ColorStateList.valueOf(surfaceColor))
+                card.cardElevation = 4 * resources.displayMetrics.density
+                card.strokeWidth = 0
+            }
+        } else {
+            stopSimulation()
+            calculationsAdapter.clearSimulationValues()
+        }
     }
 
     private fun setupKeyboardHandling() {
-        // Fokus-Listener für Feldwechsel (z.B. durch "Weiter")
         focusChangeListener = android.view.ViewTreeObserver.OnGlobalFocusChangeListener { _, newFocus ->
             if (newFocus is android.widget.EditText) {
                 scrollToFocusedView(newFocus)
@@ -92,17 +328,13 @@ class HomeFragment : Fragment() {
             val rvHeight = currentBinding.recyclerViewMassInputs.height
             val paddingBottom = currentBinding.recyclerViewMassInputs.paddingBottom
             
-            // Sichtbarer Bereich zwischen Header und oberhalb der Tastatur (Padding)
             val visibleTop = headerHeight
             val visibleBottom = rvHeight - paddingBottom
 
             if (rect.bottom > visibleBottom) {
-                // Das Feld ist (teilweise) durch die Tastatur oder den unteren Rand verdeckt.
-                // Wir scrollen es so weit hoch, dass es knapp über dem unteren Rand liegt.
                 val scrollAmount = rect.bottom - visibleBottom + 24
                 currentBinding.recyclerViewMassInputs.smoothScrollBy(0, scrollAmount)
             } else if (rect.top < visibleTop) {
-                // Das Feld ist hinter dem Header verschwunden.
                 val scrollAmount = rect.top - visibleTop - 24
                 currentBinding.recyclerViewMassInputs.smoothScrollBy(0, scrollAmount)
             }
@@ -117,24 +349,32 @@ class HomeFragment : Fragment() {
         binding.recyclerViewMassInputs.apply {
             adapter = calculationsAdapter
             layoutManager = LinearLayoutManager(requireContext())
-            // Komplett deaktivieren um Flackern beim Flugzeugwechsel zu verhindern
             itemAnimator = null
         }
     }
 
     private fun observeViewModel() {
         sharedViewModel.headerHeight.observe(viewLifecycleOwner) { height ->
-            // Wir addieren 8dp Extra-Padding zum Header, damit das erste Item nicht klebt
             val extraOffset = if (height > 0) {
                 TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
             } else 0
             
+            val newTopPadding = height + extraOffset
+            val oldTopPadding = binding.recyclerViewMassInputs.paddingTop
+            
+            // Wenn die Liste ganz oben ist, wollen wir den Scroll-Zustand beibehalten
+            val isAtTop = !binding.recyclerViewMassInputs.canScrollVertically(-1)
+
             binding.recyclerViewMassInputs.setPadding(
                 binding.recyclerViewMassInputs.paddingLeft,
-                height + extraOffset,
+                newTopPadding,
                 binding.recyclerViewMassInputs.paddingRight,
                 binding.recyclerViewMassInputs.paddingBottom
             )
+
+            if (isAtTop && oldTopPadding != newTopPadding) {
+                binding.recyclerViewMassInputs.scrollToPosition(0)
+            }
         }
 
         sharedViewModel.onScenarioApplied.observe(viewLifecycleOwner) {
@@ -157,7 +397,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupCalculationObservers() {
-        // Mediator, um Gesamtgewicht UND Stations-Überlastung gleichzeitig zu überwachen
         val totalMassStatusMediator = MediatorLiveData<Pair<CalculationResult?, Boolean>>()
         totalMassStatusMediator.addSource(sharedViewModel.totalMass) { totalMassStatusMediator.value = it to (sharedViewModel.isAnyStationOverloaded.value ?: false) }
         totalMassStatusMediator.addSource(sharedViewModel.isAnyStationOverloaded) { totalMassStatusMediator.value = (sharedViewModel.totalMass.value) to it }
@@ -216,7 +455,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // 2. Schwerpunkt Observer
         sharedViewModel.cg.observe(viewLifecycleOwner) {
             updateCgUi()
         }
@@ -277,20 +515,18 @@ class HomeFragment : Fragment() {
         val maxCG = profile.maxCg ?: 0.0
         val totalRange = maxCG - minCG
         val hasLimit = profile.maxCg != null && profile.minCg != null
+        val isSimulation = sharedViewModel.isSimulationActive.value ?: false
 
         when (result) {
             is CalculationResult.Success -> {
                 val value = result.value
                 binding.twSchwerpunktlageErgebnis.text = String.format(Locale.getDefault(), "%.1f mm", value)
 
-                // Prozentuale Lage (MAC)
                 val percentage = if (totalRange > 0) (value - minCG) / totalRange * 100 else 0.0
                 binding.twCgPercent.text = String.format(Locale.getDefault(), "(%.1f%%)", percentage)
 
-                // Validierung (muss auch für die gesamte Range im Flug gelten!)
                 var isOutsideLimits = (minCG > 0.0 || maxCG > 0.0) && (value !in minCG..maxCG)
                 
-                // Falls es eine Flug-Range gibt, muss der gesamte Bereich innerhalb der Limits liegen
                 var rangeStartPct: Float? = null
                 var rangeEndPct: Float? = null
                 
@@ -305,7 +541,6 @@ class HomeFragment : Fragment() {
                     }
                 }
 
-                // UI Update
                 updateCardVisuals(
                     binding.cardCg,
                     binding.progressCg,
@@ -317,12 +552,12 @@ class HomeFragment : Fragment() {
                     hasLimit
                 )
                 
-                // Custom Progress Bar Update
+                // Animation deaktivieren, wenn wir in der Simulation sind
                 binding.progressCg.setProgress(
                     (percentage / 100.0).toFloat(),
                     rangeStartPct,
                     rangeEndPct,
-                    sharedViewModel.shouldAnimate.value ?: true
+                    if (isSimulation) false else (sharedViewModel.shouldAnimate.value ?: true)
                 )
             }
             is CalculationResult.Error -> {
@@ -356,7 +591,8 @@ class HomeFragment : Fragment() {
         limitExists: Boolean,
         isStationOverLimit: Boolean = false
     ) {
-        val animated = sharedViewModel.shouldAnimate.value ?: true
+        val isSimulation = sharedViewModel.isSimulationActive.value ?: false
+        val animated = if (isSimulation) false else (sharedViewModel.shouldAnimate.value ?: true)
 
         if (isError || !limitExists || progressValue == null) {
             progressIndicator.visibility = View.INVISIBLE

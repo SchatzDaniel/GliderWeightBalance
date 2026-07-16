@@ -115,7 +115,13 @@ class PayloadStationsAdapter(
 
             val updateCouplingVisibility = {
                 val isConsumable = dialogBinding.cbIsConsumable.isChecked
+                // 1. DumpTime Feld anzeigen wenn veränderbar
+                dialogBinding.dialogStationDumpTimeLayout.visibility = if (isConsumable) View.VISIBLE else View.GONE
+                
+                // 2. Koppelungs-Option anzeigen wenn veränderbar
                 dialogBinding.layoutCoupling.visibility = if (isConsumable) View.VISIBLE else View.GONE
+                
+                // 3. Koppelungs-Einstellungen (Button) anzeigen wenn gekoppelt UND veränderbar
                 val isCoupled = dialogBinding.cbIsCoupled.isChecked && isConsumable
                 dialogBinding.layoutCouplingSettings.visibility = if (isCoupled) View.VISIBLE else View.GONE
             }
@@ -125,7 +131,10 @@ class PayloadStationsAdapter(
 
             updateCouplingVisibility()
 
-            dialogBinding.cbIsConsumable.setOnCheckedChangeListener { _, _ -> updateCouplingVisibility() }
+            dialogBinding.cbIsConsumable.setOnCheckedChangeListener { _, isChecked ->
+                if (!isChecked) dialogBinding.dialogStationDumpTimeLayout.error = null
+                updateCouplingVisibility()
+            }
             dialogBinding.cbIsCoupled.setOnCheckedChangeListener { _, _ -> updateCouplingVisibility() }
 
             dialogBinding.btnCouplingInfo.setOnClickListener {
@@ -235,14 +244,31 @@ class PayloadStationsAdapter(
 
             dialogBinding.cbHasAmountInput.isEnabled = station.hasPresets
 
-            MaterialAlertDialogBuilder(context)
+            val dialog = MaterialAlertDialogBuilder(context)
                 .setTitle(R.string.edit_station)
                 .setView(dialogBinding.root)
-                .setNegativeButton(R.string.delete) { dialog, _ ->
+                .setNegativeButton(R.string.delete) { d, _ ->
                     onStationDeleted(station)
-                    dialog.dismiss()
+                    d.dismiss()
                 }
-                .setPositiveButton(R.string.save) { dialog, _ ->
+                .setPositiveButton(R.string.save, null) // Listener wird unten manuell gesetzt
+                .create()
+
+            dialog.setOnShowListener {
+                val saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE)
+                saveButton.setOnClickListener {
+                    val isConsumable = dialogBinding.cbIsConsumable.isChecked
+                    val dumpTimeStr = dialogBinding.dialogEditTextStationDumpTime.text.toString().trim()
+                    val dumpTime = dumpTimeStr.toDoubleOrNull()
+
+                    if (isConsumable && (dumpTime == null || dumpTime <= 0)) {
+                        dialogBinding.dialogStationDumpTimeLayout.error = "Ablaufzeit erforderlich"
+                        Toast.makeText(context, "Bitte eine gültige Ablaufzeit angeben.", Toast.LENGTH_LONG).show()
+                        return@setOnClickListener // Verhindert das Schließen des Dialogs
+                    } else {
+                        dialogBinding.dialogStationDumpTimeLayout.error = null
+                    }
+
                     val newName = dialogBinding.dialogEditTextStationName.text.toString().trim()
                     val newArm = dialogBinding.dialogEditTextStationArm.text.toString().toDoubleOrNull() ?: station.arm
                     val newUnit = dialogBinding.dialogEditTextStationUnit.text.toString().trim()
@@ -265,16 +291,19 @@ class PayloadStationsAdapter(
                             hasPresets = dialogBinding.cbHasPresets.isChecked,
                             hasAmountInput = dialogBinding.cbHasAmountInput.isChecked,
                             fluidType = newFluidType,
-                            dumpTime = dialogBinding.dialogEditTextStationDumpTime.text.toString().toDoubleOrNull(),
+                            dumpTime = dumpTime,
                             couplingGroupId = if (dialogBinding.cbIsCoupled.isChecked) currentCouplingGroupId else 0
                         ).apply {
                             this.presets = station.presets
                         }
                         onStationUpdated(updatedStation)
                         dialog.dismiss()
+                    } else if (newName.isBlank()) {
+                        Toast.makeText(context, "Name darf nicht leer sein", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .show()
+            }
+            dialog.show()
         }
     }
 

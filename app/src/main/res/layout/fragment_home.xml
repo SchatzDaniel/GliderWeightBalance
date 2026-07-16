@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="4dp"
+            android:paddingTop="0dp"
             android:paddingBottom="4dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
@@ -64,7 +64,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:padding="16dp"
@@ -137,8 +140,12 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- NEU: Simulation Bereich -->
+            <include layout="@layout/layout_cg_simulation" />
+
             <!-- Container für die zwei unteren Karten (Nebeneinander) -->
             <LinearLayout
+                android:id="@+id/lowerCardsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

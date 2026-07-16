@@ -28,6 +28,37 @@ class CalculationsAdapter(
         private const val TYPE_GROUP = 1
     }
 
+    private var simulationMasses: Map<Int, Double>? = null
+    private var isSimulationMode = false
+
+    /**
+     * Schaltet den Simulationsmodus für die UI sofort ein oder aus.
+     * Sperrt/entsperrt die Eingabefelder.
+     */
+    fun setSimulationMode(active: Boolean) {
+        this.isSimulationMode = active
+        if (!active) this.simulationMasses = null
+        notifyItemRangeChanged(0, itemCount, "SIMULATION_UPDATE")
+    }
+
+    /**
+     * Setzt temporäre Simulationswerte für die Anzeige (kg).
+     */
+    fun setSimulationValues(masses: Map<Int, Double>) {
+        this.isSimulationMode = true
+        this.simulationMasses = masses
+        notifyItemRangeChanged(0, itemCount, "SIMULATION_UPDATE")
+    }
+
+    /**
+     * Entfernt den Simulationsmodus in der Anzeige.
+     */
+    fun clearSimulationValues() {
+        this.isSimulationMode = false
+        this.simulationMasses = null
+        notifyItemRangeChanged(0, itemCount, "SIMULATION_UPDATE")
+    }
+
     fun updateData(flatList: List<StationWithPresets>) {
         val groupedList = mutableListOf<CalculationItem>()
         var currentGroup = mutableListOf<StationWithPresets>()
@@ -77,7 +108,7 @@ class CalculationsAdapter(
         if (payloads.isNotEmpty()) {
             val item = getItem(position)
             val forceUpdate = payloads.any { it == "SCENARIO_APPLIED" }
-            val onlyValues = payloads.any { it == "ONLY_VALUES" }
+            val onlyValues = payloads.any { it == "ONLY_VALUES" || it == "SIMULATION_UPDATE" }
 
             if (forceUpdate || onlyValues) {
                 if (holder is SingleViewHolder && item is CalculationItem.SingleStation) {
@@ -99,14 +130,15 @@ class CalculationsAdapter(
 
         fun updateValuesOnly(swp: StationWithPresets, force: Boolean = false) {
             val station = swp.station
-            val currentMass = station.defaultValue ?: 0.0
+            
+            // Welchen Wert zeigen wir an? (Simulation schlägt Eingabe)
+            val value = simulationMasses?.get(station.stationId) ?: (station.defaultValue ?: 0.0)
             
             // Visuellen Status sofort aktualisieren
-            refreshOverloadVisuals(currentMass, station.maxMass)
+            refreshOverloadVisuals(value, station.maxMass)
 
             // Gewicht oben rechts
             val etWeightDisplay = binding.etManualInput
-            val value = station.defaultValue ?: 0.0
             val formatted = if (value % 1.0 == 0.0) {
                 String.format(Locale.getDefault(), "%.0f", value)
             } else {
@@ -115,6 +147,13 @@ class CalculationsAdapter(
             if (etWeightDisplay.text.toString() != formatted && (force || !etWeightDisplay.hasFocus())) {
                 etWeightDisplay.setText(formatted)
             }
+
+            // Wenn wir in der Simulation sind, deaktivieren wir die Eingaben visuell etwas
+            val isSim = isSimulationMode
+            binding.etManualInput.isEnabled = !isSim
+            binding.weightSlider.isEnabled = !isSim
+            binding.etAmount.isEnabled = !isSim
+            binding.spinnerPresets.isEnabled = !isSim
 
             // Menge
             if (station.hasAmountInput) {
@@ -135,7 +174,7 @@ class CalculationsAdapter(
             // Slider
             if (station.hasSlider && station.maxMass != null) {
                 val step = if (station.maxMass % 1.0 != 0.0) 0.1f else 1.0f
-                val snappedVal = ((station.defaultValue ?: 0.0) / step).roundToInt() * step
+                val snappedVal = (value / step).roundToInt() * step
                 binding.weightSlider.value = snappedVal.coerceIn(0f, station.maxMass.toFloat())
             }
         }
@@ -308,12 +347,17 @@ class CalculationsAdapter(
                 val etInput = view.findViewById<EditText>(R.id.etSmallManualInput)
                 val tilInput = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilSmallManualInput)
                 
-                val value = swp.station.defaultValue ?: 0.0
+                // Simulationswert oder DB-Wert
+                val value = simulationMasses?.get(swp.station.stationId) ?: (swp.station.defaultValue ?: 0.0)
+                
                 val formatted = if (value % 1.0 == 0.0) String.format(Locale.getDefault(), "%.0f", value) else String.format(Locale.getDefault(), "%.1f", value)
                 
                 if (etInput.text.toString() != formatted && (force || !etInput.hasFocus())) {
                     etInput.setText(formatted)
                 }
+
+                // In der Simulation deaktivieren
+                etInput.isEnabled = !isSimulationMode
 
                 // Überlastung visuell prüfen (Mit Epsilon-Toleranz)
                 val maxMass = swp.station.maxMass ?: 0.0
