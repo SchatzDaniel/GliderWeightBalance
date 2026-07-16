@@ -184,4 +184,10 @@
     <string name="duplicate_success">Flugzeug wurde dupliziert!</string>
     <string name="status_station_overload">Station\nüberladen!</string>
     <string name="info_live_simulation_no_support">Die grafische Live-Simulation unterstützt aktuell nur eine Ventilgruppe. Du kannst hier jedoch die Auswirkungen extremer Ablass-Szenarien direkt prüfen.</string>
+    <string name="info_no_consumables_loaded">Keine veränderbaren Massen beladen. Markiere Stationen (z.B. Wasserballast) im Flugzeugprofil als \'veränderbar\', um den Schwerpunktverlauf während des Ablassens zu simulieren.</string>
+    <string name="extreme_state_forward">Max. Kopflage</string>
+    <string name="extreme_state_take_off">Abflugzustand</string>
+    <string name="extreme_state_aft">Max. Schwanzlage</string>
+    <string name="dialog_apply_simulation_title">Werte übernehmen?</string>
+    <string name="dialog_apply_simulation_message">Möchtest du die aktuell simulierten Gewichte als neuen Beladungszustand übernehmen?</string>
 </resources>

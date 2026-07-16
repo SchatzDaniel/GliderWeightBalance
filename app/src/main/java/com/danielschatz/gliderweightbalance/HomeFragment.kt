@@ -89,9 +89,9 @@ class HomeFragment : Fragment() {
                 )
                 
                 cardBinding.tvScenarioTitle.text = when (state.type) {
-                    ExtremeState.Type.FORWARD -> "Max. Kopflage"
-                    ExtremeState.Type.TAKE_OFF -> "Abflugzustand"
-                    ExtremeState.Type.AFT -> "Max. Schwanzlage"
+                    ExtremeState.Type.FORWARD -> getString(R.string.extreme_state_forward)
+                    ExtremeState.Type.TAKE_OFF -> getString(R.string.extreme_state_take_off)
+                    ExtremeState.Type.AFT -> getString(R.string.extreme_state_aft)
                 }
                 
                 cardBinding.tvScenarioCg.text = String.format(Locale.getDefault(), "%.1f mm", state.cgLocation)
@@ -151,14 +151,14 @@ class HomeFragment : Fragment() {
 
         btnApply.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Werte übernehmen?")
-                .setMessage("Möchtest du die aktuell simulierten Gewichte als neuen Beladungszustand übernehmen?")
-                .setPositiveButton("Übernehmen") { dialog, _ ->
+                .setTitle(R.string.dialog_apply_simulation_title)
+                .setMessage(R.string.dialog_apply_simulation_message)
+                .setPositiveButton(R.string.save) { dialog, _ ->
                     sharedViewModel.applySimulationToState()
                     toggleSimulationMode() // Diagramm schließen
                     dialog.dismiss()
                 }
-                .setNegativeButton("Abbrechen", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
 
@@ -222,9 +222,11 @@ class HomeFragment : Fragment() {
         
         val layoutSingle = binding.root.findViewById<View>(R.id.layoutSimSingleGroup)
         val layoutMulti = binding.root.findViewById<View>(R.id.layoutSimMultiGroup)
+        val cardNoConsumables = binding.root.findViewById<View>(R.id.cardNoConsumablesInfo)
         
         val numGroups = sharedViewModel.numOperationalGroups.value ?: 0
-        val useSingleMode = numGroups <= 1
+        val useSingleMode = numGroups == 1
+        val noConsumables = numGroups == 0
         val wasVisible = simContainer.isVisible
 
         // 1. Vorbereiten der Simulation
@@ -232,8 +234,10 @@ class HomeFragment : Fragment() {
         calculationsAdapter.setSimulationMode(newActive)
         
         // 2. Ziel-Höhe berechnen
-        layoutSingle.isVisible = useSingleMode
-        layoutMulti.isVisible = !useSingleMode
+        layoutSingle.isVisible = useSingleMode || noConsumables
+        layoutMulti.isVisible = !useSingleMode && !noConsumables
+        cardNoConsumables.isVisible = noConsumables
+
         simContainer.isVisible = newActive
         lowerCards.isVisible = !newActive
         
